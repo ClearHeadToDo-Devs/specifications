@@ -355,3 +355,73 @@ the icon for this is `#` but is optional as we want to support the ability to cr
 ### Implications
 here, we are trying to leave the door open for applications to go in later and update this whole thing with automated tools such as the cli that will be able to review and update these ids after the user has created the initial version of the structure
 
+# Examples
+As we have laid out above, we have quite an array of options when it comes to how much or how little information to give.
+
+To give the most minimal example possible, we can see below:
+`[ ] Test Action`
+
+This hopefully serves to show that these should be able to be short, with the ability to read for a human without structured editing able to go through
+
+## Robust Example
+As we saw, many optional pieces of context can be added so here is an example of an action that has much more of these optional parameters:
+
+```actions
+[x] Go to the store for chicken
+    $ Make sure you get the stuff from the butcher directly
+    !1
+    *Run Errands
++Driving,Store,Market
+@2025-01-19T08:30D30
+%2025-01-19T10:30
+#214342414342413424
+```
+
+The succinct way to read this is that one had an action to go to the store on January 19th, 2025 as a part of their running errands project.
+The action was expected to take 30 minutes but was completed in about two hours as we can see by the completion time.
+Finally, it was part of the Driving, Store, and Market contexts and contains extra instructions on where to get the chicken
+
+## Example with Links
+Actions can include links to related resources:
+
+```actions
+[ ] Review pull request [[PR #456|https://github.com/org/repo/pull/456]]
+    $ Check the implementation against [[API docs|https://api.example.com/v2/docs]]
+    !2
+    *Code Review
+    +Work,Development
+    @2025-01-26T14:00D45
+    #a1b2c3d4-e5f6-7890-abcd-ef1234567890
+```
+
+This action links to both a GitHub PR and API documentation within the description, making it easy to access relevant resources while keeping the file readable in plaintext
+
+
+## Recurring Example
+Here's an example of a recurring action with full metadata:
+
+```actions
+[ ] Weekly team meeting
+    $ Discuss progress, blockers, and next steps
+    !2
+    *Team Coordination
+    +Work,Meeting
+    @2025-01-20T14:00 D60 R:FREQ=WEEKLY;BYDAY=MO
+    #team-meeting-uuid
+```
+
+This defines a recurring weekly team meeting every Monday at 2pm for 60 minutes, with priority 2, associated with the "Team Coordination" project and tagged with Work and Meeting contexts.
+
+When this template is expanded by an application, it generates occurrence instances. When occurrences are completed, they can be logged:
+
+```actions
+[x] Weekly team meeting @2025-01-20T14:00 %2025-01-20T14:05 #team-meeting-uuid-20250120
+[x] Weekly team meeting @2025-01-27T14:00 %2025-01-27T14:10 #team-meeting-uuid-20250127
+```
+
+## Adding Children
+Finally, we will do a showcase of the format for those actions with child actions:
+```actions
+[ ] Parent Action >[ ] Child Action
+```
+
