@@ -14,9 +14,35 @@ This specification defines the canonical formatting rules for `.actions` files. 
 ## Design Principles
 
 1. **Format preserves semantics** - Formatting changes must not alter the meaning of actions
-2. **Idempotency** - Formatting the same content twice produces identical results
+2. **Idempotency** - Formatting the same content twice produces identical results for structural layout
 3. **Context-appropriate** - Different display contexts (wide screens, narrow panels) warrant different formatting styles
 4. **Minimal syntax** - The format itself uses minimal characters; formatting should honor this principle
+5. **Pragmatic scope** - Formatter focuses on structural consistency (vertical layout) over cosmetic details (horizontal spacing)
+
+## Formatter Scope and Limitations
+
+### What the Formatter Enforces
+
+The `.actions` formatter focuses on **structural layout** that it can reliably control:
+
+- ✅ **Vertical spacing**: Newline after each action
+- ✅ **Line mode**: Compact (all on one line) vs List (metadata on separate lines)
+- ✅ **Indentation**: Correct indentation in list mode based on depth
+- ✅ **Structural spacing**: Space after state brackets, space after depth markers (`>`)
+
+### What the Formatter Recommends (But Doesn't Enforce)
+
+Due to how the tree-sitter grammar captures whitespace as part of text content (by design, to support names like "Team meeting"), perfect horizontal spacing control is impractical with AST-level formatters. The formatter makes **best-effort** attempts but does not guarantee:
+
+- ⚠️ **Horizontal spacing**: Exact spacing before metadata tokens, around icons
+- ⚠️ **Metadata order**: Canonical sequencing of metadata items
+- ⚠️ **Whitespace normalization**: Removal of extra spaces in names/descriptions
+
+**Recommendation**: For consistent horizontal spacing, manually review formatted output or use a linter to detect spacing inconsistencies.
+
+### Rationale
+
+The `.actions` format is semantically whitespace-insensitive - `[x]Task$Desc` and `[x] Task $ Desc` are equivalent. The tree-sitter grammar captures whitespace as part of text chunks (necessary for multi-word names), making character-level spacing adjustments difficult at the AST level. The formatter prioritizes reliable, idempotent structural layout over perfect cosmetic spacing.
 
 ## Formatting Styles
 
@@ -26,13 +52,16 @@ The specification defines two canonical formatting styles, each optimized for di
 
 **Purpose**: Optimized for wide displays where horizontal space is abundant. Maximizes information density while maintaining readability.
 
-**Rules**:
-1. All metadata appears on the same line as the action name
-2. Exactly one space separates the state brackets from the name
-3. Exactly one space precedes each metadata token
-4. Child actions appear inline with their depth markers (`>`, `>>`, etc.)
-5. One action per line (newline after each action)
-6. Optional: blank line between root-level actions for visual grouping
+**Enforced Rules**:
+1. ✅ All metadata appears on the same line as the action name
+2. ✅ One action per line (newline after each action)
+3. ✅ Space after state brackets
+4. ✅ Space after depth markers (`>`, `>>`, etc.)
+
+**Recommended (Manual)**:
+- Exactly one space before each metadata token
+- No extra spaces in names/descriptions
+- Consistent spacing around icons
 
 **Example**:
 ```actions
@@ -40,22 +69,24 @@ The specification defines two canonical formatting styles, each optimized for di
 [ ] Parent task >[ ] Child task >>[ ] Grandchild task
 ```
 
-**Spacing details**:
-- State to name: `[x] Task` (one space after `]`)
-- Metadata tokens: `Task $ desc !1` (one space before `$`, one space before `!`)
-- Child markers: `>[ ]` (no space before `>`, one space after `>`)
+**Note**: The formatter preserves most horizontal spacing from the input. For consistent spacing, manually format or use a linter to detect issues like `[x]  Task  $  Desc` (extra spaces).
 
 ### List Style
 
 **Purpose**: Optimized for narrow displays (e.g., task sidebars, mobile views, split panes). Prioritizes vertical readability over horizontal density.
 
-**Rules**:
-1. Action name appears on its own line immediately after the state
-2. Each metadata item appears on a separate line
-3. Metadata is indented to `(action_depth + 1) × indent_width` spaces
-4. Child actions follow the same pattern at their respective depth
-5. Default `indent_width`: 4 spaces
-6. Child action depth is indicated by `>` markers, not additional indentation
+**Enforced Rules**:
+1. ✅ Action name on same line as state
+2. ✅ Each metadata item appears on a separate line
+3. ✅ Metadata indented to `(action_depth + 1) × indent_width` spaces
+4. ✅ Child actions at their respective depth level
+5. ✅ Default `indent_width`: 4 spaces
+
+**Recommended (Manual)**:
+- Clean horizontal spacing within each line
+- Consistent metadata order
+
+**Note**: In list mode, the formatter primarily handles vertical structure (line breaks and indentation). Horizontal spacing within each line is preserved from input.
 
 **Example** (with `indent_width = 4`):
 ```actions
