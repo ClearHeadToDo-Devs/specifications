@@ -46,6 +46,7 @@ CREATE TABLE actions (
     do_datetime TEXT,          -- ISO 8601 format
     do_duration INTEGER,        -- Duration in minutes
     completed_datetime TEXT,    -- ISO 8601 format
+    created_datetime TEXT,      -- ISO 8601 format
     depth INTEGER NOT NULL DEFAULT 0 CHECK(depth >= 0 AND depth <= 5)
 );
 
@@ -69,6 +70,7 @@ CREATE INDEX idx_actions_depth ON actions(depth);
 - `do_datetime` - Scheduled date/time in ISO 8601 format
 - `do_duration` - Duration in minutes (NULL if not specified)
 - `completed_datetime` - Completion timestamp in ISO 8601 format
+- `created_datetime` - Creation timestamp in ISO 8601 format
 - `depth` - Nesting level (0=root, 1-5=child depths)
 
 #### `action_contexts` Table

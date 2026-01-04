@@ -188,6 +188,72 @@ Cannot skip depth levels (e.g., depth 0 → depth 2).
    >>[ ] Depth 2
 ```
 
+#### E012: Completed Parent with Uncompleted Children
+**Severity:** Error
+**Fixable:** No
+
+A parent action cannot be marked as completed if it has children that are still active.
+
+```actions
+❌ [x] Parent
+   >[ ] Uncompleted child
+✅ [x] Parent
+   >[x] Completed child
+```
+
+**Rationale:** Archiving and completion logic typically operates on trees. A "completed" parent with "active" work is semantically inconsistent.
+
+#### E013: Uncompleted Parent with All Children Completed
+**Severity:** Warning
+**Fixable:** No
+
+A parent action that is not completed but has all its children marked as completed should likely be completed as well.
+
+```actions
+⚠️  [ ] Parent
+   >[x] Child 1
+   >[x] Child 2
+✅ [x] Parent
+   >[x] Child 1
+   >[x] Child 2
+```
+
+**Rationale:** Serves as a nudge to the user to wrap up the parent action once all its sub-tasks are finished.
+
+#### E014: Missing Creation Date
+**Severity:** Error
+**Fixable:** Yes (derive from UUID v7 or add current date)
+
+All actions should have a creation date, either explicitly via the `^` marker or implicitly via a UUID v7 in the `#` field.
+
+```actions
+❌ [ ] New task
+✅ [ ] New task ^2026-01-03
+✅ [ ] New task #01942db4-0000-7000-8000-000000000001
+```
+
+**Rationale:** Accurate history and aging of tasks require knowing when they were created.
+
+#### E015: Creation Date in Future
+**Severity:** Error
+**Fixable:** No
+
+The creation date (`^`) cannot be in the future relative to the current system time.
+
+```actions
+❌ [ ] Task ^2099-01-01
+```
+
+#### E016: Completion Before Creation
+**Severity:** Error
+**Fixable:** No
+
+The completion date (`%`) cannot be before the creation date (`^`).
+
+```actions
+❌ [x] Impossible Task ^2026-01-03 %2026-01-01
+```
+
 ### 2. Temporal Logic (Warnings)
 
 These rules check for suspicious date/time relationships.

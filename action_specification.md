@@ -347,6 +347,17 @@ Started with the `%` character, this helps to determine the date/time the action
 
 It follows the same format as the Do-Date/Time: `YYYY-MM-DD`, `HH:MM`, or `YYYY-MM-DDTHH:MM`.
 
+## Created Date (Optional)
+
+Intended to be added automatically by tooling when an action is first created.
+
+Started with the `^` character, this helps to determine when the action was initially recorded.
+
+It follows the same format as the Do-Date/Time: `YYYY-MM-DD`, `HH:MM`, or `YYYY-MM-DDTHH:MM`.
+
+### Derivation from UUID
+Since ClearHead uses UUID v7, which encodes a millisecond-precision timestamp, tooling MAY derive the creation date from the `#` field if the `^` field is missing. However, an explicit `^` field always takes precedence.
+
 ## Id (Optional)
 for this we are going to be using the v7 of the UUID standard.
 

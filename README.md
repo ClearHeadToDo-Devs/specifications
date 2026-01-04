@@ -19,6 +19,7 @@ Here is the index of specifications and their purpose within the whole:
 5. [Database Schema](./sql_schema_specification.md) - The schema for storing actions in a relational database. This allows for efficient querying, filtering, and manipulation of action data in a structured environment.
     1. [clearhead-cli](https://github.com/ClearHeadToDo-Devs/clearhead-cli) leverages this to query lists of actions in an efficient manner, allowing for complex filters and operations that would be cumbersome with plaintext files alone. while also being able to translate operations losslessly back to the action file format.
 6. the [examples directory](../examples/) - A collection of example action files, covering a wide range of use cases and scenarios.
-    1. Implementors are expected to vendor these examples into their own projects as conformance tests and usage examples for their users. Thus, ensuring a consistent experience across different tools in the ClearHead ecosystem.
+    1. [conformance_test.actions](../examples/conformance_test.actions) - A "Gold Standard" file testing all metadata fields, tree consistency, and date derivation.
+    2. Implementors are expected to vendor these examples into their own projects as conformance tests and usage examples for their users. Thus, ensuring a consistent experience across different tools in the ClearHead ecosystem.
     2. Example queries for both jq and sql are provided to help with interoperability between different query approaches.
         1. while these are optional, it is recommended that implementors atleast be aware of canonical query patterns to help users transition between different tools more easily.

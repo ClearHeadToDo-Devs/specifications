@@ -47,6 +47,7 @@ Each action object has the following structure:
     }
   },
   "completedDate": "2025-01-19T10:30",
+  "createdDate": "2025-01-19T08:00",
   "id": "214342414342413424",
   "parent_id": null,
   "depth": 0
@@ -157,6 +158,13 @@ Typically added automatically by tooling when state changes to `completed`.
 **Type**: String (ISO 8601)
 **Omit if**: Not present in source
 
+#### `createdDate` (string, optional)
+ISO 8601 formatted date/time when the action was initially created. Corresponds to `^` metadata in plaintext.
+Typically added automatically by tooling when an action is first created.
+
+**Type**: String (ISO 8601)
+**Omit if**: Not present in source
+
 #### `id` (string, optional)
 UUIDv7 identifier for the action. Corresponds to `#` metadata in plaintext.
 
@@ -192,6 +200,7 @@ Nesting level of the action. Root actions have depth 0, their children have dept
 | Do-date `@2025-01-19` | String (ISO 8601) | Within `doDate.datetime` |
 | Duration `D30` | Integer | Minutes, within `doDate.duration` |
 | Completed `%2025-01-19` | String (ISO 8601) | Direct mapping |
+| Created `^2025-01-19` | String (ISO 8601) | Direct mapping |
 | UUID `#abc-123` | String | Direct mapping |
 | Children `>` | String (UUID) | Parent's UUID in `parent_id` field |
 | Depth level `>>`| Integer | Count of `>` markers in `depth` field |
@@ -250,6 +259,7 @@ The canonical JSON serialization is:
         "duration": 30
       },
       "completedDate": "2025-01-19T10:30",
+      "createdDate": "2025-01-19T08:00",
       "id": "214342414342413424",
       "parent_id": null,
       "depth": 0
