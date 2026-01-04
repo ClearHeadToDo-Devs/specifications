@@ -59,11 +59,14 @@ The specification defines two canonical formatting styles, each optimized for di
 5. ✅ Space before each metadata token: `Task !1 *Story` not `Task!1*Story`
 6. ✅ Space after description icon: `$ Desc` not `$Desc`
 7. ✅ No space after value icons: `!1` not `! 1`
+8. ✅ Child actions are indented by `depth × indent_width` units of `indent_style` whitespace.
 
-**Example**:
+**Example** (with `indent_width = 4`, `indent_style = spaces`):
 ```actions
 [x] Team meeting $ Discuss Q1 roadmap !1 *Projects +Work @2025-01-20T14:00 D60 %2025-01-20T15:05
-[ ] Parent task >[ ] Child task >>[ ] Grandchild task
+[ ] Parent task
+    >[ ] Child task
+        >>[ ] Grandchild task
 ```
 
 ### List Style
@@ -73,36 +76,10 @@ The specification defines two canonical formatting styles, each optimized for di
 **Formatting Rules**:
 1. ✅ Action name on same line as state
 2. ✅ Each metadata item appears on a separate line
-3. ✅ Metadata indented to `(action_depth + 1) × indent_width` spaces
-4. ✅ Child actions at their respective depth level
-5. ✅ Default `indent_width`: 4 spaces
-6. ✅ All horizontal spacing rules from compact style apply within each line
-
-**Example** (with `indent_width = 4`):
-```actions
-[x] Team meeting
-    $ Discuss Q1 roadmap
-    !1
-    *Projects
-    +Work
-    @2025-01-20T14:00
-    D60
-    %2025-01-20T15:05
-[ ] Parent task
-    >[ ] Child task
-        $ Child description
-        !2
-        >>[ ] Grandchild task
-            $ Grandchild description
-            !3
-```
-
-**Indentation details**:
-- Root action (depth 0) metadata: `0 + 1 = 1 × 4 = 4 spaces`
-- Depth 1 child action: `1 × 4 = 4 spaces` (for the `>` marker)
-- Depth 1 child metadata: `1 + 1 = 2 × 4 = 8 spaces`
-- Depth 2 grandchild action: `2 × 4 = 8 spaces` (for the `>>` markers)
-- Depth 2 grandchild metadata: `2 + 1 = 3 × 4 = 12 spaces`
+3. ✅ Metadata indented to `(action_depth + 1) × indent_width` units of `indent_style` whitespace.
+4. ✅ Child actions indented to `depth × indent_width` units of `indent_style` whitespace.
+5. ✅ Default `indent_width`: 4 units.
+6. ✅ All horizontal spacing rules from compact style apply within each line.
 
 ## Metadata Token Formatting
 
@@ -200,7 +177,13 @@ Implementations should support the following configuration options:
 - Type: integer
 - Valid range: 1-8
 - Default: `4`
-- Description: Number of spaces per indentation level (list style only)
+- Description: Number of spaces/tabs per indentation level.
+
+### `indent_style`
+- Type: enum
+- Values: `spaces` | `tabs`
+- Default: `spaces`
+- Description: Whether to use spaces or tabs for indentation.
 
 ### Example configuration (TOML):
 ```toml
