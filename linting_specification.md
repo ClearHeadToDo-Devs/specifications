@@ -4,22 +4,24 @@ description: Optional checks for correctness, consistency, and best practices in
 author: backup-admin
 categories: Reference
 created: 2026-01-03
-version: 1.0.0
+version: 1.1.0
 ---
 
 # Actions File Linting Specification
 
-This specification defines optional linting rules for `.actions` files. While the [action_specification.md](./action_specification.md) defines valid syntax and [formatting_specification.md](./formatting_specification.md) defines structural layout, this document defines quality checks that detect potential issues without changing file semantics.
+This specification defines optional linting rules for `.actions` files. While the [action_specification.md](./action_specification.md) defines valid syntax and [formatting_specification.md](./formatting_specification.md) handles all presentation (spacing, indentation, layout), this document defines semantic quality checks that detect correctness issues, temporal problems, and style violations.
 
 ## Philosophy
 
 ### Linting vs Formatting
 
-- **Formatting** enforces structural layout (vertical spacing, indentation)
-- **Linting** detects correctness, consistency, and style issues
-- **Parsing** validates syntax
+- **Formatter** enforces ALL presentation (spacing, indentation, layout) - automatic, opinionated, zero-config
+- **Linter** detects semantic issues, temporal problems, and style preferences - optional, configurable, informative
+- **Parser** validates syntax
 
-A linter is *optional* and *configurable* - teams choose which rules to enforce based on their workflow.
+The formatter handles everything about *how code looks*. The linter handles everything about *what code means* and whether it's correct, consistent, or following best practices.
+
+A linter is *optional* and *configurable* - teams choose which rules to enforce based on their workflow. The formatter runs automatically (e.g., on save) and needs no configuration.
 
 ### Design Principles
 
@@ -41,65 +43,7 @@ Linting rules are categorized by severity:
 
 ## Rule Categories
 
-### 1. Spacing (Fixable)
-
-These rules check horizontal spacing that the formatter cannot enforce due to grammar constraints.
-
-#### S001: Space After State
-**Severity:** Warning
-**Fixable:** Yes
-
-State brackets should be followed by exactly one space.
-
-```actions
-❌ [x]Task
-❌ [x]  Task
-✅ [x] Task
-```
-
-**Rationale:** Consistent spacing improves readability. While semantically equivalent, `[x]Task` is harder to scan.
-
-#### S002: Space Before Metadata
-**Severity:** Warning
-**Fixable:** Yes
-
-Each metadata item should be preceded by exactly one space.
-
-```actions
-❌ [x] Task$Desc!1*Project
-❌ [x] Task  $  Desc
-✅ [x] Task $ Desc !1 *Project
-```
-
-#### S003: Space After Description Icon
-**Severity:** Warning
-**Fixable:** Yes
-
-The `$` icon should be followed by exactly one space before the description text.
-
-```actions
-❌ [ ] Task $Desc
-❌ [ ] Task $  Desc
-✅ [ ] Task $ Desc
-```
-
-**Exception:** Empty descriptions are allowed: `[ ] Task $`
-
-#### S004: No Space Around Value Icons
-**Severity:** Info
-**Fixable:** Yes
-
-Non-description metadata icons (`!`, `*`, `+`, `@`, `D`, `R:`, `%`, `#`) should have no space between icon and value.
-
-```actions
-❌ [ ] Task ! 1
-❌ [ ] Task * Project
-✅ [ ] Task !1 *Project
-```
-
-**Rationale:** These values are terse identifiers, not prose. Spacing makes them harder to scan: `! 1` looks like "exclamation one" rather than "priority one".
-
-### 2. Semantic Correctness (Errors)
+### 1. Semantic Correctness (Errors)
 
 These rules detect logical inconsistencies that likely indicate mistakes.
 
@@ -244,7 +188,7 @@ Cannot skip depth levels (e.g., depth 0 → depth 2).
    >>[ ] Depth 2
 ```
 
-### 3. Temporal Logic (Warnings)
+### 2. Temporal Logic (Warnings)
 
 These rules check for suspicious date/time relationships.
 
@@ -302,7 +246,7 @@ Not-started or in-progress actions with very old do-dates may need review.
 
 **Configuration:** `old_action_threshold_days` (default: 365)
 
-### 4. Style and Conventions (Info)
+### 3. Style and Conventions (Info)
 
 These rules enforce team conventions and best practices. All are configurable.
 
@@ -399,7 +343,7 @@ Child actions with higher priority than parents may indicate organizational issu
 
 **Configuration:** `check_child_priority` (default: false)
 
-### 5. Content Quality (Info)
+### 4. Content Quality (Info)
 
 These rules check for common content issues.
 
@@ -452,14 +396,7 @@ Linters should support configuration files to customize rule behavior.
 # .actions-lint.toml
 
 [rules]
-# Spacing rules
-S001.enabled = true
-S001.severity = "warning"
-S002.enabled = true
-S003.enabled = true
-S004.enabled = false  # Team prefers spaces around all icons
-
-# Semantic rules (errors)
+# Semantic rules (errors) - all default to enabled
 E001.enabled = true
 E002.enabled = true
 # ... all E rules default to enabled
@@ -555,32 +492,33 @@ tasks.actions:12:5: warning[S001]: Missing space after state bracket
 }
 ```
 
-## Auto-Fix Behavior
+## Code Actions and Fixes
 
-Some rules are fixable automatically:
+Linters can provide **code actions** (LSP quick fixes) for some rules:
 
-### Safe Fixes (Apply Automatically with `--fix`)
+### Auto-fixable via Code Actions
 
-- **Spacing rules** (S001-S004): Mechanical changes, no semantic impact
-- **Metadata reordering** (I001): If enabled and no ambiguity
+- **Metadata reordering** (I001): If enabled, can automatically reorder to canonical sequence
 
-### Suggested Fixes (Require User Confirmation)
+### Suggested Fixes (Informational Only)
 
-- **Adding completion dates**: Linter can't guess the timestamp
-- **Changing states**: Requires understanding user intent
-- **Removing duplicate IDs**: Which one to keep?
+Most linting rules detect issues but cannot automatically fix them, as they require user judgment:
 
-Example fix workflow:
+- **Adding completion dates** (E001): Linter can't guess the timestamp
+- **Changing states** (E002): Requires understanding user intent
+- **Removing duplicate IDs** (E005): Which one to keep?
+- **Adding missing metadata** (W001, I002): User must decide values
+
+Linters should provide **helpful suggestions** in diagnostics to guide users toward fixes.
+
+Example workflow:
 
 ```bash
 # Check for issues
 actions-lint tasks.actions
 
-# Auto-fix spacing
-actions-lint --fix tasks.actions
-
-# Interactive fix for semantic issues
-actions-lint --fix-interactive tasks.actions
+# Use editor code actions (LSP) to apply suggested fixes interactively
+# Or fix manually based on diagnostic suggestions
 ```
 
 ## Implementation Guidance
@@ -640,8 +578,8 @@ connection.onCodeAction((params) => {
 | Tool | Purpose | When to Run |
 |------|---------|-------------|
 | **Parser** | Validate syntax | On every file read |
-| **Formatter** | Fix structural layout | On save, pre-commit |
-| **Linter** | Check quality/correctness | On save, pre-commit, CI |
+| **Formatter** | Fix ALL presentation (spacing, layout) | On save, pre-commit |
+| **Linter** | Check semantic correctness & best practices | On save, pre-commit, CI |
 | **LSP** | Real-time editor feedback | Continuous |
 
 Recommended workflow:
@@ -649,11 +587,12 @@ Recommended workflow:
 ```bash
 # Pre-commit hook
 tree-sitter parse file.actions || exit 1  # Syntax check
-topiary format file.actions               # Format
-actions-lint --fix file.actions           # Auto-fix spacing
-actions-lint file.actions || exit 1       # Check for errors
+topiary format file.actions               # Format (handles all spacing)
+actions-lint file.actions || exit 1       # Check semantic correctness
 git add file.actions
 ```
+
+**Note:** The formatter handles all presentation issues automatically. The linter only needs to check semantic correctness (E/W/I rules).
 
 ## Examples
 
@@ -671,11 +610,11 @@ git add file.actions
 # Error: E001 - Missing completed date
 [x] Completed task !1
 
-# Warning: S001 - Missing space after state
-[x]Another task
-
 # Warning: W001 - Past do-date
 [ ] Old task @2020-01-01
+
+# Warning: W002 - Completed before scheduled
+[x] Meeting @2025-01-20T14:00 %2025-01-20T10:00
 
 # Info: I002 - High priority without do-date
 [ ] Critical !1
@@ -688,16 +627,23 @@ git add file.actions
 
 ```
 tasks.actions:2:1: error[E001]: Completed action missing completed date
-tasks.actions:5:1: warning[S001]: Missing space after state bracket
-tasks.actions:8:1: warning[W001]: Not-started action with past do-date (>5 years old)
+tasks.actions:5:1: warning[W001]: Not-started action with past do-date (>5 years old)
+tasks.actions:8:1: warning[W002]: Completed 4 hours before scheduled time
 tasks.actions:11:1: info[I002]: High priority action without do-date
 tasks.actions:14:1: info[I001]: Metadata not in canonical order
 
 5 problems (1 error, 2 warnings, 2 info)
-1 error and 1 warning potentially fixable with --fix
+Code actions available for 1 rule (I001)
 ```
 
 ## Version History
+
+### 1.1.0 (2026-01-03)
+- **Breaking change:** Removed spacing rules (S001-S004)
+- Spacing is now handled entirely by the formatter
+- Linter focuses exclusively on semantic correctness, temporal logic, and style preferences
+- 28 rules total (11 errors, 4 warnings, 13 info)
+- Updated philosophy section to clarify formatter vs linter boundary
 
 ### 1.0.0 (2026-01-03)
 - Initial specification

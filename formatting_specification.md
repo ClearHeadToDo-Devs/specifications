@@ -4,7 +4,7 @@ description: Canonical formatting rules for .actions files
 author: primary_desktop
 categories: Reference
 created: 2026-01-01
-version: 1.0.0
+version: 1.1.0
 ---
 
 # Actions File Formatting Specification
@@ -14,35 +14,34 @@ This specification defines the canonical formatting rules for `.actions` files. 
 ## Design Principles
 
 1. **Format preserves semantics** - Formatting changes must not alter the meaning of actions
-2. **Idempotency** - Formatting the same content twice produces identical results for structural layout
+2. **Idempotency** - Formatting the same content twice produces identical results
 3. **Context-appropriate** - Different display contexts (wide screens, narrow panels) warrant different formatting styles
 4. **Minimal syntax** - The format itself uses minimal characters; formatting should honor this principle
-5. **Pragmatic scope** - Formatter focuses on structural consistency (vertical layout) over cosmetic details (horizontal spacing)
+5. **Zero-configuration** - Formatter handles all presentation automatically; users shouldn't think about spacing
 
-## Formatter Scope and Limitations
+## Formatter Scope
 
-### What the Formatter Enforces
-
-The `.actions` formatter focuses on **structural layout** that it can reliably control:
+The `.actions` formatter enforces **all presentation-level formatting**:
 
 - ✅ **Vertical spacing**: Newline after each action
 - ✅ **Line mode**: Compact (all on one line) vs List (metadata on separate lines)
 - ✅ **Indentation**: Correct indentation in list mode based on depth
-- ✅ **Structural spacing**: Space after state brackets, space after depth markers (`>`)
+- ✅ **Horizontal spacing**: Exact spacing around all tokens
+  - Space after state brackets: `[x] ` not `[x]`
+  - Space before metadata: `Task !1` not `Task!1`
+  - Space after description icon: `$ Desc` not `$Desc`
+  - No space after value icons: `!1` not `! 1`
+- ✅ **Metadata order**: Optional canonical sequencing (see configuration)
 
-### What the Formatter Recommends (But Doesn't Enforce)
+### Design Philosophy
 
-Due to how the tree-sitter grammar captures whitespace as part of text content (by design, to support names like "Team meeting"), perfect horizontal spacing control is impractical with AST-level formatters. The formatter makes **best-effort** attempts but does not guarantee:
+The formatter is **opinionated and automatic** - it silently fixes all presentation issues without user intervention. Users should never need to think about formatting; running format (e.g., LSP format-on-save) should produce perfectly formatted output.
 
-- ⚠️ **Horizontal spacing**: Exact spacing before metadata tokens, around icons
-- ⚠️ **Metadata order**: Canonical sequencing of metadata items
-- ⚠️ **Whitespace normalization**: Removal of extra spaces in names/descriptions
+The `.actions` format is semantically whitespace-insensitive - `[x]Task$Desc` and `[x] Task $ Desc` are equivalent in meaning. This allows the formatter to normalize all spacing without changing semantics.
 
-**Recommendation**: For consistent horizontal spacing, manually review formatted output or use a linter to detect spacing inconsistencies.
+### Implementation Note
 
-### Rationale
-
-The `.actions` format is semantically whitespace-insensitive - `[x]Task$Desc` and `[x] Task $ Desc` are equivalent. The tree-sitter grammar captures whitespace as part of text chunks (necessary for multi-word names), making character-level spacing adjustments difficult at the AST level. The formatter prioritizes reliable, idempotent structural layout over perfect cosmetic spacing.
+Current implementations may have technical limitations (e.g., tree-sitter grammar constraints around whitespace capture). This specification defines the **target behavior** that implementations should work toward. Implementations may use post-processing, custom parsers, or other techniques to achieve full conformance.
 
 ## Formatting Styles
 
@@ -52,16 +51,14 @@ The specification defines two canonical formatting styles, each optimized for di
 
 **Purpose**: Optimized for wide displays where horizontal space is abundant. Maximizes information density while maintaining readability.
 
-**Enforced Rules**:
+**Formatting Rules**:
 1. ✅ All metadata appears on the same line as the action name
 2. ✅ One action per line (newline after each action)
-3. ✅ Space after state brackets
-4. ✅ Space after depth markers (`>`, `>>`, etc.)
-
-**Recommended (Manual)**:
-- Exactly one space before each metadata token
-- No extra spaces in names/descriptions
-- Consistent spacing around icons
+3. ✅ Space after state brackets: `[x] Task` not `[x]Task`
+4. ✅ Space after depth markers: `>[ ] Child` not `>[  ]Child`
+5. ✅ Space before each metadata token: `Task !1 *Story` not `Task!1*Story`
+6. ✅ Space after description icon: `$ Desc` not `$Desc`
+7. ✅ No space after value icons: `!1` not `! 1`
 
 **Example**:
 ```actions
@@ -69,24 +66,17 @@ The specification defines two canonical formatting styles, each optimized for di
 [ ] Parent task >[ ] Child task >>[ ] Grandchild task
 ```
 
-**Note**: The formatter preserves most horizontal spacing from the input. For consistent spacing, manually format or use a linter to detect issues like `[x]  Task  $  Desc` (extra spaces).
-
 ### List Style
 
 **Purpose**: Optimized for narrow displays (e.g., task sidebars, mobile views, split panes). Prioritizes vertical readability over horizontal density.
 
-**Enforced Rules**:
+**Formatting Rules**:
 1. ✅ Action name on same line as state
 2. ✅ Each metadata item appears on a separate line
 3. ✅ Metadata indented to `(action_depth + 1) × indent_width` spaces
 4. ✅ Child actions at their respective depth level
 5. ✅ Default `indent_width`: 4 spaces
-
-**Recommended (Manual)**:
-- Clean horizontal spacing within each line
-- Consistent metadata order
-
-**Note**: In list mode, the formatter primarily handles vertical structure (line breaks and indentation). Horizontal spacing within each line is preserved from input.
+6. ✅ All horizontal spacing rules from compact style apply within each line
 
 **Example** (with `indent_width = 4`):
 ```actions
@@ -304,6 +294,12 @@ The final `output.actions` must be semantically identical to `input.actions` (sa
 ```
 
 ## Version History
+
+### 1.1.0 (2026-01-03)
+- **Expanded scope:** Formatter now enforces ALL spacing (horizontal and vertical)
+- Removed caveats about horizontal spacing limitations
+- Clarified that spec defines target behavior; implementations work toward conformance
+- Updated philosophy to emphasize zero-configuration automatic formatting
 
 ### 1.0.0 (2026-01-01)
 - Initial specification
