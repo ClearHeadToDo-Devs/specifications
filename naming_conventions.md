@@ -10,28 +10,41 @@ They are separate, because different implementors may choose to work with the fo
 
 ## Workspace Structure
 
-All action files/folders should be organized into a directory that conforms with the standards of the given operating system.
+All action files/folders should be organized into a directory that conforms with the standards of the given operating system or follows a project-local structure.
 
-For example, in linux, this should be in `XDG_DATA_HOME` for data files (the action files themselves)
-    and `XDG_CONFIG_HOME` for configuration files (the settings for the action files).
+### Global Workspace
+For global management, action files reside in standard system locations (e.g., `XDG_DATA_HOME/clearhead` on Linux).
 
-### User Workspace Name
-    For the workspace name itself, we will look for `clearhead` at the root of the data/config directories. and all other directories will be subdirectories of this.
+### Project-Local Workspace
+For project-specific management, a directory may be designated as a workspace by the presence of a `.clearhead/` directory or a `next.actions` file at its root.
 
-    We shall hereafter refer to this as `$workspace` for the sake of file paths for structuring our work
+#### The `.clearhead/` Directory
+Similar to `.git/`, a `.clearhead/` directory at the project root signals that the project is managed by the ClearHead system.
+- `.clearhead/inbox.actions` - Project-specific inbox.
+- `.clearhead/config.json` - Project-specific configuration (overrides global).
+- `.clearhead/logs/` - Project-specific completion logs.
 
-#### Core Files
+#### The `next.actions` File
+A `next.actions` file at the root of a directory is a "first-class" project entry point. It allows for lightweight task management without the overhead of a full `.clearhead/` folder.
 
-    We have a few key files that all implementors can look for:
+## Discovery Protocol
 
-    - `$workspace/inbox.actions` - The main inbox file for capturing new actions and should be, as the name implies, the default location for new actions to be added.
-    - `<project>/next.actions` - The next actions file for a given project/story
-    - placing the action file within the project/story directory allows for easy organization of related actions
-    - this file IS intended to be seen! as it is intended to be the main working file for that project/story
-    - `<project>/local.next.actions` - An optional, personal ovverride file for next actions within a project/story
-    - this file is intended to be ignored by version control and allows for personal task management without affecting the shared project/story file
-    - `$workspace/completed.actions` - A global completed actions log file
-        - this file is intended to be an append-only log of all completed actions across all projects
+Implementors (CLI, LSP, etc.) should resolve the active workspace and default action file using the following precedence:
+
+1.  **Explicit File**: Path provided via command-line argument (e.g., `clearhead_cli read my_tasks.actions`).
+2.  **Project Root File**: Search upwards from the current directory for a `next.actions` file.
+3.  **Project Data Directory**: Search upwards from the current directory for a `.clearhead/` directory. If found, the default file is `.clearhead/inbox.actions`.
+4.  **Global Workspace**: Fallback to the system-standard directory (e.g., `~/.local/share/clearhead_cli/inbox.actions`).
+
+### Precedence Summary Table
+
+| Input | Logic | Default File |
+| :--- | :--- | :--- |
+| `clearhead_cli read <file>` | Explicit | `<file>` |
+| Current dir has `next.actions` | Local Root | `./next.actions` |
+| Current dir has `.clearhead/` | Local Data | `./.clearhead/inbox.actions` |
+| Parent dir has `next.actions` | Upward Root | `../next.actions` |
+| None of the above | Global | `~/.local/share/clearhead_cli/inbox.actions` |
 
 ### Project/Story Naming
 
