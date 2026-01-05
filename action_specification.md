@@ -385,11 +385,12 @@ As we saw, many optional pieces of context can be added so here is an example of
 +Driving,Store,Market
 @2025-01-19T08:30D30
 %2025-01-19T10:30
+^2025-01-19T08:00
 #214342414342413424
 ```
 
 The succinct way to read this is that one had an action to go to the store on January 19th, 2025 as a part of their running errands project.
-The action was expected to take 30 minutes but was completed in about two hours as we can see by the completion time.
+The action was created at 8:00 AM, expected to take 30 minutes starting at 8:30 AM, but was completed in about two hours as we can see by the completion time at 10:30 AM.
 Finally, it was part of the Driving, Store, and Market contexts and contains extra instructions on where to get the chicken
 
 ## Example with Links

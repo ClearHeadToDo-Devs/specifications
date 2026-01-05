@@ -221,18 +221,18 @@ A parent action that is not completed but has all its children marked as complet
 **Rationale:** Serves as a nudge to the user to wrap up the parent action once all its sub-tasks are finished.
 
 #### E014: Missing Creation Date
-**Severity:** Error
+**Severity:** Warning (style/tracking preference, not a correctness issue)
 **Fixable:** Yes (derive from UUID v7 or add current date)
 
-All actions should have a creation date, either explicitly via the `^` marker or implicitly via a UUID v7 in the `#` field.
+Actions should ideally have a creation date, either explicitly via the `^` marker or implicitly via a UUID v7 in the `#` field.
 
 ```actions
-❌ [ ] New task
+⚠️  [ ] New task
 ✅ [ ] New task ^2026-01-03
 ✅ [ ] New task #01942db4-0000-7000-8000-000000000001
 ```
 
-**Rationale:** Accurate history and aging of tasks require knowing when they were created.
+**Rationale:** Creation timestamps help with aging analysis and history tracking, but are not required for correctness. This is a best practice for teams wanting detailed action tracking, but can be disabled for casual use.
 
 #### E015: Creation Date in Future
 **Severity:** Error
