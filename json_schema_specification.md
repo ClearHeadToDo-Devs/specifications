@@ -48,6 +48,7 @@ Each action object has the following structure:
   },
   "completedDate": "2025-01-19T10:30",
   "createdDate": "2025-01-19T08:00",
+  "predecessors": ["uuid-of-predecessor-1", "uuid-of-predecessor-2"],
   "id": "214342414342413424",
   "parent_id": null,
   "depth": 0
@@ -165,6 +166,14 @@ Typically added automatically by tooling when an action is first created.
 **Type**: String (ISO 8601)
 **Omit if**: Not present in source
 
+#### `predecessors` (array, optional)
+Array of UUIDs of actions that must be completed before this action. Corresponds to `<` metadata in plaintext.
+Multiple `<` markers in plaintext are collected into this array.
+
+**Type**: Array of strings (UUID format)
+**Pattern (each element)**: `^[0-9a-fA-F-]+$` (UUID format)
+**Omit if**: Not present in source
+
 #### `id` (string, optional)
 UUIDv7 identifier for the action. Corresponds to `#` metadata in plaintext.
 
@@ -201,6 +210,7 @@ Nesting level of the action. Root actions have depth 0, their children have dept
 | Duration `D30` | Integer | Minutes, within `doDate.duration` |
 | Completed `%2025-01-19` | String (ISO 8601) | Direct mapping |
 | Created `^2025-01-19` | String (ISO 8601) | Direct mapping |
+| Predecessors `< uuid` | Array of strings | UUIDs in `predecessors` array |
 | UUID `#abc-123` | String | Direct mapping |
 | Children `>` | String (UUID) | Parent's UUID in `parent_id` field |
 | Depth level `>>`| Integer | Count of `>` markers in `depth` field |

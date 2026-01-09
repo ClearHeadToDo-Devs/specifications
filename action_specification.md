@@ -236,6 +236,7 @@ The list of special characters that need to be escaped are below:
 - `+` - Reserved for contexts
 - `@` - Reserved for Do-Date-Time
 - `%` - Reserved for Completed Date
+- `<` - Reserved for Predecessors
 - `>` - Reserved for Children
 - `[` `]` - Reserved for State markers and Links (when used as `[[link]]`)
 - `|` - Reserved for Link separator (when within `[[...]]`)
@@ -301,6 +302,56 @@ We use the context in accordance with GTD to answer the where question often.
 started with the `+` character, one can use multiple contexts by separating each one with the `,` character to get multiple tags
 
 contexts are simply keys and cannot be assigned values
+
+## Predecessors (Optional)
+
+Actions can depend on other actions being completed first. A predecessor is another action that must reach a completed or cancelled state before this action's dependencies are fully satisfied.
+
+Started with the `<` character, you can specify one predecessor per marker. Multiple predecessors on the same action means ALL must be completed or cancelled.
+
+### Name or UUID Resolution
+
+Predecessors are resolved within the workspace scope (all `.actions` files under the workspace root):
+- If the reference looks like a valid UUID (format: `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`), it's matched directly against action IDs
+- Otherwise, the parser attempts a case-insensitive name match across the workspace
+- If multiple actions match the name, a linting warning (W003) suggests the closest matches and recommends using a UUID for clarity
+- If no match is found, a linting error (E026) reports the invalid reference
+- At parse time, resolved names are converted to UUIDs for internal storage
+
+### Examples
+
+**Simple predecessor (same file):**
+```actions
+[ ] Wash clothes < Put clothes in hamper
+[ ] Dry clothes < Wash clothes
+```
+
+**Multiple predecessors (all must be done):**
+```actions
+[ ] Deploy to production < Code review complete < Tests passing
+```
+
+**Using UUID for specificity:**
+```actions
+[ ] Task B < #01951111-cfa6-718d-b303-d7107f4005b3
+```
+
+**Across files in workspace:**
+```actions
+# In project-a/next.actions
+[ ] Deploy < Code review complete
+
+# In project-a/code-review.actions
+[ ] Code review complete
+```
+
+### Semantics
+
+- Predecessors represent a **logical dependency**, independent of parent-child hierarchy (which uses `>`)
+- An action with predecessors can have any state (`[ ]`, `[-]`, `[=]`, etc.) — state is independent of predecessors
+- When querying for "doable" actions (e.g., agenda view), filters check if all predecessors are completed or cancelled
+- This includes **transitive** checking: if A → B → C, then C requires both B and A to be complete, not just B
+- Circular dependencies are detected and reported as errors (E025)
 
 ## Do-Date/Time (Optional)
 Actions can have a do-date, do-time, or both. This is designated by the `@` character. The format conforms to a simplified subset of ISO 8601.

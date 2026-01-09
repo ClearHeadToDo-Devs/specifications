@@ -117,6 +117,35 @@ CREATE TABLE action_recurrence (
 **Note on JSON fields:**
 The `by_*` fields store JSON arrays for simplicity in SQLite. Databases with native array support (PostgreSQL) can use array types instead.
 
+#### `action_dependencies` Table
+
+Unified table for storing all action-to-action relationships (both hierarchical parent-child and logical predecessors). This enables efficient querying of dependency chains and transitive closure.
+
+```sql
+CREATE TABLE action_dependencies (
+    action_id TEXT NOT NULL REFERENCES actions(id) ON DELETE CASCADE,
+    predecessor_id TEXT NOT NULL REFERENCES actions(id) ON DELETE CASCADE,
+    dependency_type TEXT NOT NULL CHECK(dependency_type IN ('parent', 'predecessor')),
+    PRIMARY KEY (action_id, predecessor_id, dependency_type)
+);
+
+CREATE INDEX idx_action_dependencies_predecessor ON action_dependencies(predecessor_id);
+CREATE INDEX idx_action_dependencies_type ON action_dependencies(dependency_type);
+```
+
+**Fields:**
+- `action_id` - The action that has the dependency
+- `predecessor_id` - The action that must be completed first
+- `dependency_type` - Type of relationship:
+  - `'parent'` - Hierarchical parent-child (from `parent_id` in actions table)
+  - `'predecessor'` - Logical predecessor (from `<` marker in plaintext)
+
+**Design Notes:**
+- Stores both parent-child relationships (for consistency) and logical predecessors in one table
+- Enables efficient queries for all transitive dependencies regardless of type
+- The `parent_id` column in the `actions` table is maintained for denormalization (for query performance)
+- The dependencies table acts as the source of truth for relationship queries
+
 ### Helper Views
 
 #### `actions_with_contexts` View
@@ -149,8 +178,9 @@ Translation between plaintext, JSON, and SQL representations:
 | Duration `D30` | Integer (minutes) | `INTEGER` | `actions.do_duration` | NULL if not present |
 | Recurrence `R` | Object | Separate table | `action_recurrence` | NULL if not recurring |
 | Completed `%` | String (ISO 8601) | `TEXT` | `actions.completed_datetime` | NULL if not completed |
+| Predecessors `< uuid` | Array of strings | Separate table | `action_dependencies` | With `dependency_type = 'predecessor'` |
 | UUID `#` | String | `TEXT PRIMARY KEY` | `actions.id` | Generated if not provided |
-| Children `>` | Nested array | `parent_id` self-reference | `actions.parent_id` | Hierarchical via foreign key |
+| Children `>` | Nested array | `parent_id` self-reference | `actions.parent_id` / `action_dependencies` | Hierarchical via foreign key or dependencies table |
 
 ## Design Decisions
 
@@ -351,6 +381,81 @@ SELECT action_id, COUNT(*) as context_count
 FROM action_contexts
 GROUP BY action_id
 HAVING COUNT(*) > 1;
+```
+
+### Dependency and Transitive Closure Queries
+
+**All actions that action X depends on (transitively):**
+```sql
+WITH RECURSIVE all_predecessors(action_id, predecessor_id, depth) AS (
+  -- Base: direct predecessors
+  SELECT action_id, predecessor_id, 1
+  FROM action_dependencies
+  WHERE dependency_type = 'predecessor'
+  
+  UNION ALL
+  
+  -- Recursive: predecessors of predecessors
+  SELECT ap.action_id, ad.predecessor_id, ap.depth + 1
+  FROM all_predecessors ap
+  JOIN action_dependencies ad ON ap.predecessor_id = ad.action_id
+    AND ad.dependency_type = 'predecessor'
+  WHERE ap.depth < 100  -- prevent infinite recursion
+)
+SELECT DISTINCT a.* FROM actions a
+JOIN all_predecessors ap ON a.id = ap.predecessor_id
+WHERE ap.action_id = ?;
+```
+
+**Agenda: All doable actions (not blocked by incomplete predecessors):**
+```sql
+WITH RECURSIVE all_predecessors(action_id, predecessor_id, depth) AS (
+  -- Base: direct predecessors
+  SELECT action_id, predecessor_id, 1
+  FROM action_dependencies
+  WHERE dependency_type = 'predecessor'
+  
+  UNION ALL
+  
+  -- Recursive: predecessors of predecessors
+  SELECT ap.action_id, ad.predecessor_id, ap.depth + 1
+  FROM all_predecessors ap
+  JOIN action_dependencies ad ON ap.predecessor_id = ad.action_id
+    AND ad.dependency_type = 'predecessor'
+  WHERE ap.depth < 100
+)
+
+SELECT DISTINCT a.* FROM actions a
+WHERE a.state IN ('not_started', 'in_progress')
+  AND (a.do_datetime IS NULL OR date(a.do_datetime) >= date('now'))
+  AND NOT EXISTS (
+    SELECT 1 FROM all_predecessors ap
+    JOIN actions p ON ap.predecessor_id = p.id
+    WHERE ap.action_id = a.id
+    AND p.state NOT IN ('completed', 'cancelled')
+  )
+ORDER BY a.do_datetime ASC;
+```
+
+**Check for circular dependencies:**
+```sql
+-- Circular dependency exists if there's a path from X back to X
+WITH RECURSIVE cycle_check(action_id, predecessor_id, depth) AS (
+  SELECT action_id, predecessor_id, 1
+  FROM action_dependencies
+  WHERE dependency_type = 'predecessor'
+  
+  UNION ALL
+  
+  SELECT cc.action_id, ad.predecessor_id, cc.depth + 1
+  FROM cycle_check cc
+  JOIN action_dependencies ad ON cc.predecessor_id = ad.action_id
+    AND ad.dependency_type = 'predecessor'
+  WHERE cc.depth < 100 AND cc.action_id != ad.predecessor_id
+)
+
+SELECT DISTINCT action_id FROM cycle_check
+WHERE action_id = predecessor_id;  -- Cycle found!
 ```
 
 ## Importing from JSON

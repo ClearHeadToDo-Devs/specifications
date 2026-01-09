@@ -254,6 +254,50 @@ The completion date (`%`) cannot be before the creation date (`^`).
 ❌ [x] Impossible Task ^2026-01-03 %2026-01-01
 ```
 
+#### E025: Circular Dependency
+**Severity:** Error
+**Fixable:** No
+
+Actions cannot have circular dependencies (directly or transitively).
+
+```actions
+❌ [ ] Task A < Task B
+❌ [ ] Task B < Task A
+```
+
+**Rationale:** Circular dependencies are logically impossible — neither action can ever be completed.
+
+**Fix suggestion:** Review the dependency structure and break the cycle by removing or reworking one of the dependencies.
+
+#### E026: Invalid Predecessor Reference
+**Severity:** Error
+**Fixable:** No
+
+A predecessor references an action that doesn't exist in the workspace.
+
+```actions
+❌ [ ] Task < Nonexistent Action
+```
+
+**Rationale:** Actions should only depend on other actions that actually exist.
+
+**Fix suggestion:** Check the name/UUID spelling, or create the missing predecessor action.
+
+#### E027: Ambiguous Predecessor Reference
+**Severity:** Warning
+**Fixable:** No
+
+Multiple actions in the workspace match the predecessor name. Use UUID to disambiguate.
+
+```actions
+⚠️  [ ] Deploy < setup  # Three "setup" actions exist in workspace
+✅ [ ] Deploy < #01951111-cfa6-718d-b303-d7107f4005b3
+```
+
+**Rationale:** Name-based references should be unambiguous. When multiple matches exist, recommend UUIDs for clarity.
+
+**Configuration:** `require_uuid_for_ambiguous_predecessors` (default: false) — if true, escalates to error severity.
+
 ### 2. Temporal Logic (Warnings)
 
 These rules check for suspicious date/time relationships.

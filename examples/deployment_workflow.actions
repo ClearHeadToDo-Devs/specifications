@@ -1,0 +1,28 @@
+[ ] Deploy to production
+* Release Management
++Work,DevOps,Critical
+@2025-02-15T14:00 D30
+!1
+< Tests passing
+< Code review complete
+$ Monitor logs after deployment
+
+[ ] Tests passing
+* Release Management
++Work,Testing
+@2025-02-15T10:00 D90
+!1
+< All PR checks completed
+
+[ ] Code review complete
+* Release Management
++Work,CodeReview
+@2025-02-15T11:00 D60
+!2
+< PR submitted
+
+[ ] PR submitted
+* Release Management
++Work
+@2025-02-14T17:00
+!3

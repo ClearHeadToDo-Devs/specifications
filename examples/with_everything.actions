@@ -12,3 +12,5 @@ $ descriptions
 >>> [ ] great grandchild action
 >>>> [ ] double-great grandchild action
 >>>>> [ ] Leaf action
+
+[ ] Action with predecessor < Mega Action
