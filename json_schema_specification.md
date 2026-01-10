@@ -302,3 +302,40 @@ The canonical JSON serialization is:
 All JSON output should validate against the JSON Schema provided at `schema/actions.schema.json` in this repository. The schema is generated from the same regex patterns used by the tree-sitter grammar to ensure parsing and validation are consistent.
 
 ---
+
+## Interoperability & Linked Data
+
+The JSON serialization of actions is designed to be usable as **Linked Data**, allowing actions to be referenced by and interoperable with other systems (IoT devices, AI agents, personal knowledge graphs) without requiring those systems to support a custom format.
+
+### The Context Map
+
+To treat a ClearHead JSON export as a semantic graph, use the canonical JSON-LD context map provided at `schemas/actions.context.json`.
+
+This context maps the simplified JSON keys to the rigorous, BFO-compliant [Actions Vocabulary v3](https://clearhead.us/vocab/actions/v3).
+
+### Usage Example
+
+By adding a single `@context` reference to the root of your JSON output, the data becomes fully self-describing RDF:
+
+```json
+{
+  "@context": "https://clearhead.us/schemas/actions.context.json",
+  "actions": [
+    {
+      "id": "urn:uuid:018e3c2a-1234...",
+      "name": "Buy milk",
+      "priority": 1,
+      "state": "not_started"
+    }
+  ]
+}
+```
+
+### Semantic Interpretation
+
+When an agent or tool reads this data with the context, it understands that:
+- `"state": "not_started"` maps to the URL `https://clearhead.us/vocab/actions/v3#NotStarted`
+- `"priority": 1` is an Eisenhower Matrix urgency level (`hasPriority`)
+- `"predecessors"` implies a standard dependency relationship (`dependsOn`)
+
+This enables a standard "smart light" or automation agent to reason about your actions ("Turn on light when an action with `priority=1` is `not_started`") without needing any knowledge of ClearHead-specific implementation details.

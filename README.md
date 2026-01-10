@@ -18,7 +18,10 @@ Here is the index of specifications and their purpose within the whole:
         1. Great for those who want to build with data but dont want a full database. with knowledge they can be synced back to plaintext action files later.
 5. [Database Schema](./sql_schema_specification.md) - The schema for storing actions in a relational database. This allows for efficient querying, filtering, and manipulation of action data in a structured environment.
     1. [clearhead-cli](https://github.com/ClearHeadToDo-Devs/clearhead-cli) leverages this to query lists of actions in an efficient manner, allowing for complex filters and operations that would be cumbersome with plaintext files alone. while also being able to translate operations losslessly back to the action file format.
-6. the [examples directory](../examples/) - A collection of example action files, covering a wide range of use cases and scenarios.
+6. [Ontology & Linked Data](./ontology_specification.md) - Defines the semantic meaning of the data using the Actions Vocabulary (OWL) and explains the Context Map strategy.
+    1. This specification ensures that while tools typically interact with simple JSON, the data remains semantically rigorous and interoperable with the broader Semantic Web (RDF/JSON-LD).
+    2. It bridges the gap between the pragmatic `clearhead-cli` world and the formal logic of the ontology.
+7. the [examples directory](../examples/) - A collection of example action files, covering a wide range of use cases and scenarios.
     1. [conformance_test.actions](../examples/conformance_test.actions) - A "Gold Standard" file testing all metadata fields, tree consistency, and date derivation.
     2. Implementors are expected to vendor these examples into their own projects as conformance tests and usage examples for their users. Thus, ensuring a consistent experience across different tools in the ClearHead ecosystem.
     2. Example queries for both jq and sql are provided to help with interoperability between different query approaches.

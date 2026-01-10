@@ -83,6 +83,22 @@
           "description": "ISO 8601 formatted completion date/time",
           "pattern": "[^\\n!$*+@#>]+"
         },
+        "predecessors": {
+          "type": "array",
+          "description": "Array of UUIDs of actions that must be completed before this action",
+          "items": {
+            "type": "string",
+            "pattern": "[0-9a-fA-F-]+"
+          }
+        },
+        "predecessors": {
+          "type": "array",
+          "description": "Array of UUIDs of actions that must be completed before this action",
+          "items": {
+            "type": "string",
+            "pattern": "[0-9a-fA-F-]+"
+          }
+        },
         "id": {
           "type": "string",
           "description": "UUIDv7 identifier",
