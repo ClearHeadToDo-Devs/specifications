@@ -703,6 +703,6 @@ Issues to resolve in future revisions:
 
 ---
 
-**Version:** 1.0.0-draft
-**Status:** Draft specification for implementation
+**Version:** 1.0.0
+**Status:** Implemented
 **Last updated:** 2026-01-10
