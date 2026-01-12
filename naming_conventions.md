@@ -90,67 +90,196 @@ In this way, users can grow their actions workspace organically, organizing proj
     This allows users to have a quick reference for each project/story directly within the workspace structure.
 
     Tool implementors can leverage these README files to provide additional context in their interfaces, enhancing the user experience.
-# Recurrence Logging (Optional)
+# Action History and Completion Tracking
 
-    For actions with recurrence rules, there are two complementary approaches to tracking completion:
+For tracking action completion history and analytics, the ClearHead platform uses **event sourcing** via a persistent event log database. This section explains how history is managed and how it affects file organization.
 
-## Template-Only Approach (Simplest)
+## Event Sourcing (Recommended)
 
-    The recurring action remains as a template in the main `.actions` file. The template defines the pattern but does not track individual occurrences.
+**History is tracked in `events.db`, not in plaintext log files.**
 
-    **Example:**
-    ```actions
-    [ ] Take out trash @2025-01-21T19:00 R:FREQ=WEEKLY;BYDAY=TU #trash-001
-    ```
+The event logging system (see [Event Logging Specification](./event_logging_specification.md)) provides persistent tracking of action lifecycle events in a SQLite database. This enables time-series analytics, completion history, and audit trails without duplicating data in plaintext files.
 
-    **Use case:** Simple reminders where historical tracking is not needed. The action serves as a reference that this needs to happen weekly.
+### Workflow with Event Sourcing
 
-## Template + Log Approach (For Analytics)
+**Active files contain current state only:**
+```
+workspace/
+├── inbox.actions           # Current active actions
+├── project-a.actions       # Project A active actions
+└── .clearhead/
+    └── (no logs/ directory needed)
+```
 
-    The template remains in the main `.actions` file unchanged, while completed occurrences are logged in separate files. This enables historical tracking, metrics, and analytics while keeping templates stable.
+**History lives in events database:**
+```
+~/.local/state/clearhead/
+└── events.db              # Machine-wide event log (all projects)
+```
 
-    **Template file (inbox.actions):**
-        ```actions
-           [ ] Take out trash @2025-01-21T19:00 R:FREQ=WEEKLY;BYDAY=TU #trash-001
-           [ ] Daily standup @2025-01-20T09:00 R:FREQ=DAILY;BYDAY=MO,TU,WE,TH,FR #standup-001
-           ```
+**Note:** Events are stored in `XDG_STATE_HOME` (not `XDG_DATA_HOME`) because they are machine-specific state that shouldn't be git-tracked or synced across devices via file sync.
 
-           **Log file (logs/2025-01.actions):**
-               ```actions
-                  [x] Take out trash @2025-01-07T19:00 %2025-01-07T19:15 #trash-001-20250107
-                  [x] Take out trash @2025-01-14T19:00 %2025-01-14T19:32 #trash-001-20250114
-                  [x] Take out trash @2025-01-21T19:00 %2025-01-21T18:45 #trash-001-20250121
-                  [x] Daily standup @2025-01-20T09:00 %2025-01-20T09:05 #standup-001-20250120
-                  ```
+**Example workflow for recurring actions:**
 
-    **Log Entry Format:**
-    - State is typically `[x]` (completed) or `[_]` (cancelled)
-- `@datetime` is the **scheduled** occurrence time (from the template expansion)
-    - `%datetime` is the **actual** completion time
-    - UUID links to template: `{template-uuid}-{occurrence-date-YYYYMMDD}`
-- **No recurrence rule** in log entries (they are concrete instances, not templates)
+1. **Template stays active in file:**
+   ```actions
+   [ ] Weekly standup @2026-01-14T09:00 R:FREQ=WEEKLY;BYDAY=TU #abc123
+   ```
 
-    **File Organization Convention:**
-    ```
-    clearhead/
-    ├── inbox.actions              # Active recurring templates
+2. **Complete the action** (CLI, LSP, or UI):
+   ```bash
+   clearhead complete abc123
+   ```
+
+3. **Events emitted to events.db:**
+   - `instance_completed` event logged with timestamp
+   - `instance_due` event logged for next occurrence
+
+4. **Template remains unchanged in file** (recurring actions never complete):
+   ```actions
+   [ ] Weekly standup @2026-01-14T09:00 R:FREQ=WEEKLY;BYDAY=TU #abc123
+   ```
+
+5. **Query history from events database:**
+   ```bash
+   # Show completion history for this action
+   clearhead history abc123
+
+   # Show all completions in January
+   clearhead history --since 2026-01-01 --until 2026-02-01
+
+   # Export history to plaintext if needed
+   clearhead export --completed --since 2026-01-01 > january.actions
+   ```
+
+### File Cleanup Workflow
+
+With event sourcing, **completed actions can be deleted from files to save space** - their history is preserved in events.db.
+
+**One-time actions:**
+```actions
+# Before completion
+[ ] Fix bug in login form !1 #xyz789
+
+# After completion - DELETE from file (history in events.db)
+# (action removed)
+```
+
+**Recurring actions:**
+```actions
+# Template stays in file (never deleted)
+[ ] Weekly standup @2026-01-14T09:00 R:FREQ=WEEKLY;BYDAY=TU #abc123
+```
+
+**Cleanup commands:**
+```bash
+# Remove all completed non-recurring actions from file
+clearhead clean inbox.actions
+
+# Remove completed actions older than 30 days
+clearhead clean --completed --older-than 30d inbox.actions
+```
+
+### Benefits of Event Sourcing
+
+- ✅ **Single source of truth** - History exists in exactly one place (events.db)
+- ✅ **Time-travel queries** - "How many actions were open on 2026-01-15?"
+- ✅ **Cross-project analytics** - Query completion rates across all projects
+- ✅ **No file duplication** - Completed actions don't need to be moved to log files
+- ✅ **Simpler LSP** - No file move operations to track
+- ✅ **Space efficient** - Delete completed actions from files, query history from DB
+- ✅ **Export on demand** - Generate plaintext history when needed
+
+### Querying History
+
+**CLI commands for common queries:**
+
+```bash
+# Show completion history for specific action
+clearhead history abc123
+
+# Show all completions this week
+clearhead history --since monday
+
+# Show recurring action instance history
+clearhead history --recurring abc123
+
+# Completion rate over time
+clearhead stats completion-rate --since 2026-01-01
+
+# Actions open on specific date (time-travel)
+clearhead stats open-on --date 2026-01-15
+
+# Export to plaintext
+clearhead export --completed --since 2026-01-01 --format actions > log.actions
+```
+
+**Direct SQL queries (advanced):**
+
+```bash
+# Open the events database directly
+sqlite3 ~/.local/state/clearhead/events.db
+
+# Query completion history
+SELECT timestamp, event_type, metadata
+FROM events
+WHERE action_uuid = 'abc123'
+ORDER BY timestamp;
+```
+
+## Plaintext Logs (Legacy/Optional)
+
+**Note:** Plaintext log files are no longer recommended with event sourcing. However, implementations MAY still support them for backwards compatibility or user preference.
+
+If using plaintext logs instead of event sourcing:
+
+**File Organization:**
+```
+workspace/
+├── inbox.actions           # Active actions
+└── .clearhead/
     └── logs/
-    ├── 2025-01.actions       # January completions
-    ├── 2025-02.actions       # February completions
-    ```
+        ├── 2025-01.actions    # January completions
+        └── 2025-02.actions    # February completions
+```
 
-    **Benefits:**
-    - **Immutable templates** - Source of truth never changes due to completion
-    - **Full history** - Complete record of what was done and when
-    - **Metrics** - Track completion rates, timing variance, streaks, etc.
-    - **Editor-friendly** - Manual users can append to log files by hand
-    - **Application-friendly** - CLI/GUI tools can query logs for analytics
-    - **No lock-in** - All data remains in plain text `.actions` format
+**Log Entry Format:**
+```actions
+[x] Take out trash @2025-01-07T19:00 %2025-01-07T19:15 #trash-001-20250107
+[x] Daily standup @2025-01-20T09:00 %2025-01-20T09:05 #standup-001-20250120
+```
 
-    **Implementation Notes:**
-    - Applications should expand templates to show upcoming occurrences
-    - On completion, applications append to log file for that month
-    - Log files use standard `.actions` format and can be queried with same tools
-    - Manual users can maintain logs by copying template and adding completion date
-    - Templates without UUIDs can generate them: `uuidgen` or application auto-assignment
+**Tradeoffs:**
+- ✅ Human-readable plaintext history
+- ✅ Can `cat` or `grep` log files directly
+- ❌ Duplicates data (same info in files and events.db if both used)
+- ❌ Requires file move operations (complexity for LSP)
+- ❌ Limited querying (no time-series analytics without parsing all files)
+
+## Migration from Plaintext Logs to Event Sourcing
+
+If migrating from plaintext logs to event sourcing:
+
+1. **Import existing log files into events.db:**
+   ```bash
+   clearhead import-logs .clearhead/logs/*.actions
+   ```
+
+2. **Verify import:**
+   ```bash
+   clearhead history --all | wc -l  # Should match log entry count
+   ```
+
+3. **Remove log files (optional):**
+   ```bash
+   rm -rf .clearhead/logs/
+   ```
+
+4. **Update workflow to delete completed actions instead of archiving**
+
+## See Also
+
+- [Event Logging Specification](./event_logging_specification.md) - Complete event sourcing details
+- [Configuration Specification](./configuration_specification.md) - Configure events.db path
+- [Action File Format](./action_specification.md) - Core file format
 
