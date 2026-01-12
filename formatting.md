@@ -52,14 +52,14 @@ The specification defines two canonical formatting styles, each optimized for di
 **Purpose**: Optimized for wide displays where horizontal space is abundant. Maximizes information density while maintaining readability.
 
 **Formatting Rules**:
-1. ✅ All metadata appears on the same line as the action name
-2. ✅ One action per line (newline after each action)
-3. ✅ Space after state brackets: `[x] Task` not `[x]Task`
-4. ✅ Space after depth markers: `>[ ] Child` not `>[  ]Child`
-5. ✅ Space before each metadata token: `Task !1 *Story` not `Task!1*Story`
-6. ✅ Space after description icon: `$ Desc` not `$Desc`
-7. ✅ No space after value icons: `!1` not `! 1`
-8. ✅ Child actions are indented by `depth × indent_width` units of `indent_style` whitespace.
+1. All metadata appears on the same line as the action name
+2. One action per line (newline after each action)
+3. Space after state brackets: `[x] Task` not `[x]Task`
+4. Space after depth markers: `>[ ] Child` not `>[  ]Child`
+5. Space before each metadata token: `Task !1 *Story` not `Task!1*Story`
+6. Space after description icon: `$ Desc` not `$Desc`
+7. No space after value icons: `!1` not `! 1`
+8. Child actions are indented by `depth × indent_width` units of `indent_style` whitespace.
 
 **Example** (with `indent_width = 4`, `indent_style = spaces`):
 ```actions
@@ -74,12 +74,12 @@ The specification defines two canonical formatting styles, each optimized for di
 **Purpose**: Optimized for narrow displays (e.g., task sidebars, mobile views, split panes). Prioritizes vertical readability over horizontal density.
 
 **Formatting Rules**:
-1. ✅ Action name on same line as state
-2. ✅ Each metadata item appears on a separate line
-3. ✅ Metadata indented to `(action_depth + 1) × indent_width` units of `indent_style` whitespace.
-4. ✅ Child actions indented to `depth × indent_width` units of `indent_style` whitespace.
-5. ✅ Default `indent_width`: 4 units.
-6. ✅ All horizontal spacing rules from compact style apply within each line.
+1. Action name on same line as state
+2. Each metadata item appears on a separate line
+3. Metadata indented to `(action_depth + 1) × indent_width` units of `indent_style` whitespace.
+4. Child actions indented to `depth × indent_width` units of `indent_style` whitespace.
+5. Default `indent_width`: 4 units.
+6. All horizontal spacing rules from compact style apply within each line.
 
 ## Metadata Token Formatting
 

@@ -1,8 +1,9 @@
 [x] Update actions.context.json to close semantic gap $ Add parentAction, createdDate, and complete Recurrence mapping to context map !1 +specification +semantic-web +interoperability %2026-01-09T23:55 ^2026-01-09T23:41 #019ba6da-c157-79b3-ba5f-93283526b6ca
 [ ] Document UUID prefix reference system $ Add comprehensive documentation for short UUID prefix syntax in predecessor references !2 +specification +documentation ^2026-01-09T23:20 #019ba6c6-cc8b-7410-9230-a326f20724b2
-    >[ ] Document UUID prefix syntax $ Explain 8 !2 +specification ^2026-01-09T23:20 #019ba6c6-cc8b-7410-9230-a33eafed202a
-    >[ ] Document collision detection rules $ Specify minimum length requirements and collision resolution !2 +specification ^2026-01-09T23:20 #019ba6c6-cc8b-7410-9230-a34844fb6132
-    >[ ] Document normalization behavior $ Explain how and when short refs expand to full UUIDs !2 +specification ^2026-01-09T23:20 #019ba6c6-cc8b-7410-9230-a3551f5b34fc
-    >[ ] Add examples showing prefix usage $ Provide before/after examples of using short vs full UUIDs !3 +documentation ^2026-01-09T23:20 #019ba6c6-cc8b-7410-9230-a3641aea7694
-    >[ ] Document resolution algorithm $ Specify exact algorithm for matching prefixes to full UUIDs !2 +specification ^2026-01-09T23:20 #019ba6c6-cc8b-7410-9230-a373e6ac0da7
-    >[ ] Update predecessor reference section $ Integrate prefix syntax into existing predecessor documentation !2 +specification ^2026-01-09T23:20 #019ba6c6-cc8b-7410-9230-a389cf65015a
+        >[ ] Document UUID prefix syntax $ Explain 8 !2 +specification ^2026-01-09T23:20 #019ba6c6-cc8b-7410-9230-a33eafed202a
+        >[ ] Document collision detection rules $ Specify minimum length requirements and collision resolution !2 +specification ^2026-01-09T23:20 #019ba6c6-cc8b-7410-9230-a34844fb6132
+        >[ ] Document normalization behavior $ Explain how and when short refs expand to full UUIDs !2 +specification ^2026-01-09T23:20 #019ba6c6-cc8b-7410-9230-a3551f5b34fc
+        >[ ] Add examples showing prefix usage $ Provide before/after examples of using short vs full UUIDs !3 +documentation ^2026-01-09T23:20 #019ba6c6-cc8b-7410-9230-a3641aea7694
+        >[ ] Document resolution algorithm $ Specify exact algorithm for matching prefixes to full UUIDs !2 +specification ^2026-01-09T23:20 #019ba6c6-cc8b-7410-9230-a373e6ac0da7
+        >[ ] Update predecessor reference section $ Integrate prefix syntax into existing predecessor documentation !2 +specification ^2026-01-09T23:20 #019ba6c6-cc8b-7410-9230-a389cf65015a
+[ ] Consider implementing a tag taxonomy system $ this way, we can do obvious subtypes like "Browser" is an obvious subcontext of "online" !2 ^2026-01-10T11:38 #019ba96a-b2f5-79e2-a604-a0ae763c4030

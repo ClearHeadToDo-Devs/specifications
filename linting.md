@@ -12,6 +12,12 @@ version: 1.1.0
 This specification defines optional linting rules for `.actions` files. While the [action_specification.md](./action_specification.md) defines valid syntax and [formatting_specification.md](./formatting_specification.md) handles all presentation (spacing, indentation, layout), this document defines semantic quality checks that detect correctness issues, temporal problems, and style violations.
 
 ## Philosophy
+Linting is a strange topic. As the research has continued its clear that different languages use their linters differently.
+
+For this, We will break it into three sections that roughly correspond to the error levels found in things like LSP server diagnostics
+- Errors: Parse Errors for the tree. These errors should indicate that the file is unable to parse as valid when these errors are present.
+- Warnings: Errors that, while not preventing parsing, will make downstream systems less able to input the information as data and may lead to headaches down the line.
+- Info: Finally, these elements are those we cover in the 
 
 ### Linting vs Formatting
 
@@ -35,11 +41,11 @@ A linter is *optional* and *configurable* - teams choose which rules to enforce 
 
 Linting rules are categorized by severity:
 
-| Level | Symbol | Meaning | Recommended Action |
-|-------|--------|---------|-------------------|
-| **Error** | ❌ | Violates semantic correctness | Must fix |
-| **Warning** | ⚠️ | Likely mistake or bad practice | Should fix |
-| **Info** | ℹ️ | Suggestion or style preference | Consider fixing |
+| Level     | Symbol |         Meaning              | Recommended Action |
+|-----------|--------|------------------------------|--------------------|
+| **Error**   | ❌ | Violates semantic correctness  | Must fix           |
+| **Warning** | ⚠️ | Likely mistake or bad practice | Should fix         |
+| **Info**    | ℹ️ | Suggestion or style preference | Consider fixing    |
 
 ## Rule Categories
 
@@ -325,8 +331,8 @@ Actions with state `[ ]` (not started) probably shouldn't have do-dates in the p
 Completed date shouldn't be significantly before do-date.
 
 ```actions
-⚠️  [x] Meeting @2025-01-20T14:00 %2025-01-20T10:00  # 4 hours early
-✅ [x] Meeting @2025-01-20T14:00 %2025-01-20T14:30  # Slightly late is normal
+ [x] Meeting @2025-01-20T14:00 %2025-01-20T10:00  
+ [x] Meeting @2025-01-20T14:00 %2025-01-20T14:30  
 ```
 
 **Configuration:** `early_completion_threshold_minutes` (default: 60)
