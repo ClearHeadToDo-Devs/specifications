@@ -38,6 +38,7 @@ With this platform, my goal is to create a system with a few core values:
 - local-first: Users should be able to use the system fully offline, with optional cloud sync.
   - Adherence to Standards: In particular, i believe we achieve local-first software through the coordination of standards and data rather than bespoke implementations.
   - Interoperability: Different tools and implementations should be able to work together seamlessly.
+    - This is why these specifications exist as a separate repo, so that other implementors can build their own tools that interoperate with the ecosystem.
 - Incremental Adoption: Users should be able to start small and gradually integrate more features as they see fit, or not! A core usecase is the single person, writing a plaintext file in the woods are their phone without internet.
   - This is why the string file format is the core of the system, and everything else builds on top of that.
   - Power users will also need to extend the system beyond the core and this needs to be possible without breaking the core usecases.

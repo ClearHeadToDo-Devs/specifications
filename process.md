@@ -116,3 +116,49 @@ In many ways, this is the core "why" beind the whole system as we want to make g
 If all goes well, this list should be where you spend the majority of your time as you work through your day.
 
 This list will include recurring and one-off actions, as well as actions that have no due date but are of high priority of which can be done within the current context/timeframe.
+
+# Workflow
+Now that we have covered the overarching stages, we want to get a bit more granular around the relationships between various properties around the actions and how they are meant to communicate our intent
+
+## Action States
+At any given time, an action is of one of the following states:
+- Not Started 
+  - The default state when actions are created
+- In Progress
+  - Intended to express actions an agent is actively focused on
+- Blocked
+  - Expresses that an action cannot be worked on for some reason
+    - where possible, we would rather use proper dependencies to express state but this is often useful for external blockers
+- Completed
+  - The action has been finished successfully
+- Cancelled
+  - The action is no longer relevant and will not be completed
+    - Holding this distinction can be important for seeing when we wanted to do something but it was no longer relevant
+
+a normal workflow for an action would likely be:
+Not Started -> In Progress -> Completed
+
+While many more difficult actions could be:
+Not Started -> In Progress -> Blocked -> Cancelled
+
+These systems are not about judgement simply tracking this data as it moves through the traditional lifecyle
+
+### On Children Actions
+One important note is that unless otherwise specified, and where relevant, the state of parent actions are determined by their children actions.
+
+This means an action can be considered done if all the children are completed.
+  - This applies recursively up the tree such that an Action Plan is only done when all its sub-actions are done.
+
+The reverse is also true, we want to avoid closed parent actions with open children actions as this creates confusion around what is actually done.
+
+## Priority
+Generally, we focus on a 1-4 scale aligned to the Eisenhower matrix:
+1. Do: Urgent and Important
+2. Schedule: Not Urgent but Important
+3. Delegate: Urgent but Not Important
+4. Delete: Not Urgent and Not Important
+
+While your ability to delegate may vary on your circumstances, the core idea is that we will often want to AVOID doing things that are not important and not urgent as these are often distractions from the core work we want to be doing.
+
+This is where that cancelled state can be useful as it gives us an easy way to cancel actions in a thoughtful way
+
