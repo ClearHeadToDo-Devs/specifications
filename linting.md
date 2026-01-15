@@ -37,91 +37,13 @@ A linter is *optional* and *configurable* - teams choose which rules to enforce 
 4. **Fast** - Checks should be efficient enough for real-time editor integration
 5. **Layered** - Rules grouped by concern (correctness, style, best practices)
 
-## Severity Levels
-
-Linting rules are categorized by severity:
-
-| Level     | Symbol |         Meaning              | Recommended Action |
-|-----------|--------|------------------------------|--------------------|
-| **Error**   | ❌ | Violates semantic correctness  | Must fix           |
-| **Warning** | ⚠️ | Likely mistake or bad practice | Should fix         |
-| **Info**    | ℹ️ | Suggestion or style preference | Consider fixing    |
-
 ## Rule Categories
 
-### 1. Semantic Correctness (Errors)
+### 1. Parser Correctness (Errors)
 
 These rules detect logical inconsistencies that likely indicate mistakes.
 
-#### E001: Completed State Requires Completed Date
-**Severity:** Error
-**Fixable:** No (requires user input)
-
-Actions with state `[x]` (completed) must have a completed date (`%`).
-
-```actions
-❌ [x] Task $ Description !1
-✅ [x] Task $ Description !1 %2025-01-20T15:00
-```
-
-**Rationale:** Completion tracking requires knowing *when* the action was completed.
-
-**Fix suggestion:** Add `%YYYY-MM-DDTHH:MM` or change state to `[ ]`.
-
-#### E002: Completed Date Requires Completed State
-**Severity:** Error
-**Fixable:** No
-
-Actions with completed date (`%`) must have state `[x]`.
-
-```actions
-❌ [ ] Task %2025-01-20
-✅ [x] Task %2025-01-20
-```
-
-**Rationale:** A completed date without completed state is contradictory.
-
-#### E003: Invalid Priority Level
-**Severity:** Error
-**Fixable:** No
-
-Priority must be 1-5 (1 = highest, 5 = lowest).
-
-```actions
-❌ [ ] Task !0
-❌ [ ] Task !6
-❌ [ ] Task !high
-✅ [ ] Task !1
-```
-
-**Rationale:** Priority levels are defined by the format specification.
-
-#### E004: Invalid UUID Format
-**Severity:** Error
-**Fixable:** No
-
-UUIDs must follow standard format: `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx` (UUIDv7 recommended).
-
-```actions
-❌ [ ] Task #not-a-uuid
-❌ [ ] Task #123
-✅ [ ] Task #01950000-0000-7000-8000-000000000001
-```
-
-#### E005: Duplicate ID
-**Severity:** Error
-**Fixable:** No
-
-Action IDs must be unique within the file (and ideally across the project).
-
-```actions
-❌ [ ] Task1 #01950000-0000-7000-8000-000000000001
-   [ ] Task2 #01950000-0000-7000-8000-000000000001
-```
-
-**Scope:** File-level check is mandatory. Cross-file checking is optional (requires project context).
-
-#### E006: Duration Without Do-Date
+#### E001: Duration Without Do-Date
 **Severity:** Error
 **Fixable:** No
 
@@ -134,7 +56,7 @@ Duration (`D`) requires a do-date (`@`) to be meaningful.
 
 **Rationale:** A duration without a start time is nonsensical.
 
-#### E007: Recurrence Without Do-Date
+#### E002: Recurrence Without Do-Date
 **Severity:** Error
 **Fixable:** No
 
@@ -145,7 +67,7 @@ Recurrence (`R:`) requires a do-date (`@`) as the starting point.
 ✅ [ ] Task @2025-01-20 R:FREQ=DAILY
 ```
 
-#### E008: Empty Context Tag
+#### E003: Empty Context Tag
 **Severity:** Error
 **Fixable:** No
 
@@ -157,18 +79,8 @@ Context tags cannot be empty.
 ✅ [ ] Task +work,home
 ```
 
-#### E009: Hierarchy Depth Exceeded
-**Severity:** Error
-**Fixable:** No
 
-Maximum nesting depth is 5 levels (depth 0-5).
-
-```actions
-❌ [ ] Root >>>>>>[ ] Too deep (depth 6)
-✅ [ ] Root >>>>>[ ] OK (depth 5)
-```
-
-#### E010: Orphaned Child Marker
+#### E004: Orphaned Child Marker
 **Severity:** Error
 **Fixable:** No
 
@@ -180,7 +92,7 @@ Child actions (`>`) must follow a parent action at the appropriate depth.
    >[ ] Child
 ```
 
-#### E011: Skipped Hierarchy Level
+#### E005: Skipped Hierarchy Level
 **Severity:** Error
 **Fixable:** No
 
@@ -194,117 +106,23 @@ Cannot skip depth levels (e.g., depth 0 → depth 2).
    >>[ ] Depth 2
 ```
 
-#### E012: Completed Parent with Uncompleted Children
+#### E006: Invalid UUID Format
 **Severity:** Error
 **Fixable:** No
 
-A parent action cannot be marked as completed if it has children that are still active.
+UUIDs must follow standard format: `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx` (UUIDv7 recommended).
 
 ```actions
-❌ [x] Parent
-   >[ ] Uncompleted child
-✅ [x] Parent
-   >[x] Completed child
+❌ [ ] Task #not-a-uuid
+❌ [ ] Task #123
+✅ [ ] Task #01950000-0000-7000-8000-000000000001
 ```
 
-**Rationale:** Archiving and completion logic typically operates on trees. A "completed" parent with "active" work is semantically inconsistent.
+UUIDs are critical for the unique identification of actions across files and systems.
 
-#### E013: Uncompleted Parent with All Children Completed
-**Severity:** Warning
-**Fixable:** No
+V7 adds the benefit of being time-sortable, which is useful for tracking creation order.
 
-A parent action that is not completed but has all its children marked as completed should likely be completed as well.
-
-```actions
-⚠️  [ ] Parent
-   >[x] Child 1
-   >[x] Child 2
-✅ [x] Parent
-   >[x] Child 1
-   >[x] Child 2
-```
-
-**Rationale:** Serves as a nudge to the user to wrap up the parent action once all its sub-tasks are finished.
-
-#### E014: Missing Creation Date
-**Severity:** Warning (style/tracking preference, not a correctness issue)
-**Fixable:** Yes (derive from UUID v7 or add current date)
-
-Actions should ideally have a creation date, either explicitly via the `^` marker or implicitly via a UUID v7 in the `#` field.
-
-```actions
-⚠️  [ ] New task
-✅ [ ] New task ^2026-01-03
-✅ [ ] New task #01942db4-0000-7000-8000-000000000001
-```
-
-**Rationale:** Creation timestamps help with aging analysis and history tracking, but are not required for correctness. This is a best practice for teams wanting detailed action tracking, but can be disabled for casual use.
-
-#### E015: Creation Date in Future
-**Severity:** Error
-**Fixable:** No
-
-The creation date (`^`) cannot be in the future relative to the current system time.
-
-```actions
-❌ [ ] Task ^2099-01-01
-```
-
-#### E016: Completion Before Creation
-**Severity:** Error
-**Fixable:** No
-
-The completion date (`%`) cannot be before the creation date (`^`).
-
-```actions
-❌ [x] Impossible Task ^2026-01-03 %2026-01-01
-```
-
-#### E025: Circular Dependency
-**Severity:** Error
-**Fixable:** No
-
-Actions cannot have circular dependencies (directly or transitively).
-
-```actions
-❌ [ ] Task A < Task B
-❌ [ ] Task B < Task A
-```
-
-**Rationale:** Circular dependencies are logically impossible — neither action can ever be completed.
-
-**Fix suggestion:** Review the dependency structure and break the cycle by removing or reworking one of the dependencies.
-
-#### E026: Invalid Predecessor Reference
-**Severity:** Error
-**Fixable:** No
-
-A predecessor references an action that doesn't exist in the workspace.
-
-```actions
-❌ [ ] Task < Nonexistent Action
-```
-
-**Rationale:** Actions should only depend on other actions that actually exist.
-
-**Fix suggestion:** Check the name/UUID spelling, or create the missing predecessor action.
-
-#### E027: Ambiguous Predecessor Reference
-**Severity:** Warning
-**Fixable:** No
-
-Multiple actions in the workspace match the predecessor name. Use UUID to disambiguate.
-
-```actions
-⚠️  [ ] Deploy < setup  # Three "setup" actions exist in workspace
-✅ [ ] Deploy < #01951111-cfa6-718d-b303-d7107f4005b3
-```
-
-**Rationale:** Name-based references should be unambiguous. When multiple matches exist, recommend UUIDs for clarity.
-
-**Configuration:** `require_uuid_for_ambiguous_predecessors` (default: false) — if true, escalates to error severity.
-
-### 2. Temporal Logic (Warnings)
+### 2. Warnings 
 
 These rules check for suspicious date/time relationships.
 
@@ -337,36 +155,198 @@ Completed date shouldn't be significantly before do-date.
 
 **Configuration:** `early_completion_threshold_minutes` (default: 60)
 
-#### W003: Excessive Duration
-**Severity:** Info
+
+#### W005: Hierarchy Depth Exceeded
+**Severity:** Warning
 **Fixable:** No
 
-Very long durations may indicate data entry errors.
+Maximum nesting depth is 5 levels (depth 0-5).
 
 ```actions
-ℹ️  [ ] Task @2025-01-20 D10080  # 1 week = 168 hours
-✅ [ ] Task @2025-01-20 D120  # 2 hours
+❌ [ ] Root >>>>>>[ ] Too deep (depth 6)
+✅ [ ] Root >>>>>[ ] OK (depth 5)
 ```
 
-**Configuration:** `max_duration_minutes` (default: 480 = 8 hours)
+This may or may not be a breaking issue depending on parser implementation. but either way, the process also discourages deep nesting for clarity.
 
-#### W004: Very Old Action
-**Severity:** Info
+#### E006: Completed Parent with Uncompleted Children
+**Severity:** Error
 **Fixable:** No
 
-Not-started or in-progress actions with very old do-dates may need review.
+A parent action cannot be marked as completed if it has children that are still active.
 
 ```actions
-ℹ️  [ ] Ancient task @2020-01-01  # 5+ years old
+❌ [x] Parent
+   >[ ] Uncompleted child
+✅ [x] Parent
+   >[x] Completed child
 ```
 
-**Configuration:** `old_action_threshold_days` (default: 365)
+**Rationale:** Archiving and completion logic typically operates on trees. A "completed" parent with "active" work is semantically inconsistent.
+
+#### E007: Uncompleted Parent with All Children Completed
+**Severity:** Warning
+**Fixable:** No
+
+A parent action that is not completed but has all its children marked as completed should likely be completed as well.
+
+```actions
+⚠️  [ ] Parent
+   >[x] Child 1
+   >[x] Child 2
+✅ [x] Parent
+   >[x] Child 1
+   >[x] Child 2
+```
+
+**Rationale:** Serves as a nudge to the user to wrap up the parent action once all its sub-tasks are finished.
+
+#### E008: Missing Creation Date
+**Severity:** Warning (style/tracking preference, not a correctness issue)
+**Fixable:** Yes (derive from UUID v7 or add current date)
+
+Actions should ideally have a creation date, either explicitly via the `^` marker or implicitly via a UUID v7 in the `#` field.
+
+```actions
+⚠️  [ ] New task
+✅ [ ] New task ^2026-01-03
+✅ [ ] New task #01942db4-0000-7000-8000-000000000001
+```
+
+**Rationale:** Creation timestamps help with aging analysis and history tracking, but are not required for correctness. This is a best practice for teams wanting detailed action tracking, but can be disabled for casual use.
+
+#### E009: Creation Date in Future
+**Severity:** Error
+**Fixable:** No
+
+The creation date (`^`) cannot be in the future relative to the current system time.
+
+```actions
+❌ [ ] Task ^2099-01-01
+```
+
+#### E010: Completion Before Creation
+**Severity:** Error
+**Fixable:** No
+
+The completion date (`%`) cannot be before the creation date (`^`).
+
+```actions
+❌ [x] Impossible Task ^2026-01-03 %2026-01-01
+```
+
+#### E011: Circular Dependency
+**Severity:** Error
+**Fixable:** No
+
+Actions cannot have circular dependencies (directly or transitively).
+
+```actions
+❌ [ ] Task A < Task B
+❌ [ ] Task B < Task A
+```
+
+**Rationale:** Circular dependencies are logically impossible — neither action can ever be completed.
+
+**Fix suggestion:** Review the dependency structure and break the cycle by removing or reworking one of the dependencies.
+
+#### W012: Invalid Predecessor Reference
+**Severity:** Warning
+**Fixable:** No
+
+A predecessor references an action that doesn't exist in the workspace.
+
+```actions
+❌ [ ] Task < Nonexistent Action
+```
+
+**Rationale:** Actions should only depend on other actions that actually exist.
+
+**Fix suggestion:** Check the name/UUID spelling, or create the missing predecessor action.
+
+#### W013: Ambiguous Predecessor Reference
+**Severity:** Warning
+**Fixable:** No
+
+Multiple actions in the workspace match the predecessor name. Use UUID to disambiguate.
+
+```actions
+⚠️  [ ] Deploy < setup  # Three "setup" actions exist in workspace
+✅ [ ] Deploy < #01951111-cfa6-718d-b303-d7107f4005b3
+```
+
+**Rationale:** Name-based references should be unambiguous. When multiple matches exist, recommend UUIDs for clarity.
+
+**Configuration:** `require_uuid_for_ambiguous_predecessors` (default: false) — if true, escalates to error severity.
+
 
 ### 3. Style and Conventions (Info)
 
+#### I001: Completed State Requires Completed Date
+**Severity:** Info
+**Fixable:** No (requires user input)
+
+Actions with state `[x]` (completed) must have a completed date (`%`).
+
+```actions
+❌ [x] Task $ Description !1
+✅ [x] Task $ Description !1 %2025-01-20T15:00
+```
+
+**Rationale:** Completion tracking requires knowing *when* the action was completed.
+
+**Fix suggestion:** Add `%YYYY-MM-DDTHH:MM` or change state to `[ ]`.
+
+#### I002: Completed Date Requires Completed State
+**Severity:** Info
+**Fixable:** No
+
+Actions with completed date (`%`) must have state `[x]`.
+
+```actions
+❌ [ ] Task %2025-01-20
+✅ [x] Task %2025-01-20
+```
+
+**Rationale:** A completed date without completed state is contradictory.
+
+We may consider reopen date if requested but for now it is assumed that actions are completed if they have a completed date.
+
+#### E003: Invalid Priority Level
+**Severity:** Error
+**Fixable:** No
+
+Priority must be 1-5 (1 = highest, 5 = lowest).
+
+```actions
+❌ [ ] Task !0
+❌ [ ] Task !6
+❌ [ ] Task !high
+✅ [ ] Task !1
+```
+
+**Rationale:** Priority levels are defined by the format specification.
+
+While we dont necessarily stop you from putting higher values, for the sake of the process, we conform to the eisenhower matrix
+
+
+#### I005: Duplicate ID
+**Severity:** Info
+**Fixable:** No
+
+Action IDs must be unique within the file (and ideally across the project).
+
+```actions
+❌ [ ] Task1 #01950000-0000-7000-8000-000000000001
+   [ ] Task2 #01950000-0000-7000-8000-000000000001
+```
+
+**Scope:** File-level check is mandatory. Cross-file checking is optional (requires project context).
+
+
 These rules enforce team conventions and best practices. All are configurable.
 
-#### I001: Metadata Order
+#### I006: Metadata Order
 **Severity:** Info
 **Fixable:** Yes (if auto-reordering is enabled)
 
@@ -381,7 +361,7 @@ Metadata should follow canonical order: `$` → `!` → `*` → `+` → `@` → 
 
 **Rationale:** Consistent ordering improves scanability across files.
 
-#### I002: High Priority Without Do-Date
+#### I007: High Priority Without Do-Date
 **Severity:** Info
 **Fixable:** No
 
@@ -394,7 +374,7 @@ Priority 1-2 actions without do-dates may need scheduling.
 
 **Configuration:** `high_priority_threshold` (default: 2)
 
-#### I003: Blocked Without Description
+#### I008: Blocked Without Description
 **Severity:** Info
 **Fixable:** No
 
@@ -405,46 +385,8 @@ Blocked actions (`[=]`) should explain why in the description.
 ✅ [=] Task $ Waiting for API access !1
 ```
 
-#### I004: Action Name Too Long
-**Severity:** Info
-**Fixable:** No
 
-Very long action names hurt readability and should use descriptions instead.
-
-```actions
-ℹ️  [ ] This is a really long action name that should probably be split into a short name and a description
-✅ [ ] Implement feature $ Split long text into name + description
-```
-
-**Configuration:** `max_name_length` (default: 50)
-
-#### I005: Missing Context
-**Severity:** Info
-**Fixable:** No
-
-Actions may benefit from context tags for organization.
-
-```actions
-ℹ️  [ ] Call dentist
-✅ [ ] Call dentist +personal,phone
-```
-
-**Configuration:** `require_contexts` (default: false)
-
-#### I006: Missing Story Assignment
-**Severity:** Info
-**Fixable:** No
-
-Root actions may benefit from story/project assignment.
-
-```actions
-ℹ️  [ ] Implement authentication !1
-✅ [ ] Implement authentication !1 *Security-Project
-```
-
-**Configuration:** `require_story` (default: false)
-
-#### I007: Child Higher Priority Than Parent
+#### I009: Child Higher Priority Than Parent
 **Severity:** Info
 **Fixable:** No
 
@@ -459,48 +401,27 @@ Child actions with higher priority than parents may indicate organizational issu
 
 **Configuration:** `check_child_priority` (default: false)
 
+
+We keep the hierarchy limited for process requirements but many 
+
+#### W003: Excessive Duration
+**Severity:** Info
+**Fixable:** No
+
+Very long durations may indicate data entry errors.
+
+```actions
+ℹ️  [ ] Task @2025-01-20 D10080  # 1 week = 168 hours
+✅ [ ] Task @2025-01-20 D120  # 2 hours
+```
+
+**Configuration:** `max_duration_minutes` (default: 480 = 8 hours)
+
+
 ### 4. Content Quality (Info)
 
 These rules check for common content issues.
 
-#### I008: TODO/FIXME Markers
-**Severity:** Info
-**Fixable:** No
-
-TODO/FIXME markers in descriptions may indicate incomplete planning.
-
-```actions
-ℹ️  [ ] Task $ TODO: figure out the details
-✅ [ ] Task $ Complete description with clear next steps
-```
-
-**Configuration:** `detect_todo_markers` (default: true), `todo_markers` (default: `["TODO", "FIXME", "XXX"]`)
-
-#### I009: Question Marks in Name
-**Severity:** Info
-**Fixable:** No
-
-Question marks may indicate uncertainty or incomplete planning.
-
-```actions
-ℹ️  [ ] Maybe do this?
-✅ [ ] Complete specific action
-```
-
-**Configuration:** `detect_uncertainty_markers` (default: false)
-
-#### I010: All Caps Name
-**Severity:** Info
-**Fixable:** No
-
-All-caps names may indicate shouting or improper emphasis.
-
-```actions
-ℹ️  [ ] URGENT TASK
-✅ [ ] Urgent task !1  # Use priority instead
-```
-
-**Configuration:** `detect_all_caps` (default: false)
 
 ## Configuration
 
@@ -530,31 +451,6 @@ I004.max_name_length = 60
 I006.enabled = true  # Require story assignment
 ```
 
-### Severity Overrides
-
-Users can change severity levels:
-
-```toml
-[rules]
-W001.severity = "error"  # Treat past do-dates as errors
-I002.severity = "warning"  # Promote high-priority-without-date to warning
-```
-
-### Ignore Directives
-
-Inline comments can suppress warnings:
-
-```actions
-[ ] Legacy task @2020-01-01  # lint-ignore W001
-```
-
-Or disable for entire file:
-
-```actions
-# lint-disable W001, I002
-
-[ ] File contents...
-```
 
 ## Linter Output Format
 
