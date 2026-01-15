@@ -80,21 +80,11 @@ Events are stored in the XDG state directory (machine-wide, machine-specific):
 
 **Rationale for XDG_STATE_HOME:**
 - Events are **machine-specific state**, not user data to be synced
-- Avoids conflicts if user git-tracks `XDG_DATA_HOME` (`~/.local/share/clearhead/`)
+- Avoids conflicts if user git-tracks `XDG_DATA_HOME`
 - Semantically correct: logs/history vs user-created content
 - Binary database files don't belong in version control
 
-**Directory structure:**
-```
-~/.local/state/clearhead/       # Machine-specific state (not synced)
-  └── events.db
-
-~/.local/share/clearhead/       # User data (can be git-tracked/synced)
-  └── inbox.actions
-
-~/.config/clearhead/            # Configuration
-  └── config.json
-```
+See [Configuration Specification](./configuration.md) for full XDG directory structure.
 
 ### Configuration
 
@@ -700,6 +690,13 @@ Issues to resolve in future revisions:
 3. **Bulk operations** - How to represent "archived 50 actions"? 50 events or summary event? (Current: 50 events)
 4. **Retention** - Should events ever be pruned? If so, when? (Current: never, append-only forever)
 5. **Cross-file moves** - If action moves between files, delete+create or new event type? (Current: undefined)
+
+## See Also
+
+- [Configuration](./configuration.md) - XDG paths, `state_dir` setting
+- [Sync Architecture](./sync_architecture.md) - How events.db fits in CRDT architecture
+- [Naming Conventions](./naming_conventions.md) - Workspace structure
+- [Action File Format](./action_file_format.md) - DSL syntax for actions
 
 ---
 

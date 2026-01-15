@@ -20,7 +20,10 @@ All implementations MUST follow the XDG Base Directory specification:
 |---------------|----------|---------|
 | Config | `$XDG_CONFIG_HOME/clearhead` | `~/.config/clearhead` |
 | Data | `$XDG_DATA_HOME/clearhead` | `~/.local/share/clearhead` |
+| State | `$XDG_STATE_HOME/clearhead` | `~/.local/state/clearhead` |
 | Cache (optional) | `$XDG_CACHE_HOME/clearhead` | `~/.cache/clearhead` |
+
+**Note:** State directory contains machine-specific runtime state (CRDT documents, events.db) that should NOT be synced via file-sync tools like Dropbox. See [Sync Architecture](./sync_architecture.md) for details.
 
 ### Default File Structure
 
@@ -29,7 +32,11 @@ All implementations MUST follow the XDG Base Directory specification:
   └── config.json          # Primary configuration file
 
 ~/.local/share/clearhead/
-  └── inbox.actions        # Default action file
+  └── inbox.actions        # Default action file (projected from CRDT)
+
+~/.local/state/clearhead/
+  ├── workspace.crdt       # CRDT document (source of truth)
+  └── events.db            # Event log for analytics/history
 ```
 
 ## Configuration File Format
@@ -87,6 +94,7 @@ All implementations MUST recognize these core settings:
 |---------|------|---------|-------------|
 | `data_dir` | string | `~/.local/share/clearhead` | Global directory for user data and action files |
 | `config_dir` | string | `~/.config/clearhead` | Global directory for configuration files |
+| `state_dir` | string | `~/.local/state/clearhead` | Directory for machine-specific state (CRDT, events.db) |
 | `default_file` | string | `inbox.actions` | Default action file name (relative to data_dir) |
 | `project_files` | array[string] | `["next.actions"]` | Filenames that indicate a project root (see naming conventions) |
 | `use_project_config` | boolean | `true` | Whether to search for and use project-level `.clearhead/config.json` |
@@ -212,6 +220,10 @@ Implementations MAY add their own settings to the configuration file using a nam
   "nvim_format_on_save": true,
   "nvim_lsp_enable": true,
 
+  "sync_enabled": true,
+  "sync_relay_url": "wss://sync.example.com",
+  "sync_interval_seconds": 30,
+
   "web_port": 8080,
   "web_auto_sync": true,
   "web_theme": "dark"
@@ -219,11 +231,46 @@ Implementations MAY add their own settings to the configuration file using a nam
 ```
 
 **Requirements:**
-- Implementations MUST prefix their settings with a unique namespace (e.g., `cli_`, `nvim_`, `web_`)
+- Implementations MUST prefix their settings with a unique namespace (e.g., `cli_`, `nvim_`, `sync_`, `web_`)
 - Implementations MUST ignore settings from other namespaces
 - Implementations SHOULD NOT depend on settings from other namespaces
 - Namespace prefixes MUST be unique identifiers (no conflicts)
 - Core settings (no prefix) MUST be respected by all implementations
+
+### Sync Settings (`sync_*`)
+
+The sync service (`clearhead sync`) uses the following settings. See [Sync Architecture](./sync_architecture.md) for full details.
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `sync_enabled` | boolean | `false` | Enable CRDT synchronization |
+| `sync_relay_url` | string | `null` | WebSocket URL of relay server (e.g., `wss://sync.example.com`) |
+| `sync_peers` | array[string] | `[]` | Direct peer URLs for LAN/mesh sync |
+| `sync_interval_seconds` | integer | `30` | How often to poll for changes in watch mode |
+| `sync_on_save` | boolean | `true` | Trigger sync immediately when LSP updates CRDT |
+
+**Example:**
+```json
+{
+  "sync_enabled": true,
+  "sync_relay_url": "wss://sync.clearhead.io",
+  "sync_peers": [
+    "wss://192.168.1.100:8080",
+    "wss://192.168.1.101:8080"
+  ],
+  "sync_interval_seconds": 30,
+  "sync_on_save": true
+}
+```
+
+**Environment variables:**
+```bash
+CLEARHEAD_SYNC_ENABLED=true
+CLEARHEAD_SYNC_RELAY_URL="wss://sync.example.com"
+CLEARHEAD_SYNC_PEERS='["wss://192.168.1.100:8080"]'
+CLEARHEAD_SYNC_INTERVAL_SECONDS=60
+CLEARHEAD_SYNC_ON_SAVE=false
+```
 
 ### Schema Extension
 
@@ -456,6 +503,7 @@ A comprehensive configuration using multiple implementations:
 {
   "data_dir": "~/Dropbox/clearhead",
   "config_dir": "~/.config/clearhead",
+  "state_dir": "~/.local/state/clearhead",
   "default_file": "inbox.actions",
   "project_files": ["next.actions", ".actions"],
   "use_project_config": true,
@@ -469,9 +517,16 @@ A comprehensive configuration using multiple implementations:
   "nvim_inbox_file": "~/Dropbox/clearhead/inbox.actions",
   "nvim_project_file": ".actions",
   "nvim_lsp_enable": true,
-  "nvim_lsp_binary_path": "/usr/local/bin/clearhead_cli"
+  "nvim_lsp_binary_path": "/usr/local/bin/clearhead_cli",
+
+  "sync_enabled": true,
+  "sync_relay_url": "wss://sync.clearhead.io",
+  "sync_interval_seconds": 30,
+  "sync_on_save": true
 }
 ```
+
+**Note:** While `data_dir` can point to a file-sync service like Dropbox for the DSL files, `state_dir` should remain local. The CRDT handles cross-device sync; file-syncing the CRDT would cause conflicts.
 
 ### Environment Variable Overrides
 
@@ -499,14 +554,14 @@ nvim inbox.actions
 
 An implementation is conformant with this specification if it:
 
-1. Follows XDG Base Directory specification for config and data locations
+1. Follows XDG Base Directory specification for config, data, and state locations
 2. Reads configuration from `config.json` in JSON format
-3. Respects all core settings (`data_dir`, `config_dir`, `default_file`, `project_files`, `use_project_config`)
+3. Respects all core settings (`data_dir`, `config_dir`, `state_dir`, `default_file`, `project_files`, `use_project_config`)
 4. Implements configuration precedence correctly (defaults → global config → project config → env → args)
 5. Uses `CLEARHEAD_*` prefix for environment variables
 6. Handles missing/invalid configuration gracefully with defaults
 7. Supports shell expansion in path values
-8. Uses namespaced prefixes for implementation-specific settings (e.g., `cli_`, `nvim_`)
+8. Uses namespaced prefixes for implementation-specific settings (e.g., `cli_`, `nvim_`, `sync_`)
 9. Implements project detection per the discovery algorithm
 10. Merges project configuration with global configuration correctly
 
@@ -550,6 +605,8 @@ cd ~/test-project
 - [Action File Format](./action_specification.md) - Core file format
 - [Naming Conventions](./naming_conventions.md) - File and directory naming
 - [JSON Schema](./json_schema_specification.md) - Action serialization format
+- [Sync Architecture](./sync_architecture.md) - CRDT sync and state management
+- [Event Logging](./event_logging_specification.md) - Events database for analytics
 
 ## Changelog
 
