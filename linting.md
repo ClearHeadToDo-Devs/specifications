@@ -131,7 +131,7 @@ A linter is *optional* and *configurable* - teams choose which rules to enforce 
     These rules check for suspicious date/time relationships.
 
 
-#### W005: Hierarchy Depth Exceeded
+#### W001: Hierarchy Depth Exceeded
     **Fixable:** No
 
     Maximum nesting depth is 5 levels (depth 0-5).
@@ -143,7 +143,7 @@ A linter is *optional* and *configurable* - teams choose which rules to enforce 
 
     This may or may not be a breaking issue depending on parser implementation. but either way, the process also discourages deep nesting for clarity.
 
-#### W006: Completed Parent with Uncompleted Children
+#### W002: Completed Parent with Uncompleted Children
     **Fixable:** No
 
     A parent action cannot be marked as completed if it has children that are still active.
@@ -157,7 +157,7 @@ A linter is *optional* and *configurable* - teams choose which rules to enforce 
 
     **Rationale:** Archiving and completion logic typically operates on trees. A "completed" parent with "active" work is semantically inconsistent.
 
-#### W007: Uncompleted Parent with All Children Completed
+#### W003: Uncompleted Parent with All Children Completed
     **Fixable:** No
 
     A parent action that is not completed but has all its children marked as completed should likely be completed as well.
@@ -173,7 +173,7 @@ A linter is *optional* and *configurable* - teams choose which rules to enforce 
 
     **Rationale:** Serves as a nudge to the user to wrap up the parent action once all its sub-tasks are finished.
 
-#### W008: Missing Creation Date
+#### W004: Missing Creation Date
     **Fixable:** Yes (derive from UUID v7 or add current date)
 
     Actions should ideally have a creation date, either explicitly via the `^` marker or implicitly via a UUID v7 in the `#` field.
@@ -186,7 +186,7 @@ A linter is *optional* and *configurable* - teams choose which rules to enforce 
 
     **Rationale:** Creation timestamps help with aging analysis and history tracking, but are not required for correctness. This is a best practice for teams wanting detailed action tracking, but can be disabled for casual use.
 
-#### W009: Creation Date in Future
+#### W005: Creation Date in Future
     **Fixable:** No
 
     The creation date (`^`) cannot be in the future relative to the current system time.
@@ -195,7 +195,7 @@ A linter is *optional* and *configurable* - teams choose which rules to enforce 
     [ ] Task ^2099-01-01
     ```
 
-#### W010: Completion Before Creation
+#### W006: Completion Before Creation
     **Fixable:** No
 
     The completion date (`%`) cannot be before the creation date (`^`).
@@ -204,8 +204,7 @@ A linter is *optional* and *configurable* - teams choose which rules to enforce 
     [x] Impossible Task ^2026-01-03 %2026-01-01
     ```
 
-#### W011: Circular Dependency
-    **Severity:** Warning
+#### W007: Circular Dependency
     **Fixable:** No
 
     Actions cannot have circular dependencies (directly or transitively).
@@ -219,8 +218,7 @@ A linter is *optional* and *configurable* - teams choose which rules to enforce 
 
     **Fix suggestion:** Review the dependency structure and break the cycle by removing or reworking one of the dependencies.
 
-#### W012: Invalid Predecessor Reference
-    **Severity:** Warning
+#### W008: Invalid Predecessor Reference
     **Fixable:** No
 
     A predecessor references an action that doesn't exist in the workspace.
@@ -233,8 +231,7 @@ A linter is *optional* and *configurable* - teams choose which rules to enforce 
 
     **Fix suggestion:** Check the name/UUID spelling, or create the missing predecessor action.
 
-#### W013: Ambiguous Predecessor Reference
-    **Severity:** Warning
+#### W009: Ambiguous Predecessor Reference
     **Fixable:** No
 
     Multiple actions in the workspace match the predecessor name. Use UUID to disambiguate.
