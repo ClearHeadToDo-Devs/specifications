@@ -10,73 +10,40 @@ They are separate, because different implementors may choose to work with the fo
 
 ## Workspace Structure
 
-All action files/folders should be organized into a directory that conforms with the standards of the given operating system or follows a project-local structure.
+All action files/folders should be organized into a directory that conforms with the standards of the given operating system 
 
-### Global Workspace
-For global management, action files reside in XDG standard locations. See [Configuration Specification](./configuration.md) for exact paths (`data_dir`, `state_dir`, etc.).
+Please see [Configuration Specification](./configuration.md) for details on locating the global workspace location and how to configure it.
 
-### Project-Local Workspace
-For project-specific management, a directory may be designated as a workspace by the presence of a `.clearhead/` directory or a `next.actions` file at its root.
+but in general the data should reside in `XDG_DATA_HOME/clearhead/`
 
-#### The `.clearhead/` Directory
-Similar to `.git/`, a `.clearhead/` directory at the project root signals that the project is managed by the ClearHead system.
-- `.clearhead/inbox.actions` - Project-specific inbox
-- `.clearhead/config.json` - Project-specific configuration (overrides global)
-- `.clearhead/workspace.crdt` - Project-specific CRDT document (see [Sync Architecture](./sync_architecture.md))
+By default, everyone should have an `inbox.actions` file within that workspace. This file serves as the default location for uncategorized actions.
 
-#### The `next.actions` File
-A `next.actions` file at the root of a directory is a "first-class" project entry point. It allows for lightweight task management without the overhead of a full `.clearhead/` folder.
+### Project/Story Naming
 
-## Discovery Protocol
+While the action specification allows for stories/projects to be defined within the files themselves, it can often feel natural to break these files into separate files/folders for organization.
 
-Implementors resolve the active workspace by searching upward for `.clearhead/` or `next.actions`, falling back to the global workspace.
+To this end, we support the following conventions, with the assumption implementors will leverage these structures to provide better user experiences.
+- `$workspace/<project-name>.actions` - A file containing actions for a specific project/story
+- Any actions within this file are assumed to have the story/project of the file name unless otherwise specified within the action itself.
+- `$workspace/<project-name>/next.actions` - A directory containing a project/story with its own next actions file
+- This allows for sub-projects through the combination of directories and files.
 
-For the complete discovery algorithm, precedence rules, and configuration layering, see [Configuration Specification - Discovery Algorithm](./configuration.md#discovery-algorithm).
+From a data perspective, _unless otherwise specificied within the action itself_, any actions within this file are assumed to have the story/project of the directory name.
 
-## Project/Story Naming
+#### Project READMEs
 
-    While the action specification allows for stories/projects to be defined within the files themselves, it can often feel natural to break these files into separate files/folders for organization.
+To further enhance organization, each project/story directory can optionally contain a `README.md` file that provides context about the project/story.
 
-    To this end, we support the following conventions, with the assumption implementors will leverage these structures to provide better user experiences.
-    - `$workspace/<project-name>.actions` - A file containing actions for a specific project/story
-        - Any actions within this file are assumed to have the story/project of the file name unless otherwise specified within the action itself.
-    - `$workspace/<project-name>/next.actions` - A directory containing a project/story with its own next actions file
-        - This allows for sub-projects through the combination of directories and files.
+This file can include:
+- Project/Story description
+- Goals and objectives
+- Key milestones
+- Links to related resources
 
-#### Sub-Projects
-    To support sub-projects, we allow for directories within the workspace to represent projects/stories, with their own action files.
+This allows users to have a quick reference for each project/story directly within the workspace structure.
 
-    For example:
-    ```
-    $workspace/
-    ├── ProjectA/
-    │   ├── next.actions
-    |   |-- subProjectB.actions
-    │   └── SubProjectA/
-    │       └── next.actions
-    └── ProjectB.actions
-    ```
+Tool implementors can leverage these README files to provide additional context in their interfaces, enhancing the user experience.
 
-    In this structure:
-    - `ProjectA` is a project with its own `next.actions` file.
-    - `SubProjectA1` is a sub-project of `ProjectA`, also with its own `next.actions` file.
-    - `ProjectB.actions` is a standalone project file.
-    - `subProjectB.actions` is a file within `ProjectA` that can contain actions specific to that sub-project.
-
-In this way, users can grow their actions workspace organically, organizing projects and sub-projects in a way that makes sense for their workflow, leaving room for implementors to build tools that can navigate and manage these structures effectively.
-
-##### Project READMEs
-    To further enhance organization, each project/story directory can optionally contain a `README.md` file that provides context about the project/story.
-
-    This file can include:
-    - Project/Story description
-    - Goals and objectives
-    - Key milestones
-    - Links to related resources
-
-    This allows users to have a quick reference for each project/story directly within the workspace structure.
-
-    Tool implementors can leverage these README files to provide additional context in their interfaces, enhancing the user experience.
 ## Action History and Completion Tracking
 
 Action completion history is tracked via **event sourcing** in `events.db`, not in the file system.
