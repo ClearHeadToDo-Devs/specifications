@@ -10,7 +10,7 @@ This specification defines the CRDT-centered synchronization architecture for th
 - Sync operates on CRDTs, not files
 - Editors use native file-change detection
 - Conflict resolution leverages standard diff tooling
-- One CRDT document per workspace (global and per-project)
+- One CRDT document per user workspace (global)
 
 ## Conceptual Model
 
@@ -96,12 +96,6 @@ Base XDG paths are defined in [Configuration Specification](./configuration.md).
 └── events.db               # SQLite event log (see event_logging_specification.md)
 ```
 
-**Project workspaces** have their own CRDT documents:
-```
-~/projects/my-project/.clearhead/
-└── workspace.crdt          # Project-specific CRDT
-```
-
 **Why STATE_HOME for CRDT:**
 - Machine-specific runtime state
 - Should not be synced via file-sync tools (Dropbox, etc.)
@@ -113,9 +107,9 @@ Base XDG paths are defined in [Configuration Specification](./configuration.md).
 ```
 ~/.local/share/clearhead/
 ├── inbox.actions           # Default inbox (projected from CRDT)
-├── project-a.actions       # Project file (projected from CRDT)
-└── work/
-    └── next.actions        # Nested project (projected from CRDT)
+├── work.actions            # Additional action file (projected from CRDT)
+└── personal/
+    └── goals.actions       # Organized in subdirectories (projected from CRDT)
 ```
 
 These files are **projections** - they can be regenerated from the CRDT at any time.
@@ -428,7 +422,7 @@ fn update_from_file(file_path: &Path, crdt: &mut AutoCommit) -> Result<()> {
 
 ### clearhead-sync
 
-- Load/save CRDT from workspace location (global or project-local)
+- Load/save CRDT from global workspace location
 - Connect to relay server and peers
 - Sync CRDT changes via automerge-repo protocol
 - Project CRDT to DSL files when changes received (shadow copy to /tmp happens automatically)

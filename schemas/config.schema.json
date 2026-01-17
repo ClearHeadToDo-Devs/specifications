@@ -33,24 +33,6 @@
         "work.actions",
         "/absolute/path/to/actions.actions"
       ]
-    },
-    "project_files": {
-      "type": "array",
-      "description": "List of filenames that indicate a project root when found during upward directory search. See naming conventions specification.",
-      "items": {
-        "type": "string"
-      },
-      "default": ["next.actions"],
-      "examples": [
-        ["next.actions"],
-        ["next.actions", ".actions"],
-        ["next.actions", ".actions", "TODO.actions"]
-      ]
-    },
-    "use_project_config": {
-      "type": "boolean",
-      "description": "Whether to search for and merge project-level .clearhead/config.json files",
-      "default": true
     }
   },
   "additionalProperties": true,
@@ -58,14 +40,11 @@
     {
       "data_dir": "~/.local/share/clearhead",
       "config_dir": "~/.config/clearhead",
-      "default_file": "inbox.actions",
-      "project_files": ["next.actions"],
-      "use_project_config": true
+      "default_file": "inbox.actions"
     },
     {
       "data_dir": "~/Dropbox/clearhead",
       "default_file": "work.actions",
-      "project_files": ["next.actions", ".actions", "TODO.actions"],
       "cli_format": "table",
       "nvim_auto_normalize": true
     }

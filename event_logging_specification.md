@@ -102,28 +102,13 @@ Custom path can be specified via:
 export CLEARHEAD_EVENTS_DB_PATH=/path/to/events.db
 ```
 
-### Machine-Wide vs Project-Local
+### Machine-Wide Storage
 
-By default, events are **machine-wide** (stored in XDG_STATE_HOME). This enables:
-- Cross-project analytics ("How many actions completed this week across all projects?")
+Events are stored **machine-wide** in XDG_STATE_HOME. This enables:
+- Cross-project analytics ("How many actions completed this week?")
 - Unified history for aggregation server
 - Simpler mental model (one events database per machine)
-- No .gitignore conflicts (outside project directories)
-
-**Project-local events** can be configured if needed:
-```json
-// .clearhead/config.json
-{
-  "events_db_path": ".clearhead/events.db"  // Relative to project root
-}
-```
-
-If using project-local events, add to `.gitignore`:
-```
-.clearhead/events.db
-.clearhead/events.db-wal
-.clearhead/events.db-shm
-```
+- No conflicts with user data directories
 
 ## Schema Definition
 

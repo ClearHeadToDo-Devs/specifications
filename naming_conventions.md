@@ -57,7 +57,7 @@ For full details on event schema, workflows, queries, and migration from plainte
 
 ## See Also
 
-- [Configuration](./configuration.md) - XDG paths, config settings, project discovery algorithm
+- [Configuration](./configuration.md) - XDG paths and config settings
 - [Event Logging Specification](./event_logging_specification.md) - Event schema, queries, history workflows
 - [Sync Architecture](./sync_architecture.md) - CRDT sync and state management
 - [Action File Format](./action_file_format.md) - DSL syntax

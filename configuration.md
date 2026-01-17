@@ -64,9 +64,7 @@ The configuration file uses a flat structure with implementation-specific namesp
 {
   "data_dir": "~/.local/share/clearhead",
   "config_dir": "~/.config/clearhead",
-  "default_file": "inbox.actions",
-  "project_files": ["next.actions", ".actions"],
-  "use_project_config": true
+  "default_file": "inbox.actions"
 }
 ```
 
@@ -96,14 +94,11 @@ All implementations MUST recognize these core settings:
 | `config_dir` | string | `~/.config/clearhead` | Global directory for configuration files |
 | `state_dir` | string | `~/.local/state/clearhead` | Directory for machine-specific state (CRDT, events.db) |
 | `default_file` | string | `inbox.actions` | Default action file name (relative to data_dir) |
-| `project_files` | array[string] | `["next.actions"]` | Filenames that indicate a project root (see naming conventions) |
-| `use_project_config` | boolean | `true` | Whether to search for and use project-level `.clearhead/config.json` |
 
 **Requirements:**
 - Core settings MUST support shell expansion (`~`, `$HOME`, environment variables)
 - Relative paths in `default_file` MUST be resolved from `data_dir`
 - Absolute paths MUST be used as-is
-- `project_files` patterns are matched during upward directory search (see Project-Level Configuration)
 
 ## Configuration Precedence
 
@@ -111,9 +106,8 @@ Implementations MUST follow this precedence order (lowest to highest priority):
 
 1. **Built-in defaults** - Hardcoded in the application
 2. **Global configuration** - `$XDG_CONFIG_HOME/clearhead/config.json`
-3. **Project configuration** - `<project>/.clearhead/config.json` (if found)
-4. **Environment variables** - `CLEARHEAD_*` prefix
-5. **Command-line arguments** - Highest priority (CLI tools only)
+3. **Environment variables** - `CLEARHEAD_*` prefix
+4. **Command-line arguments** - Highest priority (CLI tools only)
 
 Later sources override earlier ones. Missing values fall through to the next level.
 
@@ -122,44 +116,10 @@ Later sources override earlier ones. Missing values fall through to the next lev
 ```
 Built-in default:    cli_format = "actions"
 Global config:       cli_format = "json"
-Project config:      cli_format = "table"
 Environment:         CLEARHEAD_CLI_FORMAT=xml
 CLI flag:            --format compact
 
 Result: compact (CLI flag wins)
-```
-
-### Configuration Merging
-
-When project configuration is found, it **merges** with global configuration:
-
-- **Core settings**: Project values override global
-- **Implementation settings**: Project values override global
-- **Unset values**: Fall through to global configuration
-
-**Example:**
-```json
-# Global: ~/.config/clearhead/config.json
-{
-  "data_dir": "~/.local/share/clearhead",
-  "default_file": "inbox.actions",
-  "cli_format": "json",
-  "cli_indent_width": 4
-}
-
-# Project: ~/work/.clearhead/config.json
-{
-  "default_file": "next.actions",
-  "cli_format": "table"
-}
-
-# Effective config when working in ~/work/
-{
-  "data_dir": "~/.local/share/clearhead",  # from global
-  "default_file": "next.actions",           # from project (overrides)
-  "cli_format": "table",                    # from project (overrides)
-  "cli_indent_width": 4                     # from global
-}
 ```
 
 ## Environment Variables
@@ -173,8 +133,6 @@ Environment variables MUST use the `CLEARHEAD_` prefix followed by setting names
 CLEARHEAD_DATA_DIR=/custom/path
 CLEARHEAD_CONFIG_DIR=/custom/config
 CLEARHEAD_DEFAULT_FILE=work.actions
-CLEARHEAD_PROJECT_FILES='["next.actions", ".actions", "TODO.actions"]'
-CLEARHEAD_USE_PROJECT_CONFIG=true
 ```
 
 **Implementation-specific settings** use the same prefix pattern with implementation namespace:
@@ -284,9 +242,7 @@ Implementations SHOULD provide their own JSON schema that extends the core schem
   "properties": {
     "data_dir": { "type": "string" },
     "config_dir": { "type": "string" },
-    "default_file": { "type": "string" },
-    "project_files": { "type": "array", "items": { "type": "string" } },
-    "use_project_config": { "type": "boolean" }
+    "default_file": { "type": "string" }
   },
   "additionalProperties": true
 }
@@ -311,119 +267,6 @@ This allows:
 - Validation tools to check configuration correctness
 - Editors to provide autocomplete and documentation
 - Forward compatibility as new implementations are added
-
-## Project-Level Configuration
-
-### Overview
-
-ClearHead supports project-local configuration that integrates with the [naming conventions](./naming_conventions.md) specification. This allows different projects to have their own settings while sharing global defaults.
-
-### Project Detection
-
-Implementations MUST detect projects by searching upward from the current directory for:
-
-1. **`.clearhead/` directory** - Indicates a ClearHead-managed project
-2. **Project root files** - Filenames listed in `project_files` config setting (default: `["next.actions"]`)
-
-The search stops at the first match, defining the "project root".
-
-### Project Configuration Location
-
-If a project is detected, implementations SHOULD check for:
-
-```
-<project-root>/.clearhead/config.json
-```
-
-This file follows the same format as global configuration and **merges** with it (project settings override global).
-
-### Project Directory Structure
-
-Following the [naming conventions spec](./naming_conventions.md), a project directory may contain:
-
-```
-my-project/
-├── next.actions                    # Project root file (triggers detection)
-├── .clearhead/
-│   ├── config.json                 # Project-specific configuration
-│   ├── inbox.actions               # Project-specific inbox
-│   └── logs/                       # Project completion logs
-│       ├── 2025-01.actions
-│       └── 2025-02.actions
-├── feature-a.actions               # Additional project files
-└── subproject/
-    └── next.actions                # Nested project
-```
-
-### Discovery Algorithm
-
-When no file is explicitly specified, implementations MUST use this algorithm:
-
-1. **Explicit file argument**: If provided via CLI/API, use it
-2. **Search upward for project**:
-   - Check current directory for `.clearhead/` or any file in `project_files`
-   - If not found, check parent directory
-   - Repeat until match or filesystem root
-3. **Load project config**: If `.clearhead/config.json` exists and `use_project_config` is true, merge it with global config
-4. **Determine default file**:
-   - If project found with `next.actions` → use `./next.actions`
-   - If project found with `.clearhead/` → use `./.clearhead/inbox.actions`
-   - Otherwise → use global `data_dir/default_file`
-
-### Example: Multi-Project Workflow
-
-**Global config** (`~/.config/clearhead/config.json`):
-```json
-{
-  "data_dir": "~/.local/share/clearhead",
-  "default_file": "inbox.actions",
-  "project_files": ["next.actions", ".actions"],
-  "cli_format": "json"
-}
-```
-
-**Project A** (`~/projects/web-app/.clearhead/config.json`):
-```json
-{
-  "default_file": "sprint.actions",
-  "cli_format": "table"
-}
-```
-
-**Project B** (`~/work/research/next.actions`):
-No project config file (uses global)
-
-**Behavior:**
-```bash
-# In ~/
-$ clearhead_cli read
-# Uses: ~/.local/share/clearhead/inbox.actions (global)
-# Format: json (from global config)
-
-# In ~/projects/web-app/src/
-$ clearhead_cli read
-# Detects: .clearhead/ in parent (~/projects/web-app/)
-# Uses: ~/projects/web-app/.clearhead/sprint.actions
-# Format: table (from project config)
-
-# In ~/work/research/
-$ clearhead_cli read
-# Detects: next.actions in current dir
-# Uses: ~/work/research/next.actions
-# Format: json (from global config, no project override)
-```
-
-### Configurable Project Files
-
-The `project_files` setting allows users to customize which files trigger project detection:
-
-```json
-{
-  "project_files": ["next.actions", ".actions", "TODO.actions", "tasks.actions"]
-}
-```
-
-This enables workflows where different teams or projects use different naming conventions.
 
 ## Implementation Guidelines
 
@@ -505,8 +348,6 @@ A comprehensive configuration using multiple implementations:
   "config_dir": "~/.config/clearhead",
   "state_dir": "~/.local/state/clearhead",
   "default_file": "inbox.actions",
-  "project_files": ["next.actions", ".actions"],
-  "use_project_config": true,
 
   "cli_format": "table",
   "cli_indent_style": "tabs",
@@ -515,7 +356,6 @@ A comprehensive configuration using multiple implementations:
   "nvim_auto_normalize": true,
   "nvim_format_on_save": true,
   "nvim_inbox_file": "~/Dropbox/clearhead/inbox.actions",
-  "nvim_project_file": ".actions",
   "nvim_lsp_enable": true,
   "nvim_lsp_binary_path": "/usr/local/bin/clearhead_cli",
 
@@ -542,9 +382,6 @@ export CLEARHEAD_CLI_FORMAT="json"
 # Disable format-on-save in Neovim
 export CLEARHEAD_NVIM_FORMAT_ON_SAVE="false"
 
-# Override project file detection
-export CLEARHEAD_PROJECT_FILES='["TODO.actions", "tasks.actions"]'
-
 # Run commands - they'll use overridden values
 clearhead_cli read
 nvim inbox.actions
@@ -556,14 +393,12 @@ An implementation is conformant with this specification if it:
 
 1. Follows XDG Base Directory specification for config, data, and state locations
 2. Reads configuration from `config.json` in JSON format
-3. Respects all core settings (`data_dir`, `config_dir`, `state_dir`, `default_file`, `project_files`, `use_project_config`)
-4. Implements configuration precedence correctly (defaults → global config → project config → env → args)
+3. Respects all core settings (`data_dir`, `config_dir`, `state_dir`, `default_file`)
+4. Implements configuration precedence correctly (defaults → global config → env → args)
 5. Uses `CLEARHEAD_*` prefix for environment variables
 6. Handles missing/invalid configuration gracefully with defaults
 7. Supports shell expansion in path values
 8. Uses namespaced prefixes for implementation-specific settings (e.g., `cli_`, `nvim_`, `sync_`)
-9. Implements project detection per the discovery algorithm
-10. Merges project configuration with global configuration correctly
 
 ### Testing Conformance
 
@@ -590,14 +425,6 @@ export CLEARHEAD_DEFAULT_FILE="env.actions"
 echo '{invalid json}' > ~/.config/clearhead/config.json
 <implementation_command>
 # Should warn and fall back to defaults, not crash
-
-# Test 5: Project-level configuration
-mkdir -p ~/test-project/.clearhead
-echo '{"default_file": "project.actions"}' > ~/test-project/.clearhead/config.json
-echo '[]' > ~/test-project/next.actions
-cd ~/test-project
-<implementation_command>
-# Should detect project and use project.actions from merged config
 ```
 
 ## See Also
