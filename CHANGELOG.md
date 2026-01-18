@@ -1,5 +1,42 @@
 # Changelog - Actions Specifications
 
+## 2026-01-18
+
+### Changed
+
+**Formatting Specification v2.1.0** (`formatting.md`)
+- **Breaking:** Reduced scope to vertical spacing only (newlines between actions)
+- Removed horizontal spacing enforcement - format is whitespace-insensitive by design
+- Removed indentation enforcement - depth markers define hierarchy, not whitespace
+- Formatter now implemented as Topiary query in `tree-sitter-actions/.topiary/`
+- No configuration options - formatter does one thing (newlines)
+- Dramatically simplified specification
+
+**Formatting Specification v2.0.0** (`formatting.md`)
+- Removed list style - single format only
+- Removed metadata ordering from formatter scope
+
+### Rationale
+
+The `.actions` format was designed to be whitespace-insensitive: `[x]Task$Desc` and `[x] Task $ Desc` are semantically equivalent. Fighting against this with a formatter that enforces specific spacing was adding complexity without clear benefit.
+
+Similarly, hierarchy is defined by depth markers (`>`, `>>`, etc.), not by indentation. Enforcing indentation is cosmetic, not semantic.
+
+By reducing the formatter to just "ensure newlines between actions," we:
+1. Embrace the format's whitespace-insensitive design
+2. Enable simple Topiary implementation (50 lines of queries)
+3. Move formatting upstream to tree-sitter-actions where it belongs
+4. Eliminate ~200 lines of Rust formatter code from clearhead-cli
+
+### Removed
+
+- `specifications/examples/formatting/list/` - List style test examples removed
+- Horizontal spacing rules from formatter scope
+- Indentation enforcement from formatter scope
+- `indent_width` and `indent_style` configuration options
+
+---
+
 ## 2026-01-03
 
 ### Changed
@@ -31,13 +68,12 @@ New design has clean separation based on user intent:
 
 This means formatters must work around grammar limitations (e.g., by serializing from IR with proper spacing rather than trying to edit AST).
 
-### Implementation Status
+### Implementation Status (as of 2026-01-03)
 
 **clearhead-cli** (Rust implementation):
 - ✅ Horizontal spacing implemented in `format_as_actions_basic()`
 - ✅ Spec-compliant formatter working
 - ⚠️ Topiary disabled (was stripping spacing)
-- ⚠️ LSP still using old Topiary path (broken)
-- ⚠️ List mode not implemented
+- ⚠️ LSP still using old Topiary path
 
-See `clearhead-cli/CHANGELOG.md` for detailed implementation notes and decisions needed.
+See `clearhead-cli/CHANGELOG.md` for detailed implementation notes.

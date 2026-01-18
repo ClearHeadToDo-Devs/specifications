@@ -5,7 +5,7 @@ This directory contains canonical linting test cases for `.actions` files. These
 ## Purpose
 
 These test cases serve as:
-1. **Specification artifacts** - Executable demonstrations of linting rules defined in [linting_specification.md](../../linting_specification.md)
+1. **Specification artifacts** - Executable demonstrations of linting rules defined in [linting.md](../../linting.md)
 2. **Implementation tests** - Used by linter implementations (CLI, LSP server) to verify correctness via snapshot testing
 3. **Documentation** - Show developers what each linting rule detects and how to fix violations
 
@@ -170,9 +170,9 @@ When adding linting test cases:
 ## Linting Rules Reference
 
 For the complete linting specification, see:
-- [linting_specification.md](../../linting_specification.md) - Canonical linting rules
+- [linting.md](../../linting.md) - Canonical linting rules
 - [action_specification.md](../../action_specification.md) - File format syntax
-- [formatting_specification.md](../../formatting_specification.md) - Formatting rules
+- [formatting.md](../../formatting.md) - Formatting rules
 
 ## Version History
 

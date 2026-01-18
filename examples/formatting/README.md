@@ -5,59 +5,46 @@ This directory contains canonical formatting test cases for `.actions` files. Th
 ## Purpose
 
 These test cases serve as:
-1. **Specification artifacts** - Executable demonstrations of formatting rules defined in [formatting_specification.md](../../formatting_specification.md)
-2. **Implementation tests** - Used by formatter implementations (e.g., topiary.scm in tree-sitter-actions) to verify correctness
+1. **Specification artifacts** - Executable demonstrations of formatting rules defined in [formatting.md](../../formatting.md)
+2. **Implementation tests** - Used by formatter implementations (Topiary query in tree-sitter-actions) to verify correctness
 3. **Documentation** - Show developers what "before" and "after" formatting looks like
+
+## Formatter Scope
+
+The formatter enforces **vertical spacing only**:
+- Each action must be on its own line
+
+The formatter does **not** enforce:
+- Horizontal spacing (whitespace-insensitive by design)
+- Indentation (depth markers define hierarchy, not whitespace)
 
 ## Structure
 
 Each test case is a directory containing two files:
-- `input.actions` - Intentionally malformed but valid .actions file
+- `input.actions` - Input file (may have multiple actions on one line)
 - `expected.actions` - The correctly formatted output
 
 ```
 formatting/
-  compact/                    # Compact style tests
-    01_ugly_spacing/
-      input.actions           # [x]Task$Desc!1 (no spaces)
-      expected.actions        # [x] Task $ Desc !1 (proper spacing)
-    02_extra_spaces/
-      ...
-  list/                       # List style tests
-    01_basic_split/
-      input.actions           # [x] Task $ Desc !1 (compact)
-      expected.actions        # Each metadata on own line, indented
+  newlines/                    # Vertical spacing tests
+    01_multiple_on_one_line/
+      input.actions            # [ ] Task 1[ ] Task 2
+      expected.actions         # Each on separate line
+    02_preserve_spacing/
+      input.actions            # [x]Task$Desc!1 (no spaces)
+      expected.actions         # Same (spacing preserved)
     ...
-  edge_cases/                 # Special cases
-    01_empty_file/
-    02_minimal_action/
-    03_links/
 ```
 
-## Test Categories
+## Test Cases
 
-### Compact Style
-Tests the default compact formatting style (all metadata on same line):
-- **01_ugly_spacing** - No spaces between elements
-- **02_extra_spaces** - Too many spaces
-- **03_missing_description_space** - `$` icon missing space after it
-- **04_child_marker_spacing** - Spaces before `>` markers
-- **05_metadata_icons** - Spaces after metadata icons (only `$` should have one)
-- **06_all_metadata** - Every metadata type combined
-- **07_deep_nesting** - 3+ levels of hierarchy
+### Newlines
+Tests the only formatting rule: each action on its own line.
 
-### List Style
-Tests the list formatting style (metadata on separate lines):
-- **01_basic_split** - Basic compact → list transformation
-- **02_indentation_depths** - Correct (depth+1)×4 indentation
-- **03_child_metadata_indent** - Child actions and their metadata at different indents
-- **04_all_metadata** - Every metadata type on own line
-
-### Edge Cases
-Tests special situations:
-- **01_empty_file** - Empty file remains empty
-- **02_minimal_action** - Already-formatted minimal action unchanged
-- **03_links** - Link syntax `[[text|url]]` preserved atomically
+- **01_multiple_on_one_line** - Multiple root actions on one line get split
+- **02_preserve_spacing** - Horizontal spacing is preserved unchanged
+- **03_children_on_one_line** - Parent and children on one line get split
+- **04_already_formatted** - Already-formatted files are unchanged (idempotence)
 
 ## Usage
 
@@ -66,40 +53,33 @@ Tests special situations:
 Use these test cases to verify your formatter implementation:
 
 ```bash
-# Example: Testing topiary.scm
-for test in compact/*/; do
+# Example: Testing with Topiary
+for test in newlines/*/; do
   topiary format "$test/input.actions" | diff "$test/expected.actions" -
 done
 ```
 
-### For the tree-sitter-actions Grammar
+### For tree-sitter-actions
 
-The tree-sitter-actions repository uses these via `npm run test:formatting`:
+The tree-sitter-actions repository references these via symlink or copies them:
 
 ```bash
 cd tree-sitter-actions
 npm run test:formatting
 ```
 
-This runs `test/formatting_test.js` which reads these examples from the specifications repo.
-
 ## Adding New Test Cases
 
 When adding formatting test cases:
 
-1. **Create a descriptive directory name** (e.g., `08_recurrence_spacing`)
+1. **Create a descriptive directory name** (e.g., `05_nested_children`)
 2. **Add both files**:
-   - `input.actions` - Intentionally malformed input that demonstrates the issue
-   - `expected.actions` - The correctly formatted output per the spec
-3. **Test one thing** - Each case should test a specific formatting rule
-4. **Use realistic examples** - Prefer real-world scenarios over contrived cases
-
-## Formatting Rules Reference
-
-For the complete formatting specification, see:
-- [formatting_specification.md](../../formatting_specification.md) - Canonical formatting rules
-- [action_specification.md](../../action_specification.md) - File format syntax
+   - `input.actions` - Input that demonstrates the case
+   - `expected.actions` - The correctly formatted output
+3. **Test one thing** - Each case should test a specific aspect
+4. **Remember the scope** - Formatter only adds newlines, doesn't change spacing
 
 ## Version History
 
+- **2026-01-18** - Simplified to newlines-only tests (v2.1.0 spec)
 - **2026-01-03** - Initial test suite with compact, list, and edge case tests
