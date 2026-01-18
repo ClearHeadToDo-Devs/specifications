@@ -68,12 +68,13 @@ A linter is *optional* and *configurable* - teams choose which rules to enforce 
 #### E003: Empty Context Tag
     **Fixable:** No
 
-    Context tags cannot be empty.
+    Context tags cannot be empty, including whitespace-only tags or trailing commas.
 
     ```actions
     [ ] Task +
-    [ ] Task +work,home
-    [ ] Task +work +home
+    [ ] Task +work,,home
+    [ ] Task +   
+    [ ] Task +work,
     ```
 
 
