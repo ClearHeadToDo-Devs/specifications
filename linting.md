@@ -235,16 +235,57 @@ A linter is *optional* and *configurable* - teams choose which rules to enforce 
 #### W009: Ambiguous Predecessor Reference
     **Fixable:** No
 
-    Multiple actions in the workspace match the predecessor name. Use UUID to disambiguate.
+    Multiple actions in the workspace match the predecessor name. Use UUID or alias to disambiguate.
 
     ```actions
     [ ] Deploy < setup  # Three "setup" actions exist in workspace
-    [ ] Deploy < #01951111-cfa6-718d-b303-d7107f4005b3
+    [ ] Deploy < 01951111-cfa6-718d-b303-d7107f4005b3
+    [ ] Deploy < setup-alias  # Using alias is also valid
     ```
 
-    **Rationale:** Name-based references should be unambiguous. When multiple matches exist, recommend UUIDs for clarity.
+    **Rationale:** Name-based references should be unambiguous. When multiple matches exist, recommend UUIDs, short UUIDs, or aliases for clarity.
 
     **Configuration:** `require_uuid_for_ambiguous_predecessors` (default: false) — if true, escalates to error severity.
+
+#### W010: Duplicate Alias
+    **Fixable:** No
+
+    Multiple actions in the workspace define the same alias.
+
+    ```actions
+    [ ] First task =deploy
+    [ ] Second task =deploy  # Duplicate alias
+    ```
+
+    **Rationale:** Aliases must be unique for unambiguous reference resolution.
+
+    **Fix suggestion:** Rename one of the aliases to be unique.
+
+#### W011: Ambiguous Short UUID
+    **Fixable:** No
+
+    Multiple UUIDs in the workspace share the same 8-character prefix.
+
+    ```actions
+    [ ] Task A #01951111-aaaa-aaaa-aaaa-aaaaaaaaaaaa
+    [ ] Task B #01951111-bbbb-bbbb-bbbb-bbbbbbbbbbbb
+    [ ] Task C < 01951111  # Ambiguous - matches both
+    ```
+
+    **Rationale:** Short UUID references should resolve to exactly one action. While prefix collisions are rare, they can occur.
+
+    **Fix suggestion:** Use the full UUID or an alias for the reference.
+
+#### W012: Sequential Marker on Childless Action
+    **Fixable:** No
+
+    The `~` marker is used on an action with no children.
+
+    ```actions
+    [ ] Single task ~  # No children to sequence
+    ```
+
+    **Rationale:** The sequential marker only affects child actions. Using it on a leaf action has no effect and may indicate a mistake.
 
 
 ### 3. Style and Conventions (Info)
@@ -399,5 +440,64 @@ A linter is *optional* and *configurable* - teams choose which rules to enforce 
     **Rationale:** Likely indicates stale actions that should be updated or archived.
 
     **Configuration:** `past_do_date_threshold_days` (default: 7) - how many days past before warning.
+
+#### I012: Invalid Alias Format
+    **Severity:** Info
+    **Fixable:** No
+
+    Alias names should contain only alphanumeric characters, underscores, and hyphens.
+
+    ```actions
+    [ ] Task =my alias  # Spaces not allowed
+    [ ] Task =my@alias  # Special chars not allowed
+    [ ] Task =my-alias  # Valid
+    [ ] Task =my_alias  # Valid
+    ```
+
+    **Rationale:** Aliases are used as identifiers and should be simple, machine-friendly strings.
+
+#### I013: Redundant Tag (Covered by Hierarchy)
+    **Severity:** Info
+    **Fixable:** Yes
+
+    An action is tagged with both a child tag and its ancestor tag from the configured hierarchy.
+
+    ```actions
+    # Given config: terminal includes neovim
+    [ ] Task +neovim,terminal  # "terminal" is redundant
+    [ ] Task +neovim  # Correct - "terminal" is implied
+    ```
+
+    **Rationale:** The child tag already implies the parent. Listing both adds noise without value.
+
+    **Configuration:** Requires `tag_hierarchies` to be configured.
+
+#### I014: Story Path Depth Excessive
+    **Severity:** Info
+    **Fixable:** No
+
+    Story paths with more than 4 levels may indicate over-organization.
+
+    ```actions
+    [ ] Task *work/dept/team/project/subproject/epic  # 6 levels deep
+    [ ] Task *work/clearhead/cli  # 3 levels - reasonable
+    ```
+
+    **Configuration:** `max_story_path_depth` (default: 4)
+
+    **Rationale:** Deep hierarchies become hard to navigate and may indicate scope creep.
+
+#### I015: Empty Alias
+    **Severity:** Info
+    **Fixable:** No
+
+    An alias marker `=` is present but no alias name follows.
+
+    ```actions
+    [ ] Task =
+    [ ] Task =deploy  # Valid
+    ```
+
+    **Rationale:** An alias marker without a name serves no purpose.
 
 

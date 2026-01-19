@@ -14,6 +14,14 @@ This directory contains example `.actions` files demonstrating various features 
 - **with_story.actions** - Actions belonging to projects/stories
 - **with_everything.actions** - All optional fields demonstrated
 
+## New Features (v2.0)
+
+- **with_alias.actions** - Action aliases for stable references (`=alias-name`)
+- **with_sequential.actions** - Sequential children marker (`~`) for ordered workflows
+- **with_short_uuid.actions** - Short UUID references (8 chars) for predecessors
+- **with_story_path.actions** - Hierarchical story paths (`*work/clearhead/cli`)
+- **with_new_features.actions** - Comprehensive example combining all new features
+
 ## Recurring Actions
 
 - **recurring_templates.actions** - Comprehensive recurrence patterns (daily, weekly, monthly, yearly)

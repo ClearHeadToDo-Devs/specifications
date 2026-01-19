@@ -94,6 +94,7 @@ All implementations MUST recognize these core settings:
 | `config_dir` | string | `~/.config/clearhead` | Global directory for configuration files |
 | `state_dir` | string | `~/.local/state/clearhead` | Directory for machine-specific state (CRDT, events.db) |
 | `default_file` | string | `inbox.actions` | Default action file name (relative to data_dir) |
+| `tag_hierarchies` | object | `{}` | Tag parent-child relationships for implicit inheritance |
 
 **Requirements:**
 - Core settings MUST support shell expansion (`~`, `$HOME`, environment variables)
@@ -229,6 +230,54 @@ CLEARHEAD_SYNC_PEERS='["wss://192.168.1.100:8080"]'
 CLEARHEAD_SYNC_INTERVAL_SECONDS=60
 CLEARHEAD_SYNC_ON_SAVE=false
 ```
+
+### Tag Hierarchies (`tag_hierarchies`)
+
+Tag hierarchies define parent-child relationships between context tags. When an action is tagged with a child tag, it implicitly inherits all ancestor tags.
+
+**Structure:**
+```json
+{
+  "tag_hierarchies": {
+    "parent_tag": ["child_tag_1", "child_tag_2"],
+    "another_parent": ["child_tag_3"]
+  }
+}
+```
+
+Each key is a parent tag, and its value is an array of child tags that should inherit from it.
+
+**Example:**
+```json
+{
+  "tag_hierarchies": {
+    "computer": ["terminal", "browser", "ide"],
+    "terminal": ["neovim", "tmux", "shell"],
+    "driving": ["grocery_store", "gas_station", "pharmacy"],
+    "work": ["meetings", "coding", "reviews"],
+    "low_energy": ["email", "reading", "filing"]
+  }
+}
+```
+
+**Semantics:**
+- **Transitive inheritance**: If `terminal` is a child of `computer`, and `neovim` is a child of `terminal`, then `+neovim` implicitly includes both `+terminal` and `+computer`.
+- **Query expansion**: Searching for `+computer` will match actions tagged with `+neovim`, `+terminal`, `+browser`, etc.
+- **Linting**: Actions tagged with both a child and its ancestor receive an info-level warning (I013) about redundancy.
+- **Case-insensitive**: Tag matching is case-insensitive.
+
+**Use cases:**
+- GTD contexts: `@errands` → `@grocery`, `@pharmacy`, `@bank`
+- Energy levels: `@low_energy` → `@email`, `@reading`
+- Tools: `@computer` → `@terminal` → `@neovim`
+- Locations: `@office` → `@desk`, `@meeting_room`
+
+**Environment variable:**
+```bash
+CLEARHEAD_TAG_HIERARCHIES='{"computer": ["terminal", "neovim"], "driving": ["grocery_store"]}'
+```
+
+Note: The environment variable value must be valid JSON.
 
 ### Schema Extension
 

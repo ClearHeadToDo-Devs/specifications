@@ -238,6 +238,10 @@ The list of special characters that need to be escaped are below:
 - `%` - Reserved for Completed Date
 - `<` - Reserved for Predecessors
 - `>` - Reserved for Children
+- `=` - Reserved for Aliases
+- `~` - Reserved for Sequential Children marker
+- `^` - Reserved for Created Date
+- `#` - Reserved for ID
 - `[` `]` - Reserved for State markers and Links (when used as `[[link]]`)
 - `|` - Reserved for Link separator (when within `[[...]]`)
 
@@ -288,6 +292,39 @@ designated by the `*` character, the same rules apply around escaping forbidden 
 
 otherwise actions are assumed to be unparented.
 
+### Action Plan Hierarchies (Path Notation)
+Stories can be organized into hierarchies using path notation with `/` as the separator:
+
+```actions
+[ ] Build the CLI *work/clearhead/cli
+[ ] Write documentation *work/clearhead/docs
+[ ] Fix personal website *personal/website
+```
+
+This allows:
+- Scoping actions under nested projects (work → clearhead → cli)
+- Disambiguating projects with the same leaf name (`work/cli` vs `personal/cli`)
+- Hierarchical filtering (query `*work/` to get all work actions)
+
+**Path rules:**
+- Segments are separated by `/`
+- Each segment follows standard story naming rules
+- Paths are case-insensitive for matching
+- Leading/trailing slashes are normalized away
+
+**Example hierarchy:**
+```
+work/
+├── clearhead/
+│   ├── cli
+│   ├── parser
+│   └── docs
+└── other-project
+personal/
+├── website
+└── hobbies
+```
+
 ### Root Actions only
 It should also be noted that only root actions can have a parent project/story.
 
@@ -297,11 +334,89 @@ This radically reduces the complexity of the parser and allows for a more readab
 
 
 ## Context (Optional)
-We use the context in accordance with GTD to answer the where question often. 
+We use the context in accordance with GTD to answer the where question often.
 
 started with the `+` character, one can use multiple contexts by separating each one with the `,` character to get multiple tags
 
 contexts are simply keys and cannot be assigned values
+
+### Tag Hierarchies
+Tags can be organized into hierarchies via configuration (see [configuration.md](./configuration.md)). When a tag has parent tags defined, tagging an action with a child tag implicitly includes all ancestor tags.
+
+**Example configuration:**
+```json
+{
+  "tag_hierarchies": {
+    "computer": ["neovim", "vscode", "terminal"],
+    "terminal": ["neovim"],
+    "driving": ["grocery_store", "gas_station"]
+  }
+}
+```
+
+With this configuration:
+- `+neovim` implicitly includes `+terminal` and `+computer`
+- `+grocery_store` implicitly includes `+driving`
+- Queries for `+computer` will match actions tagged with `+neovim`
+
+This enables fine-grained tagging while allowing broad filtering.
+
+## Alias (Optional)
+Actions can define an alias using the `=` character followed by the alias name. Aliases provide stable, human-readable references that persist even if the action's name changes.
+
+**Syntax:** `=alias_name`
+
+**Examples:**
+```actions
+[ ] Get the project documentation completed =docs
+[ ] Deploy to staging =staging-deploy
+```
+
+**Alias rules:**
+- Aliases must be unique within the workspace
+- Aliases can contain letters, numbers, underscores, and hyphens
+- Aliases cannot contain spaces or special characters
+- Aliases are case-insensitive for matching
+
+**Using aliases as references:**
+Once defined, aliases can be used in predecessor references:
+```actions
+[ ] Review the documentation < docs
+[ ] Run integration tests < staging-deploy
+```
+
+**Rationale:** Names evolve as understanding improves. Aliases provide a stable reference point that doesn't break dependencies when action names are refined.
+
+## Sequential Children (Optional)
+A parent action can be marked with `~` to indicate that its children should be treated as sequential steps - each child implicitly depends on the previous sibling completing.
+
+**Syntax:** `~` after the action name/metadata
+
+**Example:**
+```actions
+[ ] Build release package ~
+> [ ] Run linter
+> [ ] Run tests
+> [ ] Build binary
+> [ ] Create archive
+```
+
+This is equivalent to:
+```actions
+[ ] Build release package
+> [ ] Run linter
+> [ ] Run tests < Run linter
+> [ ] Build binary < Run tests
+> [ ] Create archive < Build binary
+```
+
+**Semantics:**
+- The `~` marker on a parent makes ALL direct children sequential
+- Sequential ordering applies transitively to nested children
+- The first child has no implicit predecessor
+- Each subsequent child depends on the immediately preceding sibling
+
+**Rationale:** Many workflows are inherently sequential (build steps, checklists, procedures). Explicitly declaring every dependency is tedious and error-prone. The `~` marker captures this common pattern concisely.
 
 ## Predecessors (Optional)
 
@@ -309,14 +424,49 @@ Actions can depend on other actions being completed first. A predecessor is anot
 
 Started with the `<` character, you can specify one predecessor per marker. Multiple predecessors on the same action means ALL must be completed or cancelled.
 
-### Name or UUID Resolution
+### Reference Styles
+
+Predecessors support multiple reference styles for flexibility:
+
+#### Full UUID
+The most specific reference - matches exactly one action:
+```actions
+[ ] Task B < 01951111-cfa6-718d-b303-d7107f4005b3
+```
+
+#### Short UUID
+The first 8 characters of a UUID provide a "good enough" reference that's both specific and human-friendly:
+```actions
+[ ] Task B < 01951111
+```
+
+Short UUIDs are resolved by prefix match. If multiple UUIDs share the same 8-character prefix (extremely rare), a linting warning (W009) suggests using the full UUID.
+
+#### Action Name
+Case-insensitive name matching within the workspace:
+```actions
+[ ] Dry clothes < Wash clothes
+```
+
+If multiple actions match the name, a linting warning (W009) suggests using a UUID or alias for clarity.
+
+#### Alias Reference
+Actions with defined aliases can be referenced by that alias:
+```actions
+[ ] Run integration tests < staging-deploy
+```
+
+See [Alias](#alias-optional) for how to define aliases.
+
+### Resolution Order
 
 Predecessors are resolved within the workspace scope (all `.actions` files under the workspace root):
-- If the reference looks like a valid UUID (format: `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`), it's matched directly against action IDs
-- Otherwise, the parser attempts a case-insensitive name match across the workspace
-- If multiple actions match the name, a linting warning (W003) suggests the closest matches and recommends using a UUID for clarity
-- If no match is found, a linting error (E026) reports the invalid reference
-- At parse time, resolved names are converted to UUIDs for internal storage
+1. **Full UUID match** - If the reference is 36 characters with hyphens, match against action IDs
+2. **Short UUID match** - If the reference is exactly 8 hex characters, match against UUID prefixes
+3. **Alias match** - Case-insensitive match against defined aliases
+4. **Name match** - Case-insensitive match against action names
+
+If no match is found, a linting warning (W008) reports the invalid reference. At parse time, resolved references are converted to UUIDs for internal storage.
 
 ### Examples
 
