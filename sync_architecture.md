@@ -12,28 +12,6 @@ This specification defines the CRDT-centered synchronization architecture for th
 - Conflict resolution leverages standard diff tooling
 - One CRDT document per user workspace (global)
 
-## Conceptual Model
-
-The **Rust struct is the canonical representation**. Everything else is a view or persistence mechanism:
-
-```
-                      Struct
-                (canonical in-memory type)
-                         │
-           ┌─────────────┼─────────────┐
-           │             │             │
-           ▼             ▼             ▼
-         CRDT           DSL         Events
-     (durable with   (text view    (derived
-      sync/merge)    for editors)   log)
-```
-
-- **CRDT** is durable storage with merge semantics (via autosurgeon)
-- **DSL** is text serialization for editor workflows
-- **Events** is a derived log for analytics and history
-
-The struct isn't an intermediary "hub" - it's the primary thing. CRDT ↔ Struct is nearly zero-cost via autosurgeon's `Hydrate`/`Reconcile`.
-
 ## Architecture Overview
 
 ```
@@ -56,13 +34,14 @@ The struct isn't an intermediary "hub" - it's the primary thing. CRDT ↔ Struct
 │                          LOCAL DEVICE                                   │
 │                                                                         │
 │   ~/.local/state/clearhead/                                            │
-│   ├── workspace.crdt      ◄── source of truth                          │
-│   └── events.db           ◄── analytics/history                        │
+│   ├── workspace.crdt      ◄── source of truth (plans + processes)      │
+│   └── oxigraph/           ◄── query cache (ephemeral, rebuildable)     │
 │                                                                         │
 │   /tmp/clearhead-shadow/  ◄── ephemeral shadow files for 3-way merge   │
 │                                                                         │
 │   ~/.local/share/clearhead/                                            │
-│   └── inbox.actions       ◄── projected view (what editor sees)        │
+│   ├── inbox.actions       ◄── projected plans (what editor sees)       │
+│   └── inbox.log.actions   ◄── projected processes (on-demand review)   │
 │                                                                         │
 │   ┌──────────────┐     ┌──────────────┐     ┌──────────────┐           │
 │   │  clearhead   │     │     LSP      │     │    Editor    │           │
@@ -71,7 +50,8 @@ The struct isn't an intermediary "hub" - it's the primary thing. CRDT ↔ Struct
 │          │                    │                    │                   │
 │          │ writes files       │ on-save: parse     │ native file       │
 │          │ when CRDT changes  │ diff, update CRDT  │ change detection  │
-│          │                    │                    │                   │
+│          │ updates Oxigraph   │ materialize to     │                   │
+│          │                    │ Oxigraph           │                   │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -84,7 +64,6 @@ Base XDG paths are defined in [Configuration Specification](./configuration.md).
 | Location | Sync Role |
 |----------|-----------|
 | `$XDG_STATE_HOME/clearhead/workspace.crdt` | CRDT source of truth |
-| `$XDG_STATE_HOME/clearhead/events.db` | Event log (see [Event Logging](./event_logging_specification.md)) |
 | `$XDG_DATA_HOME/clearhead/*.actions` | Projected DSL files |
 | `/tmp/clearhead-shadow/` | Ephemeral shadow files for 3-way merge |
 
@@ -238,7 +217,9 @@ Peer-to-peer with optional relay server:
 
 ### Sync Server (`clearhead-sync`)
 
-Can run in two modes:
+This is not implementation specific but should:
+
+run in two modes:
 
 **On-demand:**
 ```bash
