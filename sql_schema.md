@@ -1,6 +1,20 @@
 # SQL Storage Schema
 
-## Purpose
+**⚠️ DEPRECATED**
+
+This specification is **deprecated** as of January 2026. See [DECISIONS.md](https://github.com/ClearHeadToDo-Devs/platform/blob/main/DECISIONS.md) for details on architectural changes.
+
+**Migration Path:**
+- SQL queries have been replaced with SPARQL queries
+- A SPARQL-capable RDF graph store serves as the query layer
+- The CRDT document is now the source of truth for data storage
+- See [sync_architecture.md](./sync_architecture.md) for the new architecture
+
+This document is retained for historical reference only.
+
+---
+
+## Purpose (Historical)
 
 While the `.actions` format is designed as human-readable plaintext and JSON enables data interchange, many applications require persistent relational storage for:
 
@@ -10,11 +24,9 @@ While the `.actions` format is designed as human-readable plaintext and JSON ena
 - **Integration with existing systems** - Work alongside other database-backed applications
 - **Performance at scale** - Handle thousands of actions with indexed queries
 
-This section defines the canonical SQL schema for storing `.actions` data in relational databases.
+This section defined the canonical SQL schema for storing `.actions` data in relational databases.
 
-## Schema Location
-
-The canonical SQL schema is maintained at `schema/actions.sql` in the repository. It is designed for SQLite for maximum portability, but can be adapted for PostgreSQL, MySQL, or other relational databases.
+**Note:** This has been superseded by the SPARQL query layer.
 
 ## Design Philosophy
 

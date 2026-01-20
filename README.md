@@ -92,9 +92,11 @@ Here is the index of specifications and their purpose within the whole:
 4. [Json Schema](./json_schema.md) - The canonical JSON serialization format for action files. This allows different tools to exchange action data in a structured way, and also enables validation and storage in systems that require structured formats.
     1. For Example, while [clearhead-cli](https://github.com/ClearHeadToDo-Devs/clearhead-cli) can inject action files, it can export json files that conform to this specification for use in other systems.
         1. Great for those who want to build with data but dont want a full database. with knowledge they can be synced back to plaintext action files later.
-5. [Database Schema](./sql_schema.md) - The schema for storing actions in a relational database. This allows for efficient querying, filtering, and manipulation of action data in a structured environment.
-    1. [clearhead-cli](https://github.com/ClearHeadToDo-Devs/clearhead-cli) leverages this to query lists of actions in an efficient manner, allowing for complex filters and operations that would be cumbersome with plaintext files alone. while also being able to translate operations losslessly back to the action file format.
+5. ~~[Database Schema](./sql_schema.md)~~ - *(DEPRECATED)* Previously defined schema for storing actions in a relational database. This has been superseded by the SPARQL query layer. See [DECISIONS.md](https://github.com/ClearHeadToDo-Devs/platform/blob/main/DECISIONS.md) and [sync_architecture.md](./sync_architecture.md) for the current architecture.
 6. [Ontology & Linked Data](./ontology.md) - Defines the semantic meaning of the data using the Actions Vocabulary (OWL) and explains the Context Map strategy.
+    1. This specification ensures that while tools typically interact with simple JSON, the data remains semantically rigorous and interoperable with the broader Semantic Web (RDF/JSON-LD).
+    2. It bridges the gap between the pragmatic `clearhead-cli` world and the formal logic of the ontology.
+    3. Enables SPARQL-based graph queries over action data via the graph query layer (see [sync_architecture.md](./sync_architecture.md)).
     1. This specification ensures that while tools typically interact with simple JSON, the data remains semantically rigorous and interoperable with the broader Semantic Web (RDF/JSON-LD).
     2. It bridges the gap between the pragmatic `clearhead-cli` world and the formal logic of the ontology.
 7. the [examples directory](./examples/) - A collection of example action files, covering a wide range of use cases and scenarios.

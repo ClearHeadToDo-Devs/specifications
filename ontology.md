@@ -12,7 +12,7 @@ The core philosophy is **"JSON for Developers, RDF for Machines"**. We use JSON-
 
 ## The Context Map (`context.json`)
 
-The `context.json` file is the keystone of the ClearHead data architecture. It maps the simplified JSON keys used by applications to the formal URIs defined in the [Actions Vocabulary](../ontology/actions-vocabulary.owl).
+The `context.json` file is the keystone of the ClearHead data architecture. It maps the simplified JSON keys used by applications to the formal URIs defined in the [Actions Vocabulary](https://clearhead.us/vocab/actions/v3).
 
 ### Purpose
 - **Decoupling:** Applications don't need to know about RDF or ontologies. They just read/write JSON.
@@ -115,4 +115,4 @@ _:b0 a actions:Action ;
 
 ## Related Specifications
 - [JSON Schema Specification](./json_schema_specification.md): Defines the structure of the JSON output.
-- [Actions Vocabulary](../ontology/actions-vocabulary.owl): The formal OWL ontology.
+- [Actions Vocabulary](https://clearhead.us/vocab/actions/v3): The formal OWL ontology.

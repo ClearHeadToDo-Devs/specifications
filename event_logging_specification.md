@@ -4,47 +4,76 @@
 
 The event logging system provides persistent, append-only tracking of action lifecycle events for time-series analytics and historical analysis.
 
-**This specification defines event sourcing for action files:**
-- Events are the source of truth for "what happened when"
-- Current state is derived by replaying events (no separate state database)
-- Enables time-travel queries and cross-device analytics
+**This specification defines event logging for action analytics:**
+- Events track historical "what happened when" for analytics purposes
+- **CRDT is the source of truth for current state**, not events
+- Events are derived from CRDT state changes for analytics and historical analysis
+- Enables time-travel queries and cross-device analytics via DuckDB aggregation
 
 **Use Cases:**
 - **Time-series analytics** - "How many actions were open on 2026-01-15?"
 - **Completion patterns** - Track streaks, completion rates, velocity over time
 - **Recurring action instances** - Log each occurrence separately
-- **Cross-device aggregation** - Combine event history from multiple devices
+- **Cross-device aggregation** - Combine event history from multiple devices via DuckDB
 - **Audit trail** - Full history of changes to actions
+
+**Important:** The events.db is not the source of truth. The CRDT document (workspace.crdt) is the authoritative source for current state. Events are generated from CRDT changes for analytical purposes.
 
 ## Relationship to Other Specifications
 
-### vs. Action Files (Source of Truth for Current State)
+### vs. CRDT Document (Source of Truth)
 
-`.actions` files define the current state - what actions exist right now and their properties. Event logging captures the history of how that state changed over time.
-
-**Example:**
-```actions
-# inbox.actions (current state)
-[x] Weekly standup @2026-01-14T09:00 R:FREQ=WEEKLY;BYDAY=TU #abc123
-```
-
-```sql
--- events.db (history of changes)
-INSERT 2026-01-14 09:15:32 | instance_completed | abc123
-INSERT 2026-01-14 09:15:33 | instance_due       | abc123 (next: 2026-01-21)
-```
-
-### vs. SQL Schema Specification (In-Memory Query Database)
-
-**SQL Schema** (`sql_schema_specification.md`) - In-memory SQLite database for querying current state
-- **Purpose:** Fast queries on current actions (filter by priority, context, due date)
-- **Lifecycle:** Ephemeral, recreated from `.actions` files on demand
-- **Updates:** Read-only, rebuilt when files change
+**CRDT Document** (`workspace.crdt`) - Authoritative source of truth via Automerge
+- **Purpose:** Stores current state of ActionPlans and ActionProcesses
+- **Lifecycle:** Durable, merged via CRDT sync protocol
+- **Updates:** Updated on file saves or remote sync
+- **See:** [sync_architecture.md](./sync_architecture.md) for full details
 
 **Event Logging** (this spec) - Persistent SQLite database for historical events
 - **Purpose:** Time-series analytics, audit trail, completion history
 - **Lifecycle:** Persistent, append-only, never deleted
-- **Updates:** Write-only, events appended as actions change
+- **Updates:** Events derived from CRDT changes for analytics
+
+**Key distinction:** The CRDT is the source of truth for current state. Events are a derived view for historical analysis.
+
+### vs. DSL Files (Projected View)
+
+**DSL Files** (`*.actions`) - Text projections for editor workflows
+- **Purpose:** Human-readable view of current state
+- **Lifecycle:** Projected from CRDT, can be regenerated
+- **Updates:** Updated when CRDT changes (via sync or local edit)
+
+**Event Logging** (this spec) - Persistent SQLite database for historical events
+- **Purpose:** Time-series analytics, audit trail, completion history
+- **Lifecycle:** Persistent, append-only, never deleted
+- **Updates:** Events appended as CRDT changes
+
+**Example:**
+```actions
+# inbox.actions (current state, projected from CRDT)
+[x] Weekly standup @2026-01-14T09:00 R:FREQ=WEEKLY;BYDAY=TU #abc123
+```
+
+```sql
+-- events.db (history of changes for analytics)
+INSERT 2026-01-14 09:15:32 | instance_completed | abc123
+INSERT 2026-01-14 09:15:33 | instance_due       | abc123 (next: 2026-01-21)
+```
+
+### vs. Graph Query Layer
+
+**Graph Query Layer** - RDF graph store for SPARQL queries
+- **Purpose:** Query cache for complex SPARQL queries over action data
+- **Lifecycle:** Ephemeral, rebuilt from CRDT on demand
+- **Updates:** Materialized from CRDT when data changes
+- **See:** [sync_architecture.md](./sync_architecture.md) for details
+
+**Event Logging** (this spec) - Persistent SQLite database for historical events
+- **Purpose:** Time-series analytics, audit trail, completion history
+- **Lifecycle:** Persistent, append-only, never deleted
+- **Updates:** Events appended as CRDT changes
+
+**Key distinction:** Graph query layer is for complex queries over current data. Events are for historical time-series analytics.
 
 ### vs. Application Logs (Debugging/Operational)
 
@@ -62,12 +91,13 @@ Application logs are tool-specific and ephemeral. Events are platform-level and 
 
 ## Design Principles
 
-1. **Event Sourcing** - Events are source of truth, state is derived by replaying
+1. **CRDT is Source of Truth** - Events are derived from CRDT changes for analytics, not for state reconstruction
 2. **Append-Only** - Events are never modified or deleted, only appended
 3. **Machine-Wide** - Single database per machine captures events across all projects
 4. **Local-First** - Works offline without network connectivity
 5. **Simple Schema** - No enum constraints, flexible JSON metadata, forward-compatible
 6. **Platform-Agnostic** - Any tool (CLI, LSP, mobile app) can read and write
+7. **Analytics-Focused** - Events support time-series analysis via DuckDB aggregation
 
 ## Storage Location
 
@@ -239,95 +269,62 @@ The `metadata` field is a JSON object that varies by event type. Common fields:
 
 ## Event Sourcing Architecture
 
-The core architectural pattern: **derive state from events, not from separate state database**.
+The core architectural pattern: **events are derived from CRDT state changes for analytics**.
 
 ### Conceptual Flow
 
 ```
-events.db (append-only log)
-    ↓ replay events for file
-current state (in-memory)
-    ↓ compare with
-parsed file (new state from disk)
-    ↓ structural diff
-new events → append to events.db
+CRDT (workspace.crdt) - source of truth
+    ↓ changes detected
+IR (Intermediate Representation) - current state
+    ↓ derive events from changes
+events.db (append-only log) - for analytics
+    ↓ aggregate across devices
+DuckDB - cross-device time-series queries
 ```
 
 ### When Events Are Emitted
 
-Events are emitted when `.actions` files are saved, using structural diffing:
+Events are emitted when the CRDT document changes (from file saves or sync):
 
-1. **Load last known state** - Replay events for this file to reconstruct last known state
-2. **Parse current file** - Read file from disk, parse current state
-3. **Structural diff** - Compare states to find what changed
-4. **Emit events** - Append events for each change to events.db
-5. **State is now current** - Next time, replay includes these events
+1. **Load CRDT** - Get current state from workspace.crdt
+2. **Detect changes** - Compare previous state vs current state
+3. **Emit events** - Append events for each significant change to events.db
+4. **Events are for analytics** - CRDT remains the source of truth
+
+**Note:** Events are NOT used to reconstruct current state. The CRDT is the authoritative source.
 
 ### Who Emits Events
 
 | Tool | Trigger | What's Diffed |
 |------|---------|---------------|
-| **CLI** | After any mutation command (`complete`, `add`, `archive`, etc.) | Modified file |
-| **LSP Server** | On `textDocument/didSave` notification | Saved file |
-| **Neovim** | `autocmd BufWritePost *.actions` | Saved file |
-| **Web UI** | After saving changes to file | Modified file |
+| **CLI** | After any mutation command (`complete`, `add`, `archive`, etc.) | CRDT changes |
+| **LSP Server** | On `textDocument/didSave` notification | CRDT changes |
+| **clearhead-sync** | After receiving remote CRDT changes | CRDT changes |
 
-**Important:** Events are emitted on **save**, not on keystroke (avoids noisy events during editing).
+**Important:** Events are emitted from CRDT state changes, not from file diffs. This ensures consistency across all tools.
 
-### Deriving State from Events
+### Querying Historical State
 
-To answer "what did action X look like at time T?", replay events up to timestamp T:
+To answer "what did action X look like at time T?", query the CRDT's historical state (not events):
 
-```rust
-fn derive_state_at(file_path: &str, timestamp: &str) -> HashMap<String, Action> {
-    let events = query_events(file_path, timestamp)?;
-    let mut actions = HashMap::new();
+**Note:** Events are NOT used to reconstruct state. Use CRDT's built-in historical state querying capabilities for accurate time-travel queries.
 
-    for event in events {
-        match event.event_type {
-            "action_created" => {
-                let action = parse_metadata_as_action(event.metadata);
-                actions.insert(event.action_uuid, action);
-            }
-            "action_completed" => {
-                actions.get_mut(&event.action_uuid)?.state = "completed";
-            }
-            "action_deleted" => {
-                actions.remove(&event.action_uuid);
-            }
-            "priority_changed" => {
-                let new_priority = event.metadata["new_priority"];
-                actions.get_mut(&event.action_uuid)?.priority = new_priority;
-            }
-            // ... handle other event types
-        }
-    }
+Events are primarily for:
+- Time-series analytics (completion rates, patterns)
+- Cross-device aggregation (via DuckDB)
+- Audit trail (who changed what when)
 
-    actions
-}
-```
+### Performance: Event Retention
 
-### Performance: Snapshot Caching (Optional Optimization)
+Events are append-only for analytics purposes. Implementations MAY prune old events for performance:
 
-Replaying thousands of events can be slow. Implementations MAY periodically snapshot current state:
+**Retention strategy:**
+- Keep events for configurable retention period (e.g., 1 year)
+- Archive old events to separate storage
+- Use DuckDB aggregation for long-term analytics
 
-```sql
-CREATE TABLE state_snapshots (
-    file_path TEXT PRIMARY KEY,
-    snapshot_timestamp TEXT NOT NULL,
-    snapshot_data TEXT NOT NULL  -- JSON: full action state
-);
-```
-
-**Replay becomes:**
-1. Load latest snapshot for file (if exists)
-2. Replay events since snapshot timestamp
-3. Much faster than replaying from beginning
-
-**Snapshot strategy:**
-- Create snapshot every N events (e.g., 1000)
-- Create snapshot daily for active files
-- Snapshots are optimization, not source of truth (can always replay from events)
+**Note:** Unlike state snapshots, events can be pruned because the CRDT is the source of truth.
 
 ## Implementation Guidelines
 
@@ -357,20 +354,17 @@ fn emit_event(
 }
 ```
 
-### Structural Diffing
+### Deriving Events from CRDT Changes
 
 ```rust
-fn on_file_saved(file_path: &str) -> Result<()> {
-    // 1. Derive last known state by replaying events
-    let old_state = derive_current_state(file_path)?;
+fn on_crdt_changed(crdt_doc: &AutomergeDoc) -> Result<()> {
+    // 1. Get changes from CRDT
+    let changes = crdt_doc.get_changes_since(last_sync_point)?;
 
-    // 2. Parse file to get new state
-    let new_state = parse_file(file_path)?;
+    // 2. Convert changes to events
+    let events = derive_events_from_changes(changes)?;
 
-    // 3. Diff
-    let events = diff_states(old_state, new_state, file_path)?;
-
-    // 4. Append events in single transaction
+    // 3. Append events in single transaction
     let conn = Connection::open(events_db_path())?;
     let tx = conn.transaction()?;
     for event in events {
@@ -378,40 +372,27 @@ fn on_file_saved(file_path: &str) -> Result<()> {
     }
     tx.commit()?;
 
+    // 4. Update last sync point
+    last_sync_point = crdt_doc.get_current_hash();
+
     Ok(())
 }
 
-fn diff_states(
-    old: HashMap<String, Action>,
-    new: HashMap<String, Action>,
-    file_path: &str
-) -> Vec<Event> {
+fn derive_events_from_changes(changes: Vec<CRDTChange>) -> Vec<Event> {
     let mut events = vec![];
 
-    // Detect new actions
-    for (uuid, action) in &new {
-        if !old.contains_key(uuid) {
-            events.push(Event::created(uuid, action, file_path));
-        }
-    }
-
-    // Detect deleted actions
-    for (uuid, action) in &old {
-        if !new.contains_key(uuid) {
-            events.push(Event::deleted(uuid, action, file_path));
-        }
-    }
-
-    // Detect changed actions
-    for (uuid, new_action) in &new {
-        if let Some(old_action) = old.get(uuid) {
-            if old_action.state != new_action.state {
-                events.push(Event::state_changed(uuid, old_action, new_action, file_path));
+    for change in changes {
+        match change.change_type {
+            ChangeType::ActionAdded => {
+                events.push(Event::action_created(change.action_uuid, change.metadata));
             }
-            if old_action.priority != new_action.priority {
-                events.push(Event::priority_changed(uuid, old_action, new_action, file_path));
+            ChangeType::ActionCompleted => {
+                events.push(Event::action_completed(change.action_uuid, change.metadata));
             }
-            // ... check other fields
+            ChangeType::ActionPriorityChanged => {
+                events.push(Event::priority_changed(change.action_uuid, change.metadata));
+            }
+            // ... handle other change types
         }
     }
 
@@ -685,6 +666,13 @@ Issues to resolve in future revisions:
 
 ---
 
-**Version:** 1.0.0
+**Version:** 2.0.0
 **Status:** Implemented
-**Last updated:** 2026-01-10
+**Last updated:** 2026-01-19
+
+**Changes in 2.0.0:**
+- Clarified CRDT as source of truth (not events)
+- Removed event-sourcing pattern (no longer derive state from events)
+- Updated architecture to reflect CRDT-centric design
+- Removed snapshot caching (not needed with CRDT)
+- Updated relationship to other specs (Oxigraph, SQL schema deprecation)

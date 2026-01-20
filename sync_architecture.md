@@ -12,6 +12,29 @@ This specification defines the CRDT-centered synchronization architecture for th
 - Conflict resolution leverages standard diff tooling
 - One CRDT document per user workspace (global)
 
+## Conceptual Model
+
+The **Intermediate Representation (IR)** is the canonical in-memory form. Everything else is a serialization or projection. The IR aligns with the [Actions Ontology](https://clearhead.us/vocab/actions/v3), specifically the ActionPlan/ActionProcess distinction from BFO/CCO.
+
+```
+                              IR
+                    (canonical in-memory form)
+                    ActionPlan + ActionProcess
+                               │
+            ┌──────────────────┼──────────────────┐
+            │                  │                  │
+            ▼                  ▼                  ▼
+          CRDT               DSL           Graph Query Layer
+      (durable with      (text view        (RDF/SPARQL
+       sync/merge)       for editors)       query cache))
+```
+
+- **CRDT** is durable storage with merge semantics. Stores both ActionPlans and ActionProcesses. This is the synced source of truth.
+- **DSL** is text serialization for editor workflows. Plans: `*.actions`, Processes: `*.log.actions` (on-demand).
+- **Graph Query Layer** is an ephemeral RDF graph store materialized from the IR. Enables SPARQL queries for complex analytics and validation. This allows implementations to leverage semantic reasoning, SHACL shapes, and RDF-based linting.
+
+**Key constraint:** Valid CRDT ↔ Valid IR ↔ Valid DSL. No information loss in any direction for plans.
+
 ## Architecture Overview
 
 ```
@@ -35,7 +58,7 @@ This specification defines the CRDT-centered synchronization architecture for th
 │                                                                         │
 │   ~/.local/state/clearhead/                                            │
 │   ├── workspace.crdt      ◄── source of truth (plans + processes)      │
-│   └── oxigraph/           ◄── query cache (ephemeral, rebuildable)     │
+│   └── graph-store/         ◄── Graph query layer (ephemeral, rebuildable)      │
 │                                                                         │
 │   /tmp/clearhead-shadow/  ◄── ephemeral shadow files for 3-way merge   │
 │                                                                         │
@@ -71,8 +94,10 @@ Base XDG paths are defined in [Configuration Specification](./configuration.md).
 
 ```
 ~/.local/state/clearhead/
-├── workspace.crdt          # Automerge document (binary) - global workspace
-└── events.db               # SQLite event log (see event_logging_specification.md)
+├── workspace.crdt          # CRDT document (binary) - global workspace
+│                           # Contains both ActionPlans and ActionProcesses
+└── graph-store/            # Graph query layer (ephemeral, rebuildable from CRDT)
+                            # SPARQL-capable RDF store for analytics and validation
 ```
 
 **Why STATE_HOME for CRDT:**
@@ -85,13 +110,16 @@ Base XDG paths are defined in [Configuration Specification](./configuration.md).
 
 ```
 ~/.local/share/clearhead/
-├── inbox.actions           # Default inbox (projected from CRDT)
+├── inbox.actions           # ActionPlans - default inbox (projected from CRDT)
+├── inbox.log.actions       # ActionProcesses - completion history (on-demand projection)
 ├── work.actions            # Additional action file (projected from CRDT)
 └── personal/
     └── goals.actions       # Organized in subdirectories (projected from CRDT)
 ```
 
 These files are **projections** - they can be regenerated from the CRDT at any time.
+
+**Note on process logs:** The `*.log.actions` files are generated on-demand for human review. They are not the authoritative source - processes live in the CRDT alongside plans. See [ActionProcess Specification](./action_process_specification.md) for semantics.
 
 ## Data Flow
 
@@ -304,49 +332,68 @@ But the default flow is simply editor's native "file changed" handling.
 
 ## CRDT Schema
 
-The CRDT document structure mirrors the DSL structure (lossless bidirectional):
+The CRDT document structure aligns with the [Actions Ontology](https://clearhead.us/vocab/actions/v3). The key distinction is between **ActionPlan** (the template/intent) and **ActionProcess** (the execution/outcome).
 
 ```
 workspace.crdt
-├── actions: Map<UUID, Action>
+├── plans: Map<UUID, ActionPlan>
 │   ├── {uuid}
-│   │   ├── title: String
-│   │   ├── status: "open" | "completed" | "cancelled"
+│   │   ├── name: String
+│   │   ├── description: Option<String>
+│   │   ├── state: PlanState              # see below
 │   │   ├── priority: Option<1-4>
-│   │   ├── due: Option<DateTime>
-│   │   ├── completed_at: Option<DateTime>
-│   │   ├── recurrence: Option<RRule>
-│   │   ├── tags: List<String>
-│   │   ├── context: Option<String>
+│   │   ├── do_datetime: Option<DateTime>
+│   │   ├── do_duration: Option<Minutes>
+│   │   ├── recurrence: Option<RRule>     # RFC 5545
+│   │   ├── contexts: List<String>
 │   │   ├── project: Option<String>
-│   │   ├── children: List<UUID>
+│   │   ├── parent_id: Option<UUID>
+│   │   ├── depends_on: List<UUID>
+│   │   ├── alias: Option<String>
+│   │   ├── is_sequential: Bool
+│   │   └── created_at: DateTime
+│   └── ...
+│
+├── processes: Map<UUID, ActionProcess>
+│   ├── {uuid}
+│   │   ├── prescribed_by: UUID           # link to ActionPlan
+│   │   ├── state: ProcessState           # see below
+│   │   ├── scheduled_for: Option<DateTime>
+│   │   ├── completed_at: Option<DateTime>
 │   │   └── notes: Option<String>
 │   └── ...
-├── projects: Map<String, Project>
-│   └── ...
+│
 └── metadata
     ├── version: u32
     └── last_modified: DateTime
 ```
 
-**Key constraint:** Valid CRDT ↔ Valid DSL. No information loss in either direction.
+### State Semantics
 
-### Autosurgeon Derivation
+**PlanState** (disposition of the template):
+- `active` - Plan is active, can generate processes
+- `retired` - Plan is complete (for non-recurring) or no longer in use
+- `blocked` - Plan is blocked by external factor (not dependency)
 
-Using `autosurgeon` crate for Rust struct ↔ Automerge mapping:
+**ProcessState** (outcome of an execution):
+- `completed` - Successfully finished
+- `cancelled` - Abandoned before completion
+- `skipped` - Intentionally not done (e.g., vacation skip of recurring)
 
-```rust
-use autosurgeon::{Hydrate, Reconcile};
+See [ActionProcess Specification](./action_process_specification.md) for full semantics.
 
-#[derive(Hydrate, Reconcile)]
-struct Action {
-    title: String,
-    status: Status,
-    priority: Option<u8>,
-    due: Option<DateTime>,
-    // ...
-}
-```
+### Plan/Process Relationship
+
+For **non-recurring** actions:
+- Marking `[x]` in DSL creates one ActionProcess (state: completed) AND sets ActionPlan state to `retired`
+- The plan had one execution; it's done
+
+For **recurring** actions:
+- Each instance completion creates a new ActionProcess linked via `prescribed_by`
+- The ActionPlan remains `active` until explicitly retired
+- Query "all completions of this recurring task" = all processes where `prescribed_by` = plan UUID
+
+**Key constraint:** Valid CRDT ↔ Valid IR ↔ Valid DSL (for plans). Processes are queryable but not directly edited via DSL.
 
 ## Projection
 
@@ -354,50 +401,39 @@ struct Action {
 
 When the CRDT changes (from sync or local edit), project to DSL:
 
-```rust
-fn project_to_file(crdt: &AutoCommit, file_path: &Path) -> Result<()> {
-    // 1. Copy current file to shadow (for 3-way merge if needed)
-    let shadow_path = Path::new("/tmp/clearhead-shadow")
-        .join(file_path.file_name().unwrap())
-        .with_extension("actions.base");
-    fs::create_dir_all(shadow_path.parent().unwrap())?;
-    fs::copy(file_path, shadow_path)?;
-
-    // 2. Hydrate CRDT to struct (nearly zero-cost via autosurgeon)
-    let workspace: Workspace = hydrate(crdt)?;
-
-    // 3. Format struct to DSL text
-    let text = formatter::format(&workspace)?;
-
-    // 4. Write to file
-    fs::write(file_path, text)?;
-
-    Ok(())
-}
-```
+1. Copy current file to shadow location (for 3-way merge if needed)
+2. Load CRDT and convert to IR
+3. Filter IR to ActionPlans belonging to this file (by project/inbox assignment)
+4. Format IR to DSL text
+5. Write to file
 
 ### DSL File → CRDT
 
-When user saves file in editor, LSP updates CRDT:
+When user saves file in editor:
 
-```rust
-fn update_from_file(file_path: &Path, crdt: &mut AutoCommit) -> Result<()> {
-    // 1. Parse file to AST
-    let text = fs::read_to_string(file_path)?;
-    let ast = parser::parse(&text)?;
+1. Parse DSL file to AST
+2. Convert AST to IR (ActionPlans)
+3. Diff against current CRDT state
+4. Apply changes to CRDT
+5. Save CRDT
+6. Materialize changes to graph store (for queries)
 
-    // 2. Convert AST to struct
-    let new_state: Workspace = ast.into();
+### IR → Graph Query Layer
 
-    // 3. Reconcile changes into CRDT
-    reconcile(crdt, &new_state)?;
+When CRDT changes (local or sync), materialize to graph query layer:
 
-    // 4. Save CRDT
-    save_crdt(crdt)?;
+1. Load changed ActionPlans and ActionProcesses from CRDT
+2. Convert to RDF representation using Actions Ontology
+3. Update graph store
+4. Graph store is now queryable via SPARQL
 
-    Ok(())
-}
-```
+**Key benefits of graph query layer:**
+- **Complex queries:** SPARQL enables powerful graph queries over action data
+- **Reasoning:** Can leverage SHACL shapes and ontology reasoning for linting
+- **Integration:** RDF entities are first-class citizens for system integration
+- **Performance:** Efficient query cache built on top of CRDT
+
+**Note:** Graph store can be fully rebuilt from CRDT at any time. It is a query cache, not authoritative.
 
 ## Component Responsibilities
 
@@ -433,18 +469,25 @@ fn update_from_file(file_path: &Path, crdt: &mut AutoCommit) -> Result<()> {
 
 ## Recurrence Handling
 
-See [DECISIONS.md](../DECISIONS.md) Decision 5.
+See [DECISIONS.md](https://github.com/ClearHeadToDo-Devs/platform/blob/main/DECISIONS.md) Decision 5.
 
-Recurring actions only track upcoming instances (configurable, default ~3 months). The CRDT stores the template; `events.db` tracks instance completions.
+Recurring actions use the ActionPlan/ActionProcess model:
+- **ActionPlan** stores the recurrence rule (RFC 5545 RRule)
+- **ActionProcess** records are created for each completed instance
 
 ```
-CRDT: [ ] Weekly standup @2026-01-14 R:FREQ=WEEKLY #abc123
-                    │
-                    ▼
-events.db: instance_completed(abc123, 2026-01-07)
-           instance_completed(abc123, 2026-01-14)
-           instance_due(abc123, 2026-01-21)
+CRDT plans:     [ ] Weekly standup @2026-01-14 R:FREQ=WEEKLY #abc123
+                              │
+                              │ prescribed_by
+                              ▼
+CRDT processes: ActionProcess(prescribed_by=abc123, completed_at=2026-01-07)
+                ActionProcess(prescribed_by=abc123, completed_at=2026-01-14)
+                ActionProcess(prescribed_by=abc123, scheduled_for=2026-01-21) [pending]
 ```
+
+The ActionPlan remains `active` as long as the recurrence continues. Each completion creates a new ActionProcess linked back to the plan.
+
+**Querying recurrence history:** Use SPARQL queries on graph store to query all processes where `prescribed_by` = plan UUID, ordered by `completed_at`.
 
 ## Future Considerations
 
@@ -472,6 +515,8 @@ Same architecture applies:
 
 ## See Also
 
-- [event_logging_specification.md](./event_logging_specification.md) - Events database
+- [Actions Ontology](https://clearhead.us/vocab/actions/v3) - ActionPlan/ActionProcess semantics from BFO/CCO
+- [ActionProcess Specification](./action_process_specification.md) - Process state semantics
 - [configuration.md](./configuration.md) - Config file format
 - [naming_conventions.md](./naming_conventions.md) - Workspace structure
+- [DECISIONS.md - Oxigraph](https://github.com/ClearHeadToDo-Devs/platform/blob/main/DECISIONS.md#oxigraph-as-query-layer-and-cache) - Graph store decision

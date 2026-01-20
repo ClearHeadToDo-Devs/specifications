@@ -75,26 +75,11 @@ All other formatting (spacing, indentation) is preserved from input.
 
 The formatter has no configuration options. It does one thing: ensure newlines between actions.
 
-## Implementation
+## Implementation Notes
 
-The formatter is implemented as a [Topiary](https://topiary.tweag.io/) query in the tree-sitter-actions repository:
+Formatters should keep formatting logic with the grammar definition where it belongs, and allow any tool using the grammar to get formatting for free.
 
-```
-tree-sitter-actions/.topiary/queries/actions.scm
-```
-
-This keeps formatting logic with the grammar where it belongs, and allows any tool using tree-sitter-actions to get formatting for free.
-
-### Using the Formatter
-
-```bash
-# Via Topiary CLI
-topiary format myfile.actions
-
-# Via configuration
-export TOPIARY_CONFIG_FILE=/path/to/tree-sitter-actions/.topiary/languages.ncl
-topiary format --language actions --query /path/to/tree-sitter-actions/.topiary/queries/actions.scm
-```
+**Reference implementation:** See [tree-sitter-actions](https://github.com/ClearHeadToDo-Devs/tree-sitter-actions) for an example using Topiary.
 
 ## Style Recommendations
 

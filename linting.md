@@ -12,18 +12,27 @@ version: 1.1.0
 This specification defines optional linting rules for `.actions` files. While the [action_specification.md](./action_specification.md) defines valid syntax and [formatting.md](./formatting.md) handles presentation (spacing, indentation), this document defines semantic quality checks that detect correctness issues, temporal problems, and style violations.
 
 ## Philosophy
-Linting is a strange topic. As the research has continued its clear that different languages use their linters differently.
 
-For this, We will break it into three sections that roughly correspond to the error levels found in things like LSP server diagnostics
-- Errors: Parse Errors for the tree. These errors should indicate that the file is unable to parse as valid when these errors are present.
-- Warnings: Errors that, while not preventing parsing, will make downstream systems less able to input the information as data and may lead to headaches down the line.
-- Info: Finally, these elements are those we cover in the 
+This specification defines a **relaxed parser, strict linter** approach:
+
+- **Relaxed parser:** Accepts most valid input into a parse tree structure. Even minor issues produce a parseable tree rather than parse errors.
+- **Strict linter:** Performs rigorous checking of the parsed tree for correctness, consistency, and best practices.
+
+This approach aligns with modern tooling like TypeScript, where the parser is permissive and the typechecker/linter provides strict validation.
+
+### Severity Levels
+
+Linter rules are categorized into three levels that map to LSP diagnostic severity:
+
+- **Errors:** Logical inconsistencies that block core functionality (e.g., duration without do-date, circular dependencies)
+- **Warnings:** Semantic issues that don't block functionality but may indicate problems (e.g., completed parent with uncompleted children, invalid dates)
+- **Info:** Style violations and process improvements (e.g., metadata order, completed date missing)
 
 ### Linting vs Formatting
 
-- **Formatter** enforces ALL presentation (spacing, indentation, layout) - automatic, opinionated, zero-config
+- **Formatter** enforces presentation (spacing, indentation, layout) - automatic, opinionated, zero-config
 - **Linter** detects semantic issues, temporal problems, and style preferences - optional, configurable, informative
-- **Parser** validates syntax
+- **Parser** validates syntax with relaxed acceptance
 
 The formatter handles everything about *how code looks*. The linter handles everything about *what code means* and whether it's correct, consistent, or following best practices.
 
@@ -31,17 +40,18 @@ A linter is *optional* and *configurable* - teams choose which rules to enforce 
 
 ### Design Principles
 
-1. **Non-destructive** - Linters report issues, they don't automatically fix semantic problems
-2. **Configurable** - Rules have severity levels (error, warning, info) and can be disabled
-3. **Helpful** - Messages guide users toward fixes with clear explanations
-    4. **Fast** - Checks should be efficient enough for real-time editor integration
-5. **Layered** - Rules grouped by concern (correctness, style, best practices)
+1. **Relaxed parsing, strict linting** - Parser accepts most input, linter validates rigorously
+2. **Non-destructive** - Linters report issues, they don't automatically fix semantic problems
+3. **Configurable** - Rules have severity levels (error, warning, info) and can be disabled
+4. **Helpful** - Messages guide users toward fixes with clear explanations
+5. **Fast** - Checks should be efficient enough for real-time editor integration
+6. **Layered** - Rules grouped by concern (correctness, style, best practices)
 
 ## Rule Categories
 
-### 1. Parser Correctness (Errors)
+### 1. Correctness (Errors)
 
-    These rules detect logical inconsistencies that likely indicate mistakes.
+These rules detect logical inconsistencies that block core functionality. These are NOT parse errors - the parser accepts this input, but the linter identifies semantic problems.
 
 #### E001: Duration Without Do-Date
     **Fixable:** No
