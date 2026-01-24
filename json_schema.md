@@ -1,14 +1,30 @@
 # JSON Serialization Format
-This section defines the canonical JSON serialization format for `.actions` files. Implementations that parse `.actions` files and convert them to structured data should follow this specification to ensure interoperability.
+
+**Version:** 4.0.0
+**Ontology:** [Actions Vocabulary v4](https://clearhead.us/vocab/actions/v4)
+**Ontology Documentation:** [ontology/README.md](../ontology/README.md)
+
+## Overview
+
+This specification defines the canonical JSON serialization format and how it maps to the [Actions Vocabulary](https://clearhead.us/vocab/actions/v4). It is an **integration document** — see the [ontology README](../ontology/README.md) for conceptual documentation.
+
+**Architecture:** The ontology is the semantic hub. Both the `.actions` file format and JSON format are spokes that map to it:
+
+```
+.actions syntax ──► ontology.md ──┐
+                                  ├──► Ontology (RDF)
+JSON format ──────► json_schema.md ┘
+```
 
 ## Purpose
+
 While the `.actions` format is designed to be human-readable plaintext, many applications need to:
 - Convert parsed actions into structured data (JSON, databases, etc.)
 - Validate serialized data programmatically
 - Exchange action data between different tools
 - Store actions in systems that require structured formats
 
-This specification ensures all implementations serialize to the same JSON structure.
+This specification ensures all implementations serialize to the same JSON structure and can be converted to RDF via JSON-LD.
 
 ## Schema Location
 The canonical JSON Schema is maintained in this repository at `schema/actions.schema.json` and is generated from the same source patterns used by the tree-sitter grammar to ensure consistency.
@@ -303,15 +319,47 @@ All JSON output should validate against the JSON Schema provided at `schema/acti
 
 ---
 
+## JSON to RDF Mapping
+
+The JSON format maps to the [Actions Vocabulary v4](https://clearhead.us/vocab/actions/v4), which uses CCO classes directly.
+
+### Core Entity Mapping
+
+Each JSON action object represents a **Plan** (task definition) with an associated **Planned Act** (execution instance):
+
+| JSON Field | RDF Property | Domain | Range |
+|------------|--------------|--------|-------|
+| `id` | (subject IRI) | Plan | — |
+| `name` | `rdfs:label` | Plan | `xsd:string` |
+| `state` | `actions:hasPhase` | Planned Act | `actions:ActPhase` |
+| `priority` | `actions:hasPriority` | Plan | `xsd:integer` |
+| `story` | `actions:hasObjective` | Plan | `cco:Objective` |
+| `doDate.datetime` | `actions:hasDoDateTime` | Plan | `xsd:dateTime` |
+| `completedDate` | `actions:hasCompletedDateTime` | Planned Act | `xsd:dateTime` |
+| `predecessors` | `actions:dependsOn` | Plan | Plan |
+| `parent_id` | `actions:partOf` | Plan | Plan |
+
+### Phase Mapping
+
+| JSON `state` | RDF Individual |
+|--------------|----------------|
+| `"not_started"` | `actions:NotStarted` |
+| `"in_progress"` | `actions:InProgress` |
+| `"completed"` | `actions:Completed` |
+| `"blocked"` | `actions:Blocked` |
+| `"cancelled"` | `actions:Cancelled` |
+
+---
+
 ## Interoperability & Linked Data
 
-The JSON serialization of actions is designed to be usable as **Linked Data**, allowing actions to be referenced by and interoperable with other systems (IoT devices, AI agents, personal knowledge graphs) without requiring those systems to support a custom format.
+The JSON serialization is designed to be usable as **Linked Data** via JSON-LD, allowing actions to be referenced by other systems (IoT devices, AI agents, knowledge graphs) without requiring custom format support.
 
 ### The Context Map
 
 To treat a ClearHead JSON export as a semantic graph, use the canonical JSON-LD context map provided at `schemas/actions.context.json`.
 
-This context maps the simplified JSON keys to the rigorous, BFO-compliant [Actions Vocabulary v3](https://clearhead.us/vocab/actions/v3).
+This context maps the simplified JSON keys to the [Actions Vocabulary v4](https://clearhead.us/vocab/actions/v4).
 
 ### Usage Example
 
@@ -320,12 +368,16 @@ By adding a single `@context` reference to the root of your JSON output, the dat
 ```json
 {
   "@context": "https://clearhead.us/schemas/actions.context.json",
-  "actions": [
+  "plans": [
     {
-      "id": "urn:uuid:018e3c2a-1234...",
+      "id": "urn:uuid:018e3c2a-1234-7890-abcd-ef1234567890",
       "name": "Buy milk",
       "priority": 1,
-      "state": "not_started"
+      "objective": "groceries",
+      "execution": {
+        "id": "urn:uuid:018e3c2b-5678-7890-abcd-ef1234567890",
+        "phase": "not_started"
+      }
     }
   ]
 }
@@ -334,8 +386,10 @@ By adding a single `@context` reference to the root of your JSON output, the dat
 ### Semantic Interpretation
 
 When an agent or tool reads this data with the context, it understands that:
-- `"state": "not_started"` maps to the URL `https://clearhead.us/vocab/actions/v3#NotStarted`
-- `"priority": 1` is an Eisenhower Matrix urgency level (`hasPriority`)
-- `"predecessors"` implies a standard dependency relationship (`dependsOn`)
+- The object is a `cco:Plan` (CCO Plan class)
+- `"phase": "not_started"` maps to `actions:NotStarted` (an ActPhase quality)
+- The phase is attached to a `cco:PlannedAct`, not the Plan itself
+- `"priority": 1` is an Eisenhower Matrix urgency level
+- `"objective"` links to a `cco:Objective` entity
 
-This enables a standard "smart light" or automation agent to reason about your actions ("Turn on light when an action with `priority=1` is `not_started`") without needing any knowledge of ClearHead-specific implementation details.
+This enables semantic interoperability without requiring knowledge of ClearHead-specific implementation details.
