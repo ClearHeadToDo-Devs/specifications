@@ -51,21 +51,22 @@ Instead, we use explicit characters or a sequence of characters to make the act 
 
 Due to the nature of the format, special characters will need to be escaped with the `\` character in any fields where freeform text is allowed unless otherwise noted.
 
+In addition, if there IS a conancale ordering that the properties should be formatted into, it should be put in the order below, although this is for understanding [the linter](./linting.md) and other tooling more than anything else
+
 The list of special characters that need to be escaped are below:
-- `$` - Reserved for Descriptions
-- `!` - Reserved for Priority
-- `*` - Reserved for objectives/s
-- `+` - Reserved for contexts
-- `@` - Reserved for Do-Date-Time
-- `%` - Reserved for Completed Date
-- `<` - Reserved for Predecessors
-- `>` - Reserved for Children
-- `=` - Reserved for Aliases
-- `~` - Reserved for Sequential Children marker
-- `^` - Reserved for Created Date
-- `#` - Reserved for ID
-- `[` `]` - Reserved for State markers and Links (when used as `[[link]]`)
-- `|` - Reserved for Link separator (when within `[[...]]`)
+1. `[` `]` - Reserved for State markers 
+2. `=` - Reserved for Aliases
+3. `$` - Reserved for Descriptions
+4. `~` - Reserved for Sequential Children marker
+5. `!` - Reserved for Priority
+6. `*` - Reserved for objectives/s
+7. `+` - Reserved for contexts
+8. `@` - Reserved for Do-Date-Time
+9. `%` - Reserved for Completed Date
+10. `^` - Reserved for Created Date
+11. `#` - Reserved for ID
+12. `<` - Reserved for Predecessors
+13. `>` - Reserved for Children
 
 ### Reference Styles
 
@@ -358,12 +359,20 @@ While there is no limit, it is encourage to support around 4 levels of priority 
 we use the eisenhower matrix method as described in [the attached pdf](./Eisenhower-Matrix-Fillable.pdf)
 
 
-## Objective (Optional)
-A plan may designate a parent objective. in this case, the name of the objective is used as the key for the sake of readability
+## Parent (Optional)
+A plan may designate a parent objective OR plan. in this case, the name of the objective is used as the key for the sake of readability
 
-designated by the `*` character, the same rules apply around escaping forbidden characters
+- in the case of an objective, it represents a link to the objective the plan is helping to pursue
+- in the case of a plan, it represents an individual _planned act_ that is part of a larger plan
+  - this is useful for representing recurring plans with each planned act as a child of the overarching plan
+    - we can even still support child actions of these planned acts if needed
 
-otherwise plans are assumed to be unparented, or if done within a workspace context, as part of the objective associated with the file itself.
+Therefore, a parent can be EITHER an objective or a plan.
+- which means that the existence (or lack thereof) of a parent can be used to determine whether that item is a plan itself or simply a planned act that works in service to a larger plan
+
+Designated by the `*` character, the same rules apply around escaping forbidden characters
+
+Otherwise plans are assumed to be unparented, or if done within a workspace context, as part of the objective associated with the file itself.
 
 For more information on file conventions, please review [naming conventions](./naming_conventions.md)
 
@@ -417,7 +426,6 @@ contexts are simply keys and cannot be assigned values
 
 ### Multiple Contexts
 Multiple contexts can ALSO be designated by using multiple `+` characters
-
 ```actions
 [ ] Prepare presentation +work +meeting +client
 ```
@@ -445,17 +453,11 @@ plans can define an alias using the `=` character followed by the alias name. Al
 [ ] Deploy to staging =staging-deploy
 ```
 
-**Alias rules:**
-- Aliases must be unique within the workspace
-- Aliases can contain letters, numbers, underscores, and hyphens
-- Aliases cannot contain spaces or special characters
-- Aliases are case-insensitive for matching
-
 **Using aliases as references:**
 Once defined, aliases can be used in predecessor references:
 ```actions
-[ ] Review the documentation < docs
-[ ] Run integration tests < staging-deploy
+[ ] Review the documentation =docs 
+[ ] Run integration tests <docs
 ```
 
 **Rationale:** Names evolve as understanding improves. Aliases provide a stable reference point that doesn't break dependencies when plan names are refined.
@@ -497,33 +499,7 @@ plans can depend on other plans being completed first. A predecessor is another 
 
 Started with the `<` character, you can specify one predecessor per marker. Multiple predecessors on the same plan means ALL must be completed or cancelled.
 
-
-### Examples
-
-**Simple predecessor (same file):**
-```actions
-[ ] Wash clothes < Put clothes in hamper
-[ ] Dry clothes < Wash clothes
-```
-
-**Multiple predecessors (all must be done):**
-```actions
-[ ] Deploy to production < Code review complete < Tests passing
-```
-
-**Using UUID for specificity:**
-```actions
-[ ] Task B < #01951111-cfa6-718d-b303-d7107f4005b3
-```
-
-**Across files in workspace:**
-```actions
-# In -a/next.actions
-[ ] Deploy < Code review complete
-
-# In -a/code-review.actions
-[ ] Code review complete
-```
+predecessors can take full advantage of the reference styles described above (full UUID, short UUID, alias, name) and should resolve according to the same rules
 
 ### Semantics
 
