@@ -1,38 +1,118 @@
 ---
-title: Actions file specification
-description: File Specification for the actions filetype
+title: plans file specification
+description: File Specification for the plans filetype
 author: primary_desktop
 categories: Reference
 created: 2025-01-19T03:16:49-0800
 updated: 2025-01-20T00:04:29-0800
 version: 1.1.1
 ---
-This specification will lay out the formal specifications for the `actions` filetype, usually denoted by a `*.actions` file.
+This specification will lay out the formal specifications for the `plans` filetype, usually denoted by a `*.actions` file.
 
 # High-Level Guidelines
 This specification will attempt to maintain backwards compatibility. That is, we will only add backwards-compatible changes to prevent implement's from dealing with breaking changes in the specification.
 
-this means that there are currently no plans to add a top-level 'version' structure as we want to make sure that an action list made today will still be parsable 10 years from now, even if there are new features that have been added in that time.
+this means that there are currently no plans to add a top-level 'version' structure as we want to make sure that an plan list made today will still be parsable 10 years from now, even if there are new features that have been added in that time.
+
+## Ontological Backing
+This filetype is intended to represent a human-readable interface into data that will ultimately conform to the [Ontology](./ontology.md) defined for ClearHead
+
+In particular the three core entities we are thinking about are:
+- Objectives (placed in where people usually think of s/objectives)
+- Plans: These are the ACTUAL atomic units of work we are listing here so its more succinct to think of these as a list of plans
+  - for the purposes of this specification, plan = plan wherever it is mentioned
+- Planned Acts: All plans have atleast one planned act as these are the parts that have actual state and are meant to be planable
+  - This is primarily relevant when it comes to recurring plans as each occurrence is a planned act
+
+This filetype does the best it can to represent all of these entities in one succinct format to allow people to easily read and write these plans in any plaintext editor of their choosing
+
+the way to see it is that actions are a way to abstract away the complexity of the ontology into a simple list of plans that can be easily read and written by humans in that `todo.txt` style format
 
 ## plaintext implications
-Fundamentally, the `actions` filetype is a list of actions that can be formally parsed in a machine-readable way while still being readable and writable with any application the user chooses
+Fundamentally, the `actions` filetype is a list of Plans that can be formally parsed in a machine-readable way while still being readable and writable with any application the user chooses
 As such, great care is taken to minimize the amount of characters that need to be typed by a human, while being considerate to readability of the core file
 
 Special considerations should be made to the readable nature of the document, and how this can result in design decisions that would not normally be taken within a database.
-For example, the name should be considered a secondary key for the action. While we will have an ID that will ensure universal uniqueness, the plaintext nature of this solution lends itself to using the name as a natural key
-This could result in a situation where other filetypes are using the name of the action rather than the id to identify it
-As such, one should be considerate about creating default names for actions as this could lead to name collision within the implementation, and should instead use some form of pattern to create new actions automatically without having name collision (maybe default to UUID of action?)
+For example, the name should be considered a secondary key for the plan. While we will have an ID that will ensure universal uniqueness, the plaintext nature of this solution lends itself to using the name as a natural key
+
+We give many forms of reference as we want to make sure that users have many ways for one plan to refer to another plan without needing to remember a long UUID
+
+This could result in a situation where other filetypes are using the name of the plan rather than the id to identify it
+
+As such, one should be considerate about creating default names for plans as this could lead to name collision within the implementation, and should instead use some form of pattern to create new plan automatically without having name collision (maybe default to UUID of plan?)
 
 ## Parser Guidance
-With that said, it is also a use-case that these files are able to be read by a formal parser to allow for data extraction and the potential for placing these pieces of data into a schema
+With that said, it is also a use-case that these files are able to be read by a formal parser to allow for data extrplan and the potential for placing these pieces of data into a schema
 
 Finally, in terms of rules-processing, we take the approach of newer markdown formats like neorg which deemphasize the importance of whitespace to denote depth.
 Instead, we use explicit characters or a sequence of characters to make the act of parsing this work cleaner
 
-## Align to strong foundations
-to the degree possible, we try to adhere to the [action schema](https://schema.org/Action) defined at schema.org so that we are able to align with the larger semantic data community and leave the door open for interoperability in the future
+### Special Characters
 
-and do note from the W3C consortium we define an Action as a subset of a [Thing](http://webschemas.appspot.com/Thing) from a schema perspective
+Due to the nature of the format, special characters will need to be escaped with the `\` character in any fields where freeform text is allowed unless otherwise noted.
+
+The list of special characters that need to be escaped are below:
+- `$` - Reserved for Descriptions
+- `!` - Reserved for Priority
+- `*` - Reserved for objectives/s
+- `+` - Reserved for contexts
+- `@` - Reserved for Do-Date-Time
+- `%` - Reserved for Completed Date
+- `<` - Reserved for Predecessors
+- `>` - Reserved for Children
+- `=` - Reserved for Aliases
+- `~` - Reserved for Sequential Children marker
+- `^` - Reserved for Created Date
+- `#` - Reserved for ID
+- `[` `]` - Reserved for State markers and Links (when used as `[[link]]`)
+- `|` - Reserved for Link separator (when within `[[...]]`)
+
+### Reference Styles
+
+other things may need to be referenced in multiple places so such as predecessors.
+
+they go from _most stable_ to _least stable_ but also from _least human friendly_ to _most human friendly_
+
+#### Full UUID
+The most specific reference - matches exactly one plan:
+```actions
+[ ] Task B < 01951111-cfa6-718d-b303-d7107f4005b3
+```
+
+#### Short UUID
+The first 8 characters of a UUID provide a "good enough" reference that's both specific and human-friendly:
+```actions
+[ ] Task B < 01951111
+```
+
+Short UUIDs are resolved by prefix match. If multiple UUIDs share the same 8-character prefix (extremely rare), a linting warning (W009) suggests using the full UUID.
+
+#### Alias Reference
+plans with defined aliases can be referenced by that alias:
+```actions
+[ ] Run integration tests < staging-deploy
+```
+
+See [Alias](#alias-optional) for how to define aliases.
+
+#### plan Name
+Case-insensitive name matching within the workspace:
+```actions
+[ ] Dry clothes < Wash clothes
+```
+
+If multiple plans match the name, a linting warning (W009) suggests using a UUID or alias for clarity.
+
+
+### Resolution Order
+
+Predecessors are resolved within the workspace scope (all `.actions` files under the workspace root):
+1. **Full UUID match** - If the reference is 36 characters with hyphens, match against plan IDs
+2. **Short UUID match** - If the reference is exactly 8 hex characters, match against UUID prefixes
+3. **Alias match** - Case-insensitive match against defined aliases
+4. **Name match** - Case-insensitive match against plan names
+
+If no match is found, a linting warning (W008) reports the invalid reference. At parse time, resolved references are converted to UUIDs for internal storage.
 
 ## Dates, times, and repititions
 we make repeated use of date formats in this file type.
@@ -44,7 +124,7 @@ this makes reading dates consistent and easily parsable by nearly any language w
 
 while only some will take advantage of the extended functionality, they will all share the same base of the ISO 8601 standard
 ### Date Structure
-As denoted, each file can be understood as a list of actions that the person intends to take.
+As denoted, each file can be understood as a list of plans that the person intends to take.
 
 ordering matters here so each part is intended to be done in sequence to again make the act of parsing easier and minimizing the amount of characters that need to be escaped within the main text chunks
 
@@ -72,7 +152,7 @@ Time is denoted with the `T` character after the date and supports both extended
     - hh
     - hh
 
-if in an unambiguous context (like a child of an action due on a specific day) then simply listing the time should be sufficient, without the requirement of even a date
+if in an unambiguous context (like a child of an plan due on a specific day) then simply listing the time should be sufficient, without the requirement of even a date
 
 However, do note this will be implementation specific and will require more opinionated configuration than would otherwise be feasible for this work
 
@@ -119,7 +199,7 @@ By contrast, if we put the duration after a proper date, then there is no ambigu
 same goes for time and seconds due to leap seconds
 
 ### Recurrence
-Actions can repeat on a schedule using the RRULE (Recurrence Rule) syntax from [RFC 5545 section 3.3.10](https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.10).
+plans can repeat on a schedule using the RRULE (Recurrence Rule) syntax from [RFC 5545 section 3.3.10](https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.10).
 
 Recurrence is denoted with the `R:` prefix followed by standard RRULE syntax. The do-date/time serves as the DTSTART (start date) for the recurrence rule.
 
@@ -200,17 +280,17 @@ This specification uses RFC 5545 RRULE syntax directly rather than inventing cus
 
 While RRULE syntax is verbose, editor tooling can provide natural language interfaces that generate RRULE strings, keeping the file format precise while maintaining usability.
 ## Depth (Required)
-Every child action starts with atleast one `>` character. Children of a parent action can be denoted by `>>` and so-on down to the official limit of 5 levels of depth. Now while nothing stops implementors from allowing arbitrary nesting, it should be assumed that 5 is the limit if there is indeed a limit.
+Every child plan starts with atleast one `>` character. Children of a parent plan can be denoted by `>>` and so-on down to the official limit of 5 levels of depth. Now while nothing stops implementors from allowing arbitrary nesting, it should be assumed that 5 is the limit if there is indeed a limit.
 
 6 levels was chosen to conform with standard markdown conventions
 
-all other symbols will be valid for child actions, and parsing should still be easy since they will all be preceded by the progression of `>` characters
+all other symbols will be valid for child plans, and parsing should still be easy since they will all be preceded by the progression of `>` characters
 
 ### Adding Children
-Children actions should be added to the end of an action to leave the context closer to the name of the action. 
+Children plans should be added to the end of an plan to leave the context closer to the name of the plan. 
 Children should be the last thing in the chain before the completion-date/Id
 
-As such, child actions are encapsulated within the parent to make for easy parsing
+As such, child plans are encapsulated within the parent to make for easy parsing
 styling around indentation is left up to the implementors, it should NOT be important to parsing the document
 
 ## State (Required)
@@ -222,39 +302,32 @@ The options for states are as follows:
 - `=` Blocked/Awaiting
 - `_` Cancelled (for historical systems)
 
-This and the depth constitute the primary "marker" for the start of an action, making both parsing and reading easier since you can easily scan for the beginning of the next action visually on the screen
+This and the depth constitute the primary "marker" for the start of an plan, making both parsing and reading easier since you can easily scan for the beginning of the next plan visually on the screen
 
 
 ## Name (Required)
-The final required field is the name of the action itself. 
+The final required field is the name of the plan itself. 
 
-Due to the nature of the format, special characters will need to be escaped with the `\` character
-The list of special characters that need to be escaped are below:
-- `$` - Reserved for Descriptions
-- `!` - Reserved for Priority
-- `*` - Reserved for Stories/Projects
-- `+` - Reserved for contexts
-- `@` - Reserved for Do-Date-Time
-- `%` - Reserved for Completed Date
-- `<` - Reserved for Predecessors
-- `>` - Reserved for Children
-- `=` - Reserved for Aliases
-- `~` - Reserved for Sequential Children marker
-- `^` - Reserved for Created Date
-- `#` - Reserved for ID
-- `[` `]` - Reserved for State markers and Links (when used as `[[link]]`)
-- `|` - Reserved for Link separator (when within `[[...]]`)
 
 Otherwise, this is one of the more encompassing fields where users are allowed to write as much as they like, even newlines
 
 however, do note the point above about using names as secondary keys so if something is going to be really long, save it for the description section below
 
 ### Description (optional)
-The name fields status as a secondary key means that it is sometimes necessary to denote a longer description for an action
+This field is special as we want to allow for the user to use the full breadth of characters to enable descriptions to be much more expressive.
 
-this is where the description comes in and we can start one at any point within our name field within the `$` character
+To this end, this is the only part of the specification that REQUIRES the special `$` character at the start of the line to denote that this is a description line AND the END of the description.
 
-However, the rules around escaping still apply to ensure easy parsing
+This means descriptions can use any character they need to within the confines of the description block.
+
+like code blocks in other formats, we can designate an area that is free from the traditional rules around the format including being multiline since again, we DONT use whitespace as a meaningful part of the format
+
+```actions
+[ ] Cool Plan
+    $ This is a description of the plan 
+    special characters like ! @ # $ % ^ & * ( ) _ + - = { } [ ] | \ ; ' " : , . < > / ? can all be used here without needing to escape them
+    $
+```
 
 ### Links (optional inline syntax)
 Links to external resources can be embedded within the name or description using wiki-style double-bracket syntax:
@@ -272,7 +345,7 @@ Links to external resources can be embedded within the name or description using
 - `[[Email support|mailto:help@example.com]]`
 
 **Rationale:**
-Because `[` and `]` are used for state markers at the start of actions, links use double-bracket `[[` syntax to avoid parsing ambiguity. The pipe `|` separator follows wiki conventions, though we reverse the order to `[[text|url]]` (rather than `[[url|text]]`) for better plaintext readability when URLs are long.
+Because `[` and `]` are used for state markers at the start of plans, links use double-bracket `[[` syntax to avoid parsing ambiguity. The pipe `|` separator follows wiki conventions, though we reverse the order to `[[text|url]]` (rather than `[[url|text]]`) for better plaintext readability when URLs are long.
 
 To use literal `[[`, `]]`, or `|` characters in text outside of links, escape them with backslash: `\[\[`, `\]\]`, `\|`
 
@@ -285,15 +358,17 @@ While there is no limit, it is encourage to support around 4 levels of priority 
 we use the eisenhower matrix method as described in [the attached pdf](./Eisenhower-Matrix-Fillable.pdf)
 
 
-## Story/Project (Optional)
-An action may designate a parent project/story. in this case, the name of the story/project is used as the key for the sake of readability
+## Objective (Optional)
+A plan may designate a parent objective. in this case, the name of the objective is used as the key for the sake of readability
 
 designated by the `*` character, the same rules apply around escaping forbidden characters
 
-otherwise actions are assumed to be unparented.
+otherwise plans are assumed to be unparented, or if done within a workspace context, as part of the objective associated with the file itself.
 
-### Action Plan Hierarchies (Path Notation)
-Stories can be organized into hierarchies using path notation with `/` as the separator:
+For more information on file conventions, please review [naming conventions](./naming_conventions.md)
+
+### Objective Hierarchies (Path Notation)
+objectives can be organized into hierarchies using path notation with `/` as the separator:
 
 ```actions
 [ ] Build the CLI *work/clearhead/cli
@@ -302,9 +377,9 @@ Stories can be organized into hierarchies using path notation with `/` as the se
 ```
 
 This allows:
-- Scoping actions under nested projects (work → clearhead → cli)
-- Disambiguating projects with the same leaf name (`work/cli` vs `personal/cli`)
-- Hierarchical filtering (query `*work/` to get all work actions)
+- Scoping plans under nested objectives (work → clearhead → cli)
+- Disambiguating objectives with the same leaf name (`work/cli` vs `personal/cli`)
+- Hierarchical filtering (query `*work/` to get all work plans)
 
 **Path rules:**
 - Segments are separated by `/`
@@ -319,16 +394,16 @@ work/
 │   ├── cli
 │   ├── parser
 │   └── docs
-└── other-project
+└── other-
 personal/
 ├── website
 └── hobbies
 ```
 
-### Root Actions only
-It should also be noted that only root actions can have a parent project/story.
+### Root plans only
+It should also be noted that only root plans can have an objective designated.
 
-It is assumed that any child action(s) are part of the parent action and do not need to be designated as part of a project
+It is assumed that any child plan(s) are part of the parent plan and do not need to be designated as part of an objective themselves.
 
 This radically reduces the complexity of the parser and allows for a more readable format, it also makes querying radically easier since it enables us to simply query for the root node of the tree and get all of the children without needing to do any special parsing
 
@@ -340,35 +415,33 @@ started with the `+` character, one can use multiple contexts by separating each
 
 contexts are simply keys and cannot be assigned values
 
-### Tag Hierarchies
-Tags can be organized into hierarchies via configuration (see [configuration.md](./configuration.md)). When a tag has parent tags defined, tagging an action with a child tag implicitly includes all ancestor tags.
+### Multiple Contexts
+Multiple contexts can ALSO be designated by using multiple `+` characters
 
-**Example configuration:**
-```json
-{
-  "tag_hierarchies": {
-    "computer": ["neovim", "vscode", "terminal"],
-    "terminal": ["neovim"],
-    "driving": ["grocery_store", "gas_station"]
-  }
-}
+```actions
+[ ] Prepare presentation +work +meeting +client
 ```
+
+### Tag Hierarchies
+Tags can be organized into hierarchies via configuration (see [configuration.md](./configuration.md)). When a tag has parent tags defined, tagging an plan with a child tag implicitly includes all ancestor tags.
+
+please see [the configuration specification](./configuration.md) for more details on how to set this up
 
 With this configuration:
 - `+neovim` implicitly includes `+terminal` and `+computer`
 - `+grocery_store` implicitly includes `+driving`
-- Queries for `+computer` will match actions tagged with `+neovim`
+- Queries for `+computer` will match plans tagged with `+neovim`
 
 This enables fine-grained tagging while allowing broad filtering.
 
 ## Alias (Optional)
-Actions can define an alias using the `=` character followed by the alias name. Aliases provide stable, human-readable references that persist even if the action's name changes.
+plans can define an alias using the `=` character followed by the alias name. Aliases provide stable, human-readable references that persist even if the plan's name changes.
 
 **Syntax:** `=alias_name`
 
 **Examples:**
 ```actions
-[ ] Get the project documentation completed =docs
+[ ] Get the  documentation completed =docs
 [ ] Deploy to staging =staging-deploy
 ```
 
@@ -385,12 +458,12 @@ Once defined, aliases can be used in predecessor references:
 [ ] Run integration tests < staging-deploy
 ```
 
-**Rationale:** Names evolve as understanding improves. Aliases provide a stable reference point that doesn't break dependencies when action names are refined.
+**Rationale:** Names evolve as understanding improves. Aliases provide a stable reference point that doesn't break dependencies when plan names are refined.
 
 ## Sequential Children (Optional)
-A parent action can be marked with `~` to indicate that its children should be treated as sequential steps - each child implicitly depends on the previous sibling completing.
+A parent plan can be marked with `~` to indicate that its children should be treated as sequential steps - each child implicitly depends on the previous sibling completing.
 
-**Syntax:** `~` after the action name/metadata
+**Syntax:** `~` after the plan name/metadata
 
 **Example:**
 ```actions
@@ -420,53 +493,10 @@ This is equivalent to:
 
 ## Predecessors (Optional)
 
-Actions can depend on other actions being completed first. A predecessor is another action that must reach a completed or cancelled state before this action's dependencies are fully satisfied.
+plans can depend on other plans being completed first. A predecessor is another plan that must reach a completed or cancelled state before this plan's dependencies are fully satisfied.
 
-Started with the `<` character, you can specify one predecessor per marker. Multiple predecessors on the same action means ALL must be completed or cancelled.
+Started with the `<` character, you can specify one predecessor per marker. Multiple predecessors on the same plan means ALL must be completed or cancelled.
 
-### Reference Styles
-
-Predecessors support multiple reference styles for flexibility:
-
-#### Full UUID
-The most specific reference - matches exactly one action:
-```actions
-[ ] Task B < 01951111-cfa6-718d-b303-d7107f4005b3
-```
-
-#### Short UUID
-The first 8 characters of a UUID provide a "good enough" reference that's both specific and human-friendly:
-```actions
-[ ] Task B < 01951111
-```
-
-Short UUIDs are resolved by prefix match. If multiple UUIDs share the same 8-character prefix (extremely rare), a linting warning (W009) suggests using the full UUID.
-
-#### Action Name
-Case-insensitive name matching within the workspace:
-```actions
-[ ] Dry clothes < Wash clothes
-```
-
-If multiple actions match the name, a linting warning (W009) suggests using a UUID or alias for clarity.
-
-#### Alias Reference
-Actions with defined aliases can be referenced by that alias:
-```actions
-[ ] Run integration tests < staging-deploy
-```
-
-See [Alias](#alias-optional) for how to define aliases.
-
-### Resolution Order
-
-Predecessors are resolved within the workspace scope (all `.actions` files under the workspace root):
-1. **Full UUID match** - If the reference is 36 characters with hyphens, match against action IDs
-2. **Short UUID match** - If the reference is exactly 8 hex characters, match against UUID prefixes
-3. **Alias match** - Case-insensitive match against defined aliases
-4. **Name match** - Case-insensitive match against action names
-
-If no match is found, a linting warning (W008) reports the invalid reference. At parse time, resolved references are converted to UUIDs for internal storage.
 
 ### Examples
 
@@ -488,153 +518,59 @@ If no match is found, a linting warning (W008) reports the invalid reference. At
 
 **Across files in workspace:**
 ```actions
-# In project-a/next.actions
+# In -a/next.actions
 [ ] Deploy < Code review complete
 
-# In project-a/code-review.actions
+# In -a/code-review.actions
 [ ] Code review complete
 ```
 
 ### Semantics
 
 - Predecessors represent a **logical dependency**, independent of parent-child hierarchy (which uses `>`)
-- An action with predecessors can have any state (`[ ]`, `[-]`, `[=]`, etc.) — state is independent of predecessors
-- When querying for "doable" actions (e.g., agenda view), filters check if all predecessors are completed or cancelled
-- This includes **transitive** checking: if A → B → C, then C requires both B and A to be complete, not just B
-- Circular dependencies are detected and reported as errors (E025)
+- An plan with predecessors can have any state (`[ ]`, `[-]`, `[=]`, etc.) — state is independent of predecessors
 
 ## Do-Date/Time (Optional)
-Actions can have a do-date, do-time, or both. This is designated by the `@` character. The format conforms to a simplified subset of ISO 8601.
+plans can have a do-date, do-time, or both. This is designated by the `@` character. The format conforms to a simplified subset of ISO 8601.
 
-- **Date**: A date is specified in `YYYY-MM-DD` format (e.g., `@2025-10-20`).
-- **Time**: A time is specified in 24-hour `HH:MM` format (e.g., `@14:30`).
-- **Date and Time**: A date and time are combined with a `T` separator: `YYYY-MM-DDTHH:MM` (e.g., `@2025-10-20T14:30`).
+Do date/time makes the most use of the date and time formats laid out above.
 
-#### Duration (Optional)
-We can give an optional duration after the time by supply the `D` character followed by a number that will be converted to minutes
+it ALSO includes recurrence information if needed as described in the recurrence section above
 
-this can look like a simple `D30` to mean a duration of 30 minutes
+### Planned Acts
+in order for a plan to have more than a single planned act, it needs a recurrence rule as described above.
 
-for application designers, durations are assumed to default to 15 minutes
-
-##### Recurrence (Optional)
-Actions can repeat on a schedule by adding recurrence rules after the date/time. Recurrence is specified using the `R:` prefix followed by RRULE syntax (see [Recurrence](#recurrence) section above for full syntax reference).
-
-The do-date/time serves as the DTSTART (start date) for the recurrence, and the RRULE defines the pattern of repetition.
-
-**Examples:**
-- `@2025-01-21T19:00 R:FREQ=WEEKLY;BYDAY=TU` - Every Tuesday at 7pm
-- `@2025-01-20T09:00 R:FREQ=DAILY;BYDAY=MO,TU,WE,TH,FR` - Weekdays at 9am
-- `@2025-02-01 R:FREQ=MONTHLY;BYMONTHDAY=1` - First of each month
-- `@2025-01-01 R:FREQ=YEARLY;BYMONTH=1;BYMONTHDAY=1;COUNT=10` - Next 10 New Year's Days
-
-**Combining with Duration:**
-```actions
-[ ] Daily standup @2025-01-20T09:00 D15 R:FREQ=DAILY;BYDAY=MO,TU,WE,TH,FR
-```
-This creates a recurring 15-minute event every weekday at 9am.
-
-**Recurrence Semantics:**
-- The action with recurrence is a **template** that defines the pattern
-- Applications expand the template to generate individual **occurrence instances**
-- The template itself typically remains in the main `.actions` file unchanged
-- Completed occurrences can be logged separately (see [Recurrence Logging](#recurrence-logging-optional) below)
+When a plan has a recurrence rule, each occurrence is treated as a separate planned act with its own state and completion tracking.
 
 ## Completed Date (Optional)
 
 Intended to be added automatically by tooling when the state is changed to completed.
 
-Started with the `%` character, this helps to determine the date/time the action was completed.
+Started with the `%` character, this helps to determine the date/time the plan was completed.
 
-It follows the same format as the Do-Date/Time: `YYYY-MM-DD`, `HH:MM`, or `YYYY-MM-DDTHH:MM`.
+It only leverages the date/time formats laid out above: `YYYY-MM-DD`, `HH:MM`, or `YYYY-MM-DDTHH:MM`.
 
 ## Created Date (Optional)
 
-Intended to be added automatically by tooling when an action is first created.
+Intended to be added automatically by tooling when an plan is first created.
 
-Started with the `^` character, this helps to determine when the action was initially recorded.
+Started with the `^` character, this helps to determine when the plan was initially recorded.
 
-It follows the same format as the Do-Date/Time: `YYYY-MM-DD`, `HH:MM`, or `YYYY-MM-DDTHH:MM`.
+Again, like completed, only uses the date/time formats laid out above
 
 ### Derivation from UUID
-Since ClearHead uses UUID v7, which encodes a millisecond-precision timestamp, tooling MAY derive the creation date from the `#` field if the `^` field is missing. However, an explicit `^` field always takes precedence.
+Since ClearHead uses UUID v7, which encodes a millisecond-precision time stamp, tooling MAY derive the creation date from the `#` field if the `^` field is missing. However, an explicit `^` field always takes precedence.
 
 ## Id (Optional)
-for this we are going to be using the v7 of the UUID standard.
+for this we are going to be using the V7 of the UUID standard.
 
-the icon for this is `#` but is optional as we want to support the ability to create actions WITHOUT forcing the user to add a uuid manually before it is interpretted
+the icon for this is `#` but is optional as we want to support the ability to create plans WITHOUT forcing the user to add a UUID manually before it is interpreted
+
+while v7 is optional, it is highly recommended to include it to ensure universal uniqueness across systems and time
 
 ### Implications
 here, we are trying to leave the door open for applications to go in later and update this whole thing with automated tools such as the cli that will be able to review and update these ids after the user has created the initial version of the structure
 
 # Examples
-As we have laid out above, we have quite an array of options when it comes to how much or how little information to give.
-
-To give the most minimal example possible, we can see below:
-`[ ] Test Action`
-
-This hopefully serves to show that these should be able to be short, with the ability to read for a human without structured editing able to go through
-
-## Robust Example
-As we saw, many optional pieces of context can be added so here is an example of an action that has much more of these optional parameters:
-
-```actions
-[x] Go to the store for chicken
-    $ Make sure you get the stuff from the butcher directly
-    !1
-    *Run Errands
-+Driving,Store,Market
-@2025-01-19T08:30D30
-%2025-01-19T10:30
-^2025-01-19T08:00
-#214342414342413424
-```
-
-The succinct way to read this is that one had an action to go to the store on January 19th, 2025 as a part of their running errands project.
-The action was created at 8:00 AM, expected to take 30 minutes starting at 8:30 AM, but was completed in about two hours as we can see by the completion time at 10:30 AM.
-Finally, it was part of the Driving, Store, and Market contexts and contains extra instructions on where to get the chicken
-
-## Example with Links
-Actions can include links to related resources:
-
-```actions
-[ ] Review pull request [[PR #456|https://github.com/org/repo/pull/456]]
-    $ Check the implementation against [[API docs|https://api.example.com/v2/docs]]
-    !2
-    *Code Review
-    +Work,Development
-    @2025-01-26T14:00D45
-    #a1b2c3d4-e5f6-7890-abcd-ef1234567890
-```
-
-This action links to both a GitHub PR and API documentation within the description, making it easy to access relevant resources while keeping the file readable in plaintext
-
-
-## Recurring Example
-Here's an example of a recurring action with full metadata:
-
-```actions
-[ ] Weekly team meeting
-    $ Discuss progress, blockers, and next steps
-    !2
-    *Team Coordination
-    +Work,Meeting
-    @2025-01-20T14:00 D60 R:FREQ=WEEKLY;BYDAY=MO
-    #team-meeting-uuid
-```
-
-This defines a recurring weekly team meeting every Monday at 2pm for 60 minutes, with priority 2, associated with the "Team Coordination" project and tagged with Work and Meeting contexts.
-
-When this template is expanded by an application, it generates occurrence instances. When occurrences are completed, they can be logged:
-
-```actions
-[x] Weekly team meeting @2025-01-20T14:00 %2025-01-20T14:05 #team-meeting-uuid-20250120
-[x] Weekly team meeting @2025-01-27T14:00 %2025-01-27T14:10 #team-meeting-uuid-20250127
-```
-
-## Adding Children
-Finally, we will do a showcase of the format for those actions with child actions:
-```actions
-[ ] Parent Action >[ ] Child Action
-```
+Examples are assembled in the [Examples Directory](./examples/README.md) where you will find a variety of file samples that demonstate features, errors, and edge-cases of the specification
 
