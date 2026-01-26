@@ -14,12 +14,11 @@ This specification defines the CRDT-centered synchronization architecture for th
 
 ## Conceptual Model
 
-The **Intermediate Representation (IR)** is the canonical in-memory form. Everything else is a serialization or projection. The IR aligns with the [Actions Ontology](https://clearhead.us/vocab/actions/v3), specifically the ActionPlan/ActionProcess distinction from BFO/CCO.
+The **Intermediate Representation (IR)** is the canonical in-memory form. Everything else is a serialization or projection. The IR aligns with the [Actions Ontology](https://clearhead.us/vocab/actions/v4) 
 
 ```
                               IR
                     (canonical in-memory form)
-                    ActionPlan + ActionProcess
                                │
             ┌──────────────────┼──────────────────┐
             │                  │                  │
@@ -274,7 +273,7 @@ WantedBy=default.target
 
 ### Configuration
 
-Sync is configured via `sync_*` settings in `config.json`. See [Configuration Specification - Sync Settings](./configuration.md#sync-settings-sync_) for all options including `sync_enabled`, `sync_relay_url`, `sync_peers`, and `sync_interval_seconds`.
+Sync is configured via `sync_*` settings in `config.json`. 
 
 ## Conflict Resolution
 
@@ -330,70 +329,6 @@ Which would:
 
 But the default flow is simply editor's native "file changed" handling.
 
-## CRDT Schema
-
-The CRDT document structure aligns with the [Actions Ontology](https://clearhead.us/vocab/actions/v3). The key distinction is between **ActionPlan** (the template/intent) and **ActionProcess** (the execution/outcome).
-
-```
-workspace.crdt
-├── plans: Map<UUID, ActionPlan>
-│   ├── {uuid}
-│   │   ├── name: String
-│   │   ├── description: Option<String>
-│   │   ├── state: PlanState              # see below
-│   │   ├── priority: Option<1-4>
-│   │   ├── do_datetime: Option<DateTime>
-│   │   ├── do_duration: Option<Minutes>
-│   │   ├── recurrence: Option<RRule>     # RFC 5545
-│   │   ├── contexts: List<String>
-│   │   ├── project: Option<String>
-│   │   ├── parent_id: Option<UUID>
-│   │   ├── depends_on: List<UUID>
-│   │   ├── alias: Option<String>
-│   │   ├── is_sequential: Bool
-│   │   └── created_at: DateTime
-│   └── ...
-│
-├── processes: Map<UUID, ActionProcess>
-│   ├── {uuid}
-│   │   ├── prescribed_by: UUID           # link to ActionPlan
-│   │   ├── state: ProcessState           # see below
-│   │   ├── scheduled_for: Option<DateTime>
-│   │   ├── completed_at: Option<DateTime>
-│   │   └── notes: Option<String>
-│   └── ...
-│
-└── metadata
-    ├── version: u32
-    └── last_modified: DateTime
-```
-
-### State Semantics
-
-**PlanState** (disposition of the template):
-- `active` - Plan is active, can generate processes
-- `retired` - Plan is complete (for non-recurring) or no longer in use
-- `blocked` - Plan is blocked by external factor (not dependency)
-
-**ProcessState** (outcome of an execution):
-- `completed` - Successfully finished
-- `cancelled` - Abandoned before completion
-- `skipped` - Intentionally not done (e.g., vacation skip of recurring)
-
-See [ActionProcess Specification](./action_process_specification.md) for full semantics.
-
-### Plan/Process Relationship
-
-For **non-recurring** actions:
-- Marking `[x]` in DSL creates one ActionProcess (state: completed) AND sets ActionPlan state to `retired`
-- The plan had one execution; it's done
-
-For **recurring** actions:
-- Each instance completion creates a new ActionProcess linked via `prescribed_by`
-- The ActionPlan remains `active` until explicitly retired
-- Query "all completions of this recurring task" = all processes where `prescribed_by` = plan UUID
-
-**Key constraint:** Valid CRDT ↔ Valid IR ↔ Valid DSL (for plans). Processes are queryable but not directly edited via DSL.
 
 ## Projection
 

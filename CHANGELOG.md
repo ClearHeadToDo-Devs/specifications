@@ -1,5 +1,12 @@
 # Changelog - Actions Specifications
 
+## 2026-01-24
+### Refactor: move older specifications to archive
+Moved a few specifications to `Archive` folder as we move to an RDF-centric approach:
+- sql_schema: no need as RDF does more work 
+- json_schema: superseded by ontology 
+- event logging specification as this is now handled by the sync specification
+
 ## 2026-01-18
 
 ### Changed

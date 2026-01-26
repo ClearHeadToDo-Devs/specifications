@@ -36,7 +36,6 @@ All implementations MUST follow the XDG Base Directory specification:
 
 ~/.local/state/clearhead/
   ├── workspace.crdt       # CRDT document (source of truth)
-  └── events.db            # Event log for analytics/history
 ```
 
 ## Configuration File Format
@@ -196,40 +195,6 @@ Implementations MAY add their own settings to the configuration file using a nam
 - Namespace prefixes MUST be unique identifiers (no conflicts)
 - Core settings (no prefix) MUST be respected by all implementations
 
-### Sync Settings (`sync_*`)
-
-The sync service (`clearhead sync`) uses the following settings. See [Sync Architecture](./sync_architecture.md) for full details.
-
-| Setting | Type | Default | Description |
-|---------|------|---------|-------------|
-| `sync_enabled` | boolean | `false` | Enable CRDT synchronization |
-| `sync_relay_url` | string | `null` | WebSocket URL of relay server (e.g., `wss://sync.example.com`) |
-| `sync_peers` | array[string] | `[]` | Direct peer URLs for LAN/mesh sync |
-| `sync_interval_seconds` | integer | `30` | How often to poll for changes in watch mode |
-| `sync_on_save` | boolean | `true` | Trigger sync immediately when LSP updates CRDT |
-
-**Example:**
-```json
-{
-  "sync_enabled": true,
-  "sync_relay_url": "wss://sync.clearhead.io",
-  "sync_peers": [
-    "wss://192.168.1.100:8080",
-    "wss://192.168.1.101:8080"
-  ],
-  "sync_interval_seconds": 30,
-  "sync_on_save": true
-}
-```
-
-**Environment variables:**
-```bash
-CLEARHEAD_SYNC_ENABLED=true
-CLEARHEAD_SYNC_RELAY_URL="wss://sync.example.com"
-CLEARHEAD_SYNC_PEERS='["wss://192.168.1.100:8080"]'
-CLEARHEAD_SYNC_INTERVAL_SECONDS=60
-CLEARHEAD_SYNC_ON_SAVE=false
-```
 
 ### Tag Hierarchies (`tag_hierarchies`)
 
@@ -254,7 +219,7 @@ Each key is a parent tag, and its value is an array of child tags that should in
     "computer": ["terminal", "browser", "ide"],
     "terminal": ["neovim", "tmux", "shell"],
     "driving": ["grocery_store", "gas_station", "pharmacy"],
-    "work": ["meetings", "coding", "reviews"],
+    "work": {"project_a": ["design", "development", "testing"]},
     "low_energy": ["email", "reading", "filing"]
   }
 }
@@ -271,13 +236,6 @@ Each key is a parent tag, and its value is an array of child tags that should in
 - Energy levels: `@low_energy` → `@email`, `@reading`
 - Tools: `@computer` → `@terminal` → `@neovim`
 - Locations: `@office` → `@desk`, `@meeting_room`
-
-**Environment variable:**
-```bash
-CLEARHEAD_TAG_HIERARCHIES='{"computer": ["terminal", "neovim"], "driving": ["grocery_store"]}'
-```
-
-Note: The environment variable value must be valid JSON.
 
 ### Schema Extension
 
@@ -448,41 +406,14 @@ An implementation is conformant with this specification if it:
 6. Handles missing/invalid configuration gracefully with defaults
 7. Supports shell expansion in path values
 8. Uses namespaced prefixes for implementation-specific settings (e.g., `cli_`, `nvim_`, `sync_`)
+  1. care should be taken to avoid conflicts remember this is a global namespace 
 
-### Testing Conformance
-
-To test an implementation's conformance:
-
-```bash
-# Test 1: Default behavior (no config)
-rm -rf ~/.config/clearhead ~/.local/share/clearhead
-<implementation_command>
-# Should use built-in defaults without error
-
-# Test 2: Config file override
-mkdir -p ~/.config/clearhead
-echo '{"default_file": "test.actions"}' > ~/.config/clearhead/config.json
-<implementation_command>
-# Should use test.actions as default
-
-# Test 3: Environment override
-export CLEARHEAD_DEFAULT_FILE="env.actions"
-<implementation_command>
-# Should use env.actions (env wins over config)
-
-# Test 4: Invalid JSON handling
-echo '{invalid json}' > ~/.config/clearhead/config.json
-<implementation_command>
-# Should warn and fall back to defaults, not crash
-```
 
 ## See Also
 
 - [Action File Format](./action_specification.md) - Core file format
 - [Naming Conventions](./naming_conventions.md) - File and directory naming
-- [JSON Schema](./json_schema_specification.md) - Action serialization format
 - [Sync Architecture](./sync_architecture.md) - CRDT sync and state management
-- [Event Logging](./event_logging_specification.md) - Events database for analytics
 
 ## Changelog
 
