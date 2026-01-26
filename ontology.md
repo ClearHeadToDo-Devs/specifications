@@ -150,6 +150,5 @@ When implementing a parser:
 ```
 
 ## Related Specifications
-- [JSON Schema Specification](./json_schema_specification.md): Defines the structure of the JSON output.
 - [Actions Vocabulary v4](https://clearhead.us/vocab/actions/v4): The formal OWL ontology.
 - [V4 Design Document](../ontology/V4_DESIGN.md): Full design rationale and CCO alignment.
