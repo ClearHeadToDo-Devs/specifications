@@ -31,6 +31,7 @@ The **Intermediate Representation (IR)** is the canonical in-memory form. Everyt
 - **CRDT** is durable storage with merge semantics. Stores both ActionPlans and ActionProcesses. This is the synced source of truth.
 - **DSL** is text serialization for editor workflows. Plans: `*.actions`, Processes: `*.log.actions` (on-demand).
 - **Graph Query Layer** is an ephemeral RDF graph store materialized from the IR. Enables SPARQL queries for complex analytics and validation. This allows implementations to leverage semantic reasoning, SHACL shapes, and RDF-based linting.
+- **SHACL Source:** Validation uses the v4 shapes from `ontology/v4/actions-shapes-v4.ttl`.
 
 **Key constraint:** Valid CRDT ↔ Valid IR ↔ Valid DSL. No information loss in any direction for plans.
 

@@ -3,7 +3,8 @@
 **Version:** 4.0.0
 **Vocabulary URI:** `https://clearhead.us/vocab/actions/v4#`
 **Ontology Documentation:** [ontology/README.md](../ontology/README.md)
-**Context Map:** [`schemas/actions.context.json`](./schemas/actions.context.json)
+**Context Map:** `https://clearhead.us/vocab/actions/v4/actions.context.json`
+**JSON Schema:** `https://clearhead.us/vocab/actions/v4/actions.schema.json`
 
 ## Overview
 
@@ -11,9 +12,9 @@ This specification defines how the `.actions` file format maps to the [Actions V
 
 The core philosophy is **"JSON for Developers, RDF for Machines"**. We use JSON-LD contexts to bridge the gap between ergonomic developer experience and semantic formalisms.
 
-## The Context Map (`context.json`)
+## The Context Map (`actions.context.json`)
 
-The `context.json` file is the keystone of the ClearHead data architecture. It maps the simplified JSON keys used by applications to the formal URIs defined in the [Actions Vocabulary](https://clearhead.us/vocab/actions/v4).
+The `actions.context.json` file is the keystone of the ClearHead data architecture. It maps the simplified JSON keys used by applications to the formal URIs defined in the [Actions Vocabulary](https://clearhead.us/vocab/actions/v4).
 
 ### Purpose
 - **Decoupling:** Applications don't need to know about RDF or ontologies. They just read/write JSON.
@@ -26,12 +27,20 @@ Downstream projects (like `clearhead-cli`) simply include a reference to the con
 
 ```json
 {
-  "@context": "https://clearhead.us/schemas/actions.context.json",
+  "@context": "https://clearhead.us/vocab/actions/v4/actions.context.json",
   "plans": [ ... ]
 }
 ```
 
 This single line transforms a proprietary JSON format into a standard RDF graph.
+
+## JSON Schema (Ontology-Out)
+
+The ontology-out JSON shape is validated with a JSON Schema published alongside the vocabulary:
+
+- `https://clearhead.us/vocab/actions/v4/actions.schema.json`
+
+This schema validates the **document container** (`@context`, `@graph`) and the **entity nodes** inside the graph, while SHACL validates the RDF semantics.
 
 ## File Format to RDF Mapping
 
@@ -90,6 +99,14 @@ By adhering to this specification, tools ensure that:
 2. **Priorities are Standardized:** Priority 1 represents "Urgent & Important" (Eisenhower Matrix).
 3. **Dependencies are Traceable:** `dependsOn` allows graph traversal to find critical paths.
 4. **Recurrence is Clean:** One Plan can prescribe many Planned Acts — no need to duplicate task definitions.
+
+## Validation (SHACL)
+
+The v4 SHACL shapes live in the ontology repo and are the canonical validation ruleset:
+
+- `ontology/v4/actions-shapes-v4.ttl`
+
+Implementations should use these shapes for linting, import validation, and integration testing.
 
 ## Implementation Guidelines
 
