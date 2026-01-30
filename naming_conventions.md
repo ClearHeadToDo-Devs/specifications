@@ -44,21 +44,44 @@ This allows users to have a quick reference for each project/story directly with
 
 Tool implementors can leverage these README files to provide additional context in their interfaces, enhancing the user experience.
 
-## Action History and Completion Tracking
+## Recurring Action Instances
 
-Action completion history is tracked via **event sourcing** in `events.db`, not in the file system.
+Recurring actions store their PlannedAct instances in dedicated files alongside their templates.
 
-**Key points:**
-- Completed actions can be deleted from files - history is preserved in `events.db`
-- Recurring action templates stay in files; instance completions are logged to events.db
-- Query history via `clearhead history` or direct SQL
+### File Convention
 
-For full details on event schema, workflows, queries, and migration from plaintext logs, see [Event Logging Specification](./event_logging_specification.md).
+For each `*.actions` file containing recurring action templates, a corresponding `*.recurring.actions` file holds the instances:
+
+- `$workspace/work.actions` → `$workspace/work.recurring.actions`
+- `$workspace/personal/next.actions` → `$workspace/personal/next.recurring.actions`
+
+### File Structure
+
+Instance files contain PlannedActs that reference their parent Plan:
+
+```actions
+[x] Weekly standup *abc123 @2026-01-14 %2026-01-14T09:15 #act-004
+[ ] Weekly standup *abc123 @2026-01-21 #act-007
+[ ] Weekly standup *abc123 @2026-01-28 #act-010
+```
+
+- `*abc123` references the parent Plan's UUID
+- Instances are ordered chronologically (oldest to newest)
+- Each instance has its own state, timestamps, and UUID
+
+### History and Analytics
+
+Instance files serve as the historical record for recurring actions:
+- Past instances (completed/cancelled) remain in the file
+- Query history by parsing the `.recurring.actions` files
+- Analytics via graph queries or file parsing
+
+For workflow details (completion, generation, template edits), see [Process](./process.md#recurring-actions).
 
 ## See Also
 
 - [Configuration](./configuration.md) - XDG paths and config settings
-- [Event Logging Specification](./event_logging_specification.md) - Event schema, queries, history workflows
+- [Process](./process.md) - Workflow including recurring action behavior
 - [Sync Architecture](./sync_architecture.md) - CRDT sync and state management
 - [Action File Format](./action_file_format.md) - DSL syntax
 

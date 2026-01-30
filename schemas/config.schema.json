@@ -1,52 +1,71 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://github.com/ClearHeadToDo-Devs/specifications/schemas/config.schema.json",
-  "title": "ClearHead Core Configuration",
-  "description": "Core configuration schema for ClearHead implementations. Implementations may extend this schema with their own namespaced settings (e.g., cli_*, nvim_*, web_*).",
-  "type": "object",
-  "properties": {
-    "data_dir": {
-      "type": "string",
-      "description": "Global directory for user data and action files. Supports shell expansion (~, $HOME, etc.)",
-      "default": "~/.local/share/clearhead",
-      "examples": [
-        "~/.local/share/clearhead",
-        "~/Documents/clearhead",
-        "$HOME/Dropbox/clearhead"
-      ]
-    },
-    "config_dir": {
-      "type": "string",
-      "description": "Global directory for configuration files. Supports shell expansion (~, $HOME, etc.)",
-      "default": "~/.config/clearhead",
-      "examples": [
-        "~/.config/clearhead",
-        "~/Documents/clearhead/config"
-      ]
-    },
-    "default_file": {
-      "type": "string",
-      "description": "Default action file name. Can be relative (resolved from data_dir) or absolute.",
-      "default": "inbox.actions",
-      "examples": [
-        "inbox.actions",
-        "work.actions",
-        "/absolute/path/to/actions.actions"
-      ]
-    }
-  },
-  "additionalProperties": true,
-  "examples": [
-    {
-      "data_dir": "~/.local/share/clearhead",
-      "config_dir": "~/.config/clearhead",
-      "default_file": "inbox.actions"
-    },
-    {
-      "data_dir": "~/Dropbox/clearhead",
-      "default_file": "work.actions",
-      "cli_format": "table",
-      "nvim_auto_normalize": true
-    }
-  ]
+       "$schema": "http://json-schema.org/draft-07/schema#",
+       "$id": "https://github.com/ClearHeadToDo-Devs/specifications/schemas/config.schema.json",
+       "title": "ClearHead Core Configuration",
+       "description": "Core configuration schema for ClearHead implementations. Implementations may extend this schema with their own namespaced settings (e.g., cli_*, nvim_*, web_*).",
+       "type": "object",
+       "properties": {
+              "data_dir": {
+                     "type": "string",
+                     "description": "Global directory for user data and action files. Supports shell expansion (~, $HOME, etc.)",
+                     "default": "XDG_DATA_HOME/clearhead",
+                     "examples": [
+                            "~/.local/share/clearhead",
+                            "~/Documents/clearhead",
+                            "$HOME/Dropbox/clearhead"
+                     ]
+              },
+              "config_dir": {
+                     "type": "string",
+                     "description": "Global directory for configuration files. Supports shell expansion (~, $HOME, etc.)",
+                     "default": "$XDG_CONFIG_HOME/clearhead",
+                     "examples": [
+                            "$XDG_CONFIG_HOME/clearhead",
+                            "~/.config/clearhead",
+                            "~/Documents/clearhead/config"
+                     ]
+              },
+              "state_dir": {
+                     "type": "string",
+                     "description": "Global directory for user data and action files. Supports shell expansion (~, $HOME, etc.)",
+                     "default": "XDG_STATE_HOME/clearhead",
+                     "examples": [
+                            "~/.local/state/clearhead",
+                            "~/Documents/clearhead"
+                     ]
+              },
+              "cache_dir": {
+                     "type": "string",
+                     "description": "Global directory for user data and action files. Supports shell expansion (~, $HOME, etc.)",
+                     "default": "XDG_CACHE_HOME/clearhead",
+                     "examples": [
+                            "~/.cache/clearhead",
+                            "~/Documents/clearhead"
+                     ]
+              },
+              "default_file": {
+                     "type": "string",
+                     "description": "Default action file name. Can be relative (resolved from data_dir) or absolute.",
+                     "default": "inbox.actions",
+                     "examples": [
+                            "inbox.actions",
+                            "work.actions",
+                            "absolute/path/to/actions.actions"
+                     ]
+              }
+       },
+       "additionalProperties": true,
+       "examples": [
+              {
+                     "data_dir": "~/.local/share/clearhead",
+                     "config_dir": "~/.config/clearhead",
+                     "default_file": "inbox.actions"
+              },
+              {
+                     "data_dir": "~/Dropbox/clearhead",
+                     "default_file": "work.actions",
+                     "cli_format": "table",
+                     "nvim_auto_normalize": true
+              }
+       ]
 }

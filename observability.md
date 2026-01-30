@@ -1,0 +1,136 @@
+# Observability Specification
+
+**Version:** 1.0.0
+**Status:** Draft
+
+## Purpose
+
+This specification defines observability conventions for ClearHead tooling. It covers semantic events, structured logging, and debugging telemetry.
+
+**Observability is for:**
+- Debugging system behavior ("why is this action in this state?")
+- Property change history ("when did priority change from 2 to 1?")
+- Operational analytics (completion velocity, patterns over time)
+- Distributed tracing (sync operations, cross-device coordination)
+
+**Observability is NOT for:**
+- Current state (that's the CRDT/domain data)
+- PlannedAct instances (that's `.recurring.actions` files)
+- Sync coordination (that's the CRDT layer)
+
+## Relationship to Other Concerns
+
+```
+CRDT (Automerge)         → Coordination, conflict resolution
+Domain Specific Language Files (.actions)   → Human-readable state, queryable
+Observability (this)     → Debugging, analytics, audit trail
+```
+
+These are complementary. CRDT tracks *operational* history (insertions, deletions). Observability tracks *semantic* history (what those operations meant in domain terms).
+
+## Framework
+
+ClearHead uses [OpenTelemetry](https://opentelemetry.io/) for observability:
+
+- **Standard format** — Wide ecosystem support (Jaeger, Prometheus, Grafana)
+- **Structured logs** — Semantic events with typed fields
+- **Offline-first** — Local file export, aggregate later
+
+## Storage Location
+
+Telemetry is stored in XDG state directory (machine-specific, not synced):
+
+- **Linux/macOS:** `~/.local/state/clearhead/telemetry/` (or `$XDG_STATE_HOME/clearhead/telemetry/`)
+- **Windows:** `%LOCALAPPDATA%\clearhead\state\telemetry\`
+
+### File Format
+
+Logs are stored as newline-delimited JSON (NDJSON) for easy parsing with DuckDB, jq, or standard tools:
+
+```
+telemetry/
+├── events-2026-01.ndjson
+├── events-2026-02.ndjson
+└── ...
+```
+
+Files rotate monthly by default. Configurable via settings.
+
+## Semantic Events
+
+Events are domain-specific and use consistent field naming.
+
+### Common Fields
+
+All events include:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `timestamp` | ISO 8601 | When the event occurred |
+| `event` | string | Event type identifier |
+| `tool` | string | Emitting tool (cli, lsp, sync) |
+| `action_uuid` | string | Related action UUID (if applicable) |
+
+### Action Lifecycle Events
+
+| Event | When Emitted | Additional Fields |
+|-------|--------------|-------------------|
+| `action_created` | New plan added | `name`, `file_path` |
+| `action_completed` | State → completed | `name`, `completed_at` |
+| `action_cancelled` | State → cancelled | `name`, `reason` (optional) |
+| `action_started` | State → in_progress | `name` |
+| `action_blocked` | State → blocked | `name`, `reason` (optional) |
+| `action_restarted` | State → new   | `name`, `reason` (optional) |
+| `action_deleted` | Action removed from file | `name` |
+
+### Property Change Events
+
+| Event | When Emitted | Additional Fields |
+|-------|--------------|-------------------|
+| `priority_changed` | Priority modified | `old_priority`, `new_priority` |
+| `due_date_changed` | Do date modified | `old_date`, `new_date` |
+| `name_changed` | Name modified | `old_name`, `new_name` |
+| `context_added` | Context tag added | `context` |
+| `context_removed` | Context tag removed | `context` |
+
+### Recurring Action Events
+
+| Event | When Emitted | Additional Fields |
+|-------|--------------|-------------------|
+| `instance_generated` | New PlannedAct created | `template_uuid`, `occurrence_date` |
+| `instance_completed` | Recurring instance completed | `template_uuid`, `scheduled_date`, `completed_date` |
+| `instance_skipped` | User skips occurrence | `template_uuid`, `occurrence_date`, `reason` |
+| `template_edited` | Recurring template modified | `template_uuid`, `fields_changed` |
+
+### Sync Events
+
+| Event | When Emitted | Additional Fields |
+|-------|--------------|-------------------|
+| `sync_started` | Sync operation begins | `remote`, `direction` |
+| `sync_completed` | Sync operation succeeds | `remote`, `changes_sent`, `changes_received` |
+| `sync_failed` | Sync operation fails | `remote`, `error` |
+| `conflict_resolved` | CRDT conflict resolved | `action_uuid`, `resolution` |
+
+### System Events
+
+| Event | When Emitted | Additional Fields |
+|-------|--------------|-------------------|
+| `workspace_opened` | Workspace loaded | `path`, `action_count` |
+| `file_parsed` | Actions file parsed | `file_path`, `action_count`, `parse_time_ms` |
+| `lsp_started` | LSP server started | `port` (if applicable) |
+
+
+## Retention
+
+Default retention: 1 year. Older files can be:
+- Deleted automatically (if configured)
+- Archived to cold storage
+- Aggregated into summary statistics
+
+Telemetry settings can be aggregated via a sync server but that is not required and up to implementors and configuration
+
+## See Also
+
+- [Process](./process.md) — Workflow and action lifecycle
+- [Sync Architecture](./sync_architecture.md) — CRDT coordination
+- [Configuration](./configuration.md) — Settings including telemetry options

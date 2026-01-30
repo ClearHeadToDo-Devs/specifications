@@ -162,3 +162,84 @@ While your ability to delegate may vary on your circumstances, the core idea is 
 
 This is where that cancelled state can be useful as it gives us an easy way to cancel actions in a thoughtful way
 
+## Recurring Actions
+
+Recurring actions are Plans with an RRULE that prescribe multiple PlannedActs over time. The template defines the pattern; instances are the individual occurrences.
+
+### Plans vs PlannedActs
+
+Ontologically, a Plan is a template—it has no state. A PlannedAct is an executable instance that carries state (Not Started, In Progress, Completed, etc.).
+
+For non-recurring actions, this distinction is invisible: one Plan, one PlannedAct, represented as a single line in an `.actions` file.
+
+For recurring actions, the distinction matters:
+- The **template** (Plan) lives in `*.actions` with the recurrence rule
+- The **instances** (PlannedActs) live in `*.recurring.actions`, referencing their parent
+
+### Template and Instances
+
+The template defines the recurring pattern:
+```actions
+[ ] Weekly standup @T09:00 R:FREQ=WEEKLY;BYDAY=TU #abc123
+```
+
+Instances reference the template and carry their own state:
+```actions
+[x] Weekly standup *abc123 @2026-01-14 %2026-01-14T09:15 #act-004
+[ ] Weekly standup *abc123 @2026-01-21 #act-007
+[ ] Weekly standup *abc123 @2026-01-28 #act-010
+```
+
+Instances are ordered chronologically (oldest to newest) within the file.
+
+### Template as Interface
+
+The checkbox on a template (`[ ]`, `[x]`, etc.) is an interface into the current instance's phase. Plans themselves have no phase—only PlannedActs do.
+
+When you mark a template complete, you're actually completing the current PlannedAct.
+
+### Completion Workflow
+
+When completing a recurring action:
+1. The current instance is marked complete in `*.recurring.actions` (with completion timestamp)
+2. The next instance is generated (if within generation horizon)
+3. The template remains `[ ]` (reflecting the new current instance)
+
+### Generation Horizon
+
+Instances are generated ahead based on configuration (default: 5 instances). This keeps the number proportional to recurrence frequency—5 weekly instances is ~1 month, 5 daily instances is ~1 week.
+
+See [Configuration](./configuration.md) for customizing the generation horizon.
+
+### Template Edits
+
+Editing a template (name, time, description, etc.) updates the next upcoming instance only:
+- **Past instances:** Unchanged (they're historical records)
+- **Next upcoming instance:** Updated to reflect template changes
+- **Future instances:** Regenerated from template when their turn comes
+
+This preserves history while allowing the template to evolve.
+
+### Children of Recurring Actions
+
+If a recurring action has children, each instance includes its own child instances:
+
+Template:
+```actions
+[ ] Weekly standup @T09:00 R:FREQ=WEEKLY;BYDAY=TU #abc123
+> [ ] Prepare agenda #def456
+> [ ] Send notes #ghi789
+```
+
+Instances:
+```actions
+[x] Weekly standup *abc123 @2026-01-14 %2026-01-14T09:15 #act-004
+> [x] Prepare agenda *def456 %2026-01-14T08:45 #act-005
+> [x] Send notes *ghi789 %2026-01-14T10:30 #act-006
+[ ] Weekly standup *abc123 @2026-01-21 #act-007
+> [ ] Prepare agenda *def456 #act-008
+> [ ] Send notes *ghi789 #act-009
+```
+
+Each child instance references its parent template's child Plan.
+
