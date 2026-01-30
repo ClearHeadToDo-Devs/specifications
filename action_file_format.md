@@ -62,8 +62,8 @@ The list of special characters that need to be escaped are below:
 6. `*` - Reserved for objectives/s
 7. `+` - Reserved for contexts
 8. `@` - Reserved for Do-Date-Time
-9. `%` - Reserved for Completed Date
-10. `^` - Reserved for Created Date
+9. `^` - Reserved for Created Date
+10. `%` - Reserved for Completed Date
 11. `#` - Reserved for ID
 12. `<` - Reserved for Predecessors
 13. `>` - Reserved for Children
