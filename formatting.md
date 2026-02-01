@@ -54,6 +54,15 @@ These can be checked via linter rules (info severity) if desired.
 
 ## Version History
 
+### 3.0.0 (2026-01-31)
+- **Breaking:** Formatter now enforces indentation based on action depth
+- Depth markers themselves are indented (not just action content)
+- Indentation respects user preferences (spaces vs tabs, width)
+- Updated Topiary query to add indentation rules
+- Updated Neovim indents.scm to match Topiary behavior
+
+**Migration:** Run `clearhead format --in-place` on existing files to update formatting
+
 ### 2.3.0 (2026-01-30)
 - expanded to include guidance on the various formats
 ### 2.1.0 (2026-01-18)
