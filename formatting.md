@@ -9,53 +9,13 @@ version: 2.1.0
 
 # Actions File Formatting Specification
 
-This specification defines the minimal formatting rules for `.actions` files. The `.actions` format is **whitespace-insensitive by design** - `[x]Task$Desc` and `[x] Task $ Desc` are semantically equivalent. The formatter respects this by enforcing only structural formatting.
+This document covers the formatting rules for `.actions` files in the ClearHead ecosystem. The goal of this specification is to ensure consistent and readable formatting across different tools and editors while respecting the syntactically insignificant nature of whitespace in the ClearHead file format.
 
-## Design Principles
+## Rules
 
-1. **Format preserves semantics** - Formatting changes must not alter the meaning of actions
-2. **Idempotency** - Formatting the same content twice produces identical results
-3. **Whitespace-insensitive** - The format doesn't mandate specific horizontal spacing
-4. **Minimal intervention** - Formatter handles structure, not style
-5. **Storage vs display** - Canonical storage format; display is a tooling concern
+### New Actions on New Lines
 
-## Formatter Scope
-
-The `.actions` formatter enforces **vertical spacing only**:
-
-- ✅ **Newlines between actions** - Each action appears on its own line
-
-The formatter explicitly does **not** enforce:
-
-- ❌ **Horizontal spacing** - User's choice; format is whitespace-insensitive
-- ❌ **Indentation** - User's choice; hierarchy is defined by depth markers (`>`, `>>`), not whitespace
-- ❌ **Metadata ordering** - See [linting.md](./linting.md) rule I006 for optional canonical ordering
-
-### Rationale
-
-The `.actions` format uses depth markers (`>`, `>>`, `>>>`, etc.) to define hierarchy, not indentation. This means:
-
-```actions
-[ ] Parent
->[ ] Child
->>[ ] Grandchild
-```
-
-and
-
-```actions
-[ ] Parent
-    >[ ] Child
-        >>[ ] Grandchild
-```
-
-are **semantically identical**. The formatter doesn't have an opinion about which is "correct" because both are valid.
-
-Similarly, `[x]Task!1` and `[x] Task !1` parse to the same data. Horizontal spacing is a style preference, not a correctness concern.
-
-## Formatting Rules
-
-**The only rule**: Each action must be on its own line.
+While actions themselves may also contain newlines, it is recommended that each action be placed on its own line to enhance readability.
 
 Input:
 ```actions
@@ -69,31 +29,33 @@ Output:
 [ ] Task 3
 ```
 
-All other formatting (spacing, indentation) is preserved from input.
+This makes each action clearly distinguishable and easier to read.
 
-## Configuration
+### Identation for child actions
 
-The formatter has no configuration options. It does one thing: ensure newlines between actions.
+Child actions should be indented to reflect their hierarchy within the action list. Each level of depth should be represented by either 2 spaces or a tab character, depending on the user's preference.
 
-## Implementation Notes
+```actions
+[ ] Parent Task
+    [ ] Child Task 1
+        [ ] Sub-child Task
+    [ ] Child Task 2
+```
 
-Formatters should keep formatting logic with the grammar definition where it belongs, and allow any tool using the grammar to get formatting for free.
 
-**Reference implementation:** See [tree-sitter-actions](https://github.com/ClearHeadToDo-Devs/tree-sitter-actions) for an example using Topiary.
-
-## Style Recommendations
+### Metadata Spacing
 
 While the formatter doesn't enforce these, the following are recommended for readability:
 
 - Space after state brackets: `[x] Task` rather than `[x]Task`
 - Space before metadata: `Task !1` rather than `Task!1`
-- Space after description icon: `$ Description` rather than `$Description`
-- Indent child actions: 4 spaces per depth level
 
 These can be checked via linter rules (info severity) if desired.
 
 ## Version History
 
+### 2.3.0 (2026-01-30)
+- expanded to include guidance on the various formats
 ### 2.1.0 (2026-01-18)
 - **Breaking:** Reduced scope to vertical spacing only
 - Removed horizontal spacing enforcement (whitespace-insensitive by design)
