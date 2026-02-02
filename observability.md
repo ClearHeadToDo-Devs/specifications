@@ -81,6 +81,7 @@ All events include:
 | `action_started` | State → in_progress | `name` |
 | `action_blocked` | State → blocked | `name`, `reason` (optional) |
 | `action_restarted` | State → new   | `name`, `reason` (optional) |
+| `action_archived` | Action moved to archive | `name`, `archive_file` |
 | `action_deleted` | Action removed from file | `name` |
 
 ### Property Change Events
@@ -101,6 +102,7 @@ All events include:
 | `instance_completed` | Recurring instance completed | `template_uuid`, `scheduled_date`, `completed_date` |
 | `instance_skipped` | User skips occurrence | `template_uuid`, `occurrence_date`, `reason` |
 | `template_edited` | Recurring template modified | `template_uuid`, `fields_changed` |
+| `template_archived` | Recurring template + instances archived | `template_uuid`, `instance_count`, `archive_file` |
 
 ### Sync Events
 

@@ -243,3 +243,15 @@ Instances:
 
 Each child instance references its parent template's child Plan.
 
+## Arhiving Actions
+
+When actions are completed or cancelled, they can be moved to an archive file for record-keeping which is outlined in the [Naming Conventions](./naming_conventions.md) document.
+
+as templates are completed, they are moved to the archived actions file of the same name as their objective.
+
+When a _recurring_ action is completed, both the template, _and all completed instances_ are moved to the archive file, template first, followed by the instances in chronological order.
+
+This keeps a clean record of what was done while keeping the active action lists uncluttered.
+
+### Reading and Generation
+The sync mechanism uses these conventions to read and generate the appropriate files as actions move through their lifecycle. this should allow the objectives to be primarily focused on active actions while still keeping a full record of what was done for future reference.

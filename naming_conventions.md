@@ -78,6 +78,85 @@ Instance files serve as the historical record for recurring actions:
 
 For workflow details (completion, generation, template edits), see [Process](./process.md#recurring-actions).
 
+## Archive File
+
+Completed and cancelled PlannedActs are moved from active working files to archive files to keep the workspace focused on actionable items while preserving history.
+
+### File Convention
+
+For each `*.actions` file, a corresponding `*.archive.actions` file stores completed/cancelled actions:
+
+- `$workspace/work.actions` → `$workspace/work.archive.actions`
+- `$workspace/personal/next.actions` → `$workspace/personal/next.archive.actions`
+
+### Archive Structure
+
+The archive contains all "finished" PlannedActs removed from working files:
+
+```actions
+# work.archive.actions - mixed content
+[x] One-time task that was completed %2026-01-15 #act-001
+[x] Cancelled project [_] %2026-01-10 #act-002
+[x] Weekly standup *abc123 @2026-01-14 %2026-01-14T09:15 #act-003
+[x] Weekly standup *abc123 @2026-01-21 %2026-01-21T09:15 #act-004
+```
+
+**Non-recurring actions**: When completed/cancelled and removed from `.actions`, they move directly to archive.
+
+**Recurring templates**: When a recurring template is archived, the template itself AND all its completed instances move together to the archive file as a unit. This preserves the complete history of the recurring work.
+
+### Recurring Template Archive Example
+
+Before archive (template + instances):
+```actions
+# work.actions (active file)
+[ ] Weekly standup @T09:00 R:FREQ=WEEKLY;BYDAY=TU #abc123
+```
+
+```actions
+# work.recurring.actions (instances file)
+[x] Weekly standup *abc123 @2026-01-14 %2026-01-14T09:15 #act-001
+[x] Weekly standup *abc123 @2026-01-21 %2026-01-21T09:15 #act-002
+[ ] Weekly standup *abc123 @2026-01-28 #act-003
+```
+
+After archiving the template:
+```actions
+# work.actions (template removed)
+# (no more weekly standup template)
+```
+
+```actions
+# work.recurring.actions (remaining active instances only)
+[ ] Weekly standup *abc123 @2026-01-28 #act-003
+```
+
+```actions
+# work.archive.actions (archived template + completed instances)
+[x] Weekly standup @T09:00 R:FREQ=WEEKLY;BYDAY=TU #abc123
+[x] Weekly standup *abc123 @2026-01-14 %2026-01-14T09:15 #act-001
+[x] Weekly standup *abc123 @2026-01-21 %2026-01-21T09:15 #act-002
+```
+
+The template and its completed history are now preserved together in the archive.
+
+### Archive as Projection
+
+Like `.actions` files themselves, archive files are **projected views** from the CRDT source of truth:
+
+- Updated during the normal save/project cycle
+- Human-readable for review and historical reference
+- Parseable for analytics and reporting
+- NOT the source of truth (CRDT remains authoritative)
+
+### History Preservation
+
+Archive files serve multiple purposes:
+- **Historical record** - See what was accomplished in a project/objective
+- **Analytics source** - Query completion patterns, velocity, etc.
+- **Reference material** - Look up details of past work
+- **Undo capability** - Actions can be restored from archive if needed
+
 ## See Also
 
 - [Configuration](./configuration.md) - XDG paths and config settings
