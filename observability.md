@@ -113,6 +113,18 @@ All events include:
 | `sync_failed` | Sync operation fails | `remote`, `error` |
 | `conflict_resolved` | CRDT conflict resolved | `action_uuid`, `resolution` |
 
+### Semantic Patch / Projection Events
+
+These events help explain how user intent (DSL edits) becomes CRDT updates and how CRDT updates become projected files. They are especially useful for debugging multi-device behavior without relying on low-level CRDT operation history.
+
+| Event | When Emitted | Additional Fields |
+|-------|--------------|-------------------|
+| `patch_derived` | A semantic change set is derived from an editor save | `file_path`, `patch_id`, `operation_count` |
+| `patch_applied` | A semantic change set is applied to the CRDT | `patch_id`, `applied_count`, `skipped_count`, `reason` (optional) |
+| `projection_written` | A projected DSL file is rewritten from CRDT state | `file_path`, `bytes_written`, `reason` (e.g., on_save, manual_apply) |
+
+**Correlation:** Implementations SHOULD correlate `patch_*` and `sync_*` events using tracing identifiers (e.g., OpenTelemetry trace/span IDs) so operators can answer: "what did we pull/push, what patch did we derive, what did we apply, what did we project".
+
 ### System Events
 
 | Event | When Emitted | Additional Fields |

@@ -111,7 +111,7 @@ Base XDG paths are defined in [Configuration Specification](./configuration.md).
 ```
 ~/.local/share/clearhead/
 ├── inbox.actions           # ActionPlans - default inbox (projected from CRDT)
-├── inbox.log.actions       # ActionProcesses - completion history (on-demand projection)
+├── inbox.archive.actions       # ActionProcesses - completion history (on-demand projection)
 ├── work.actions            # Additional action file (projected from CRDT)
 └── personal/
     └── goals.actions       # Organized in subdirectories (projected from CRDT)
@@ -125,32 +125,19 @@ These files are **projections** - they can be regenerated from the CRDT at any t
 
 ### Flow 1: Local Edit (No Sync)
 
-```
-User edits inbox.actions in editor
-         │
-         ▼
-    [User saves file]
-         │
-         ▼
-LSP Server receives textDocument/didSave
-         │
-         ▼
-LSP parses file → builds AST → converts to struct
-         │
-         ▼
-LSP loads workspace.crdt, diffs current state vs struct
-         │
-         ▼
-LSP applies changes to CRDT document
-         │
-         ▼
-LSP saves workspace.crdt
-         │
-         ▼
-(Optional) LSP re-projects file (usually no-op if edit was clean)
-         │
-         ▼
-Done - CRDT is updated, file unchanged
+```mmd
+---
+Workflow: Local Edit (No Sync)
+---
+flowchart LR
+editFile[User edits file] --> saveFile[User saves file]
+saveFile --> lspDidSave[LSP Server receives textDocument/didSave]
+lspDidSave --> lspParse[LSP parses file, builds AST, converts to struct]
+lspParse --> lspDiff[LSP loads workspace.crdt, diffs current state vs struct]
+lspDiff --> lspApply[LSP applies changes to CRDT document]
+lspApply --> lspSave[LSP saves workspace.crdt]
+lspSave --> lspProject[(Optional) LSP re-projects file]
+lspProject --> done[Done - CRDT is updated, file unchanged]
 ```
 
 ### Flow 2: Remote Sync (Editor Idle)
@@ -275,6 +262,49 @@ WantedBy=default.target
 ### Configuration
 
 Sync is configured via `sync_*` settings in `config.json`. 
+
+## Bootstrap and Identity
+
+Sync requires a stable identifier for the workspace CRDT document so that multiple devices can refer to the *same* document over time.
+
+**Principles:**
+- **One workspace document per user workspace:** a single durable CRDT document acts as the workspace source of truth.
+- **Stable document identity:** devices must be able to persist and re-use the workspace document identifier across restarts.
+- **Out-of-band sharing is acceptable:** the mechanism for sharing an initial workspace identifier between devices is not prescribed here (QR code, copy/paste, file transfer, etc.).
+
+**Responsibilities (conceptual):**
+- A device MUST be able to create a new workspace document identity.
+- A device MUST be able to join an existing workspace document identity.
+- The identity MUST be persisted locally alongside other machine-specific state.
+
+**Non-goals:**
+- This specification does not require or define account systems, discovery services, or device pairing UX.
+
+## Semantic Patch Strategy
+
+Multi-device sync becomes fragile if the DSL text is treated as the merge surface. ClearHead instead treats the DSL as a *projection* and derives user edits into a semantic change set.
+
+**Decision:** When translating user edits into CRDT updates, implementations SHOULD:
+- Model changes as **domain-level operations** (e.g., set priority, rename, add/remove context tag).
+- Address entities by stable identifiers (e.g., UUIDs), not by text position.
+- Apply semantic operations to the CRDT state, allowing the CRDT to resolve concurrent edits at the data layer.
+
+This approach reduces "funky merges" by avoiding text-level reconciliation across devices.
+
+## Projection Gating (Editor-Respectful Updates)
+
+Remote CRDT updates can arrive at any time. However, rewriting projected DSL files while a user is actively editing is considered disruptive.
+
+**Decision:** Implementations SHOULD separate:
+- **Receiving/merging CRDT updates** (can happen continuously)
+- **Materializing CRDT state into projected DSL files** (should be gated)
+
+**Gating principle:** projected file rewrites SHOULD happen only at user-intentful or editor-safe moments such as:
+- on-save workflows
+- explicit "apply" operations
+- when an editor buffer is known to be clean
+
+This preserves a stable editing experience while still allowing fast background convergence at the CRDT layer.
 
 ## Conflict Resolution
 
