@@ -79,26 +79,74 @@ Phase is a quality of the **Planned Act**, not the Plan.
 | `@2025...` | `doDate` | `actions:hasDoDateTime` | Plan | `xsd:dateTime` |
 | `%2025...` | `completedDate` | `actions:hasCompletedDateTime` | Planned Act | `xsd:dateTime` |
 | `< uuid` | `dependsOn` | `actions:dependsOn` | Plan | Plan |
-| `> child` | *(hierarchy)* | `actions:partOf` | Plan | Plan |
+| `> child` | *(hierarchy)* | `bfo:BFO_0000050` | Plan | Plan (partOf) |
+| `^2025...` | `createdDate` | `actions:hasCreatedDateTime` | Plan | `xsd:dateTime` |
+| `#uuid` | `uuid` | `actions:hasUUID` | Plan | `xsd:string` |
+| `=alias` | `alias` | `actions:hasAlias` | Plan | `xsd:string` |
+| `~` | `sequentialChildren` | `actions:hasSequentialChildren` | Plan | `xsd:boolean` |
+| `R:FREQ=...` | `recurrence` | `actions:hasRecurrenceRule` | Plan | `xsd:string` |
+| `D60` | `duration` | `actions:hasDurationMinutes` | Plan | `xsd:integer` |
 
 ### Context Requirements
 
-Contexts map to CCO classes for resources required to execute a plan:
+Contexts use entity-based system for tag hierarchies and type classification:
 
-| File Syntax | JSON Key | RDF Property | Range (CCO Class) |
-|-------------|----------|--------------|-------------------|
-| `+@office` | `facility` | `actions:requiresFacility` | `cco:Facility` |
-| `+computer` | `artifact` | `actions:requiresArtifact` | `cco:Artifact` |
-| `+@bob` | `agent` | `actions:requiresAgent` | `cco:Agent` |
+| File Syntax | JSON Key | RDF Property | Range |
+|-------------|----------|--------------|-------|
+| `+work` | `context` | `actions:requiresContext` | `actions:Context` |
+| `+computer` | `context` | `actions:requiresContext` | `actions:Context` |
+| `+@office` | `context` | `actions:requiresContext` | `actions:Context` |
+
+#### Context Entity Properties
+
+| Property | Domain | Range | Purpose |
+|----------|--------|-------|---------|
+| `actions:hasContextIdentifier` | Context | `xsd:string` | DSL identifier (`"work"`, `"@office"`) |
+| `actions:hasContextType` | Context | `actions:ContextType` | Type classification |
+| `actions:contextBroader` | Context | Context | Parent in hierarchy |
+| `actions:contextNarrower` | Context | Context | Children in hierarchy |
+
+#### Context Types
+
+- `actions:FacilityContextType` - Physical locations (`+@office`, `+@home`)
+- `actions:AgentContextType` - People (`+@bob`, `+@manager`)
+- `actions:ToolContextType` - Tools/software (`+computer`, `+phone`)
+- `actions:CategoryContextType` - General categories (`+work`, `+personal`)
+
+## V4 Design Principles
+
+### Priority Simplification
+V4 uses simple integer priorities (1-4) rather than CCO Priority Measurement entities for ergonomics:
+- **1** = Urgent & Important (Do First)
+- **2** = Important & Not Urgent (Schedule) 
+- **3** = Urgent & Not Important (Delegate)
+- **4** = Not Urgent & Not Important (Eliminate)
+
+This follows the Eisenhower Matrix while remaining simple for users and queries.
+
+### Entity-Based Contexts
+V4 models contexts as entities rather than strings to enable:
+- **Tag Hierarchies:** `+neovim` inherits from `+terminal` inherits from `+computer`
+- **Type Classification:** Distinguish facilities, agents, tools, and categories
+- **Inheritance Queries:** Find all tasks requiring "computer" contexts (including neovim)
+- **Configuration Integration:** Connect to tag hierarchy configuration files
+
+### CCO Alignment Strategy
+V4 minimally extends CCO rather than wrapping it:
+- **Use BFO directly** for part-whole relationships (`bfo:BFO_0000050`)
+- **Reference CCO classes** by URI (`cco:ont00000974` for Plan)
+- **Extend only where needed** (ActPhase, Context system, specialized temporal properties)
+- **Maintain CCO semantics** while adding practical functionality
 
 ## Semantic Interoperability
 
 By adhering to this specification, tools ensure that:
 
 1. **Phase is Meaningful:** "Completed" isn't just a string; it's a quality instance defined by the ontology, attached to the execution (Planned Act), not the definition (Plan).
-2. **Priorities are Standardized:** Priority 1 represents "Urgent & Important" (Eisenhower Matrix).
+2. **Priorities are Standardized:** Priority integers map to Eisenhower Matrix quadrants consistently.
 3. **Dependencies are Traceable:** `dependsOn` allows graph traversal to find critical paths.
 4. **Recurrence is Clean:** One Plan can prescribe many Planned Acts — no need to duplicate task definitions.
+5. **Context Hierarchies Work:** Tag inheritance enables flexible context-based filtering.
 
 ## Validation (SHACL)
 
