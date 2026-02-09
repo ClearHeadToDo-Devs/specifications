@@ -166,46 +166,18 @@ This is where that cancelled state can be useful as it gives us an easy way to c
 
 Recurring actions are Plans with an RRULE that prescribe multiple PlannedActs over time. The template defines the pattern; instances are the individual occurrences.
 
-### Plans vs PlannedActs
+This affects the planned acts generated
 
-Ontologically, a Plan is a template—it has no state. A PlannedAct is an executable instance that carries state (Not Started, In Progress, Completed, etc.).
+## Plans vs PlannedActs
+While plans can represent a recurring act or just a oneoff all plans have atleast one planned act the only question is where these planned acts are stored.
 
-For non-recurring actions, this distinction is invisible: one Plan, one PlannedAct, represented as a single line in an `.actions` file.
+planned acts, while important, are not intended for people to work on by hand, instead they are meant to be used for the CRDT structures for bookkeeping and allowing users to edit individual instances if they wish
 
-For recurring actions, the distinction matters:
-- The **template** (Plan) lives in `*.actions` with the recurrence rule
-- The **instances** (PlannedActs) live in `*.recurring.actions`, referencing their parent
+As such, open planned acts are stored in `<charter-name>.open.ttl` files, while closed planned acts are stored in `<charter-name>.closed.ttl` files, and all planned acts, plans, and charters are eventually moved to `archive.ttl` once the charter is closed.
 
-### Template and Instances
+please review the [ontology](./ontology.md) for more details on the relationship between plans and planned acts
 
-The template defines the recurring pattern:
-```actions
-[ ] Weekly standup @T09:00 R:FREQ=WEEKLY;BYDAY=TU #abc123
-```
-
-Instances reference the template and carry their own state:
-```actions
-[x] Weekly standup *abc123 @2026-01-14 %2026-01-14T09:15 #act-004
-[ ] Weekly standup *abc123 @2026-01-21 #act-007
-[ ] Weekly standup *abc123 @2026-01-28 #act-010
-```
-
-Instances are ordered chronologically (oldest to newest) within the file.
-
-### Template as Interface
-
-The checkbox on a template (`[ ]`, `[x]`, etc.) is an interface into the current instance's phase. Plans themselves have no phase—only PlannedActs do.
-
-When you mark a template complete, you're actually completing the current PlannedAct.
-
-### Completion Workflow
-
-When completing a recurring action:
-1. The current instance is marked complete in `*.recurring.actions` (with completion timestamp)
-2. The next instance is generated (if within generation horizon)
-3. The template remains `[ ]` (reflecting the new current instance)
-
-### Generation Horizon
+## Generation Horizon
 
 Instances are generated ahead based on configuration (default: 5 instances). This keeps the number proportional to recurrence frequency—5 weekly instances is ~1 month, 5 daily instances is ~1 week.
 
