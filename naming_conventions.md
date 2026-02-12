@@ -50,15 +50,12 @@ From a data perspective, _unless otherwise specificied within the action itself_
 ### Planned Acts
 Per the [Ontology](./ontology.md) specification, planned acts are the actual executions of plans.
 
-open planned acts are stored in either:
-- `$workspace/inbox.open.ttl` - for planned acts connected to open plans
-- `$workspace/inbox.closed.ttl` - for BOTH closed planned acts and plans
-- `$workspace/archive.ttl` - contains all closed charters, plans, AND planned acts
+planned acts are stored in either:
+- `$workspace/inbox.acts.ttl` - for planned acts connected to open plans
+- `$workspace/archive.ttl` - contains all closed objectives, charters, plans, AND planned acts
   - this is the ultimate fate of all items once even the charter is closed
 
-in this way, we can keep closed plan
-o
-
+this is because planned acts are intended to be thought of more as data than a human-readable file and as such, most of the acts are there for review, but also for the system to be able to query the planned acts for recurring and upcoming recurrances of a plan
 
 ## See Also
 
