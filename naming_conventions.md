@@ -36,15 +36,21 @@ this allows implementors to organize subobjectives within the directories withou
 While the action specification allows for charters to be defined within the files themselves, it can often feel natural to break these files into separate files/folders for organization.
 
 To this end, we support the following conventions, with the assumption implementors will leverage these structures to provide better user experiences.
-- `$workspace/<charter-name>.actions` - A file containing actions for a specific charter
-  - Any actions within this file are assumed to have the charter of the file name unless otherwise specified within the action itself.
 - we can also designate `<charter>.md` files for charters that are primarily prose and not action-focused, but still want to be linked to actions within the platform
   - please see [the charter spec](./charters.md) for more details on how to structure these files
-- `$workspace/<charter-name>/next.actions` - A directory containing a charter with its own next actions file
   - This allows for sub-projects through the combination of directories and files.
 - `$workspace/<charter-name>/README.md` - A file containing a description of the charter, its purpose, and any other relevant information as per [the charter spec](./charters.md) 
 
 From a data perspective, _unless otherwise specificied within the action itself_, any actions within this file are assumed to have the story/project of the directory name.
+
+### Plans
+Plans can have their charter defined from within the structure
+
+now, by default we have a few naming conventions
+- `<charter>`.actions for plans that are attached to a specific charter
+- `<charter>.completed.actions` represent completed actions attached to an open charter
+- `<charter>/next.actions` for charters that are in the form of folders, we can use the `next.actions` file to designate the primary actions file
+  - do note, this accounts for sub-charters as well if people want to nest the structure
 
 
 ### Planned Acts
