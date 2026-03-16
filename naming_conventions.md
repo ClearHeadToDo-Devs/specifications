@@ -51,7 +51,22 @@ now, by default we have a few naming conventions
 - `<charter>.completed.actions` represent completed actions attached to an open charter
 - `<charter>/next.actions` for charters that are in the form of folders, we can use the `next.actions` file to designate the primary actions file
   - do note, this accounts for sub-charters as well if people want to nest the structure
+  - specifically, anything NOT named `next.actions` is assumed to be a subcharter of the charter for which the folder is the name, this way we can easily create nested charter structures
 
+  so an example would be the following format:
+
+  - `inbox.actions`
+  - `other.actions`
+  - `new/next.actions`
+  - `new/subcharter.actions`
+
+  which has 4 charters:
+  - inbox
+  - other
+  - new
+  - new/subcharter
+
+be sure to review [The reference syntax](./reference_syntax.md) for guidance on working with sub charters and sub plans
 
 ### Planned Acts
 Per the [Ontology](./ontology.md) specification, planned acts are the actual executions of plans.

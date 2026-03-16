@@ -28,3 +28,18 @@ However, for ease of use, we also support short aliases that serve as the most r
 in formats where the filesystem is used, this is often the name of the file or directory itself, again namespaced within the domain its kept within.
 
 in this way, we can have clean aliases that are still easy to reference based on the work of the structures inside
+
+#### On Paths
+
+Sub-entities can use `/` to denote a sub path.
+
+this way we can easily refer to subcharters, subplans, and even both in tandem if necessary while remaining readable.
+
+for example if we have the following plan:
+
+inbox.actions
+`[ ] something > [ ] sub`
+
+we can refer to sub as `something/sub` and if this were to be referenced with the charter we could write: `inbox/something/sub` to make reference of aliases easier
+
+this works because each element creates a new namespace so that two charters can have identical actions without being semantically different as their relationships distinguish them
