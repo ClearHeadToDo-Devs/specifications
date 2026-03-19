@@ -71,12 +71,17 @@ be sure to review [The reference syntax](./reference_syntax.md) for guidance on 
 ### Planned Acts
 Per the [Ontology](./ontology.md) specification, planned acts are the actual executions of plans.
 
-planned acts are stored in either:
-- `$workspace/inbox.acts.ttl` - for planned acts connected to open plans
-- `$workspace/archive.ttl` - contains all closed objectives, charters, plans, AND planned acts
-  - this is the ultimate fate of all items once even the charter is closed
+Planned acts are stored per-charter in two sibling Turtle files next to the `.actions` file:
 
-this is because planned acts are intended to be thought of more as data than a human-readable file and as such, most of the acts are there for review, but also for the system to be able to query the planned acts for recurring and upcoming recurrances of a plan
+- `<charter>.open.ttl` — upcoming and in-progress acts (e.g. `health.open.ttl`, `build_clearhead/build_clearhead.open.ttl`)
+- `<charter>.closed.ttl` — completed and cancelled acts for that charter
+
+When acts age out of the closed file they are swept into:
+- `archive.ttl` (same directory) — the ultimate destination for all closed acts
+
+Charter stem derivation follows the same rules as plan name inference: `next.actions` uses the parent directory name; all other `.actions` files use the file stem. Unlike plan name inference, `inbox` is NOT skipped — `inbox.open.ttl` is valid.
+
+Planned acts are treated as data rather than human-readable files; they exist primarily so the system can query recurring and upcoming occurrences of a plan.
 
 ## See Also
 
