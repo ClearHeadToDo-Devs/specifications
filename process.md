@@ -120,8 +120,13 @@ This list will include recurring and one-off actions, as well as actions that ha
 # Workflow
 Now that we have covered the overarching stages, we want to get a bit more granular around the relationships between various properties around the actions and how they are meant to communicate our intent
 
-## Action States
-At any given time, an action is of one of the following states:
+## Plans 
+
+Plans will be the primary record type that people will interact with day-to-day and as such understanding their workflow is key
+
+### State
+
+At any given time, an plan is of one of the following states:
 - Not Started 
   - The default state when actions are created
 - In Progress
@@ -142,6 +147,13 @@ While many more difficult actions could be:
 Not Started -> In Progress -> Blocked -> Cancelled
 
 These systems are not about judgement simply tracking this data as it moves through the traditional lifecyle
+
+### On Closure
+
+Closure is different from archiving which we will cover later.
+
+All formats should support closure and when we have completed a plan the most upcoming planned act, which is the only one except for the case of a recurring action, is also completed, while all projected planned acts are removed as they were simply projections and we dont want to clutter the archive with them
+
 
 ### On Children Actions
 One important note is that unless otherwise specified, and where relevant, the state of parent actions are determined by their children actions.
@@ -173,7 +185,7 @@ While plans can represent a recurring act or just a oneoff all plans have atleas
 
 planned acts, while important, are not intended for people to work on by hand, instead they are meant to be used for the CRDT structures for bookkeeping and allowing users to edit individual instances if they wish
 
-As such, open planned acts are stored in `<charter-name>.open.ttl` files, while closed planned acts are stored in `<charter-name>.closed.ttl` files, and all planned acts, plans, and charters are eventually moved to `archive.ttl` once the charter is closed.
+please review [the naming conventions](./naming_conventions.md) for the process of how they are moved from open, to closed, to archive within the file-based format
 
 please review the [ontology](./ontology.md) for more details on the relationship between plans and planned acts
 
@@ -194,36 +206,30 @@ This preserves history while allowing the template to evolve.
 
 ### Children of Recurring Actions
 
-If a recurring action has children, each instance includes its own child instances:
+If a recurring action has children, each instance includes its own child instances.
 
-Template:
-```actions
-[ ] Weekly standup @T09:00 R:FREQ=WEEKLY;BYDAY=TU #abc123
-> [ ] Prepare agenda #def456
-> [ ] Send notes #ghi789
-```
+This depends on implementation but they will often be eithe different files or tables with one being plans and one being planned acts 
 
-Instances:
-```actions
-[x] Weekly standup *abc123 @2026-01-14 %2026-01-14T09:15 #act-004
-> [x] Prepare agenda *def456 %2026-01-14T08:45 #act-005
-> [x] Send notes *ghi789 %2026-01-14T10:30 #act-006
-[ ] Weekly standup *abc123 @2026-01-21 #act-007
-> [ ] Prepare agenda *def456 #act-008
-> [ ] Send notes *ghi789 #act-009
-```
+## Charters
 
-Each child instance references its parent template's child Plan.
+Charters follow a fairly simple workflow as they are higher level than the plan and thus are expected to see less daily alteration. still, there is still some workflow to consider.
 
-## Arhiving Actions
+### State
 
-When actions are completed or cancelled, they can be moved to an archive file for record-keeping which is outlined in the [Naming Conventions](./naming_conventions.md) document.
+Charters have the following states:
+- New
+- Active
+- Closed
+- Blocked
 
-as templates are completed, they are moved to the archived actions file of the same name as their objective.
+While these states are relatively straightforward they enable a simple workflow that makes the process easier to see
 
-When a _recurring_ action is completed, both the template, _and all completed instances_ are moved to the archive file, template first, followed by the instances in chronological order.
+#### Closure
 
-This keeps a clean record of what was done while keeping the active action lists uncluttered.
+Generally, before a charter should be closed the underlying plans should be either closed or cancelled so that decisions are made around which plans will or wont go forward.
 
-### Reading and Generation
-The sync mechanism uses these conventions to read and generate the appropriate files as actions move through their lifecycle. this should allow the objectives to be primarily focused on active actions while still keeping a full record of what was done for future reference.
+tooling providers may choose to do a flag that will auto cancel/complete child plans if they wish, but the default should be that charters are not closed until the all the child plans are dealt with
+
+## Arhiving 
+
+Archival is a sparate activity from closure, a record can be closed however long we want to before it is "archived" and for some formats, the distinction isnt needed as much if the state is maintained within a database. however, for file-based interfaces it is often easier to move the closed records into some sort of "archive" for external storage and querying such that the whole graph can be queried at a a later time such as is outlined in the [file naming conventions](./naming_conventions.md)

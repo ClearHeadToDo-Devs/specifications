@@ -41,7 +41,7 @@ To this end, we support the following conventions, with the assumption implement
   - This allows for sub-projects through the combination of directories and files.
 - `$workspace/<charter-name>/README.md` - A file containing a description of the charter, its purpose, and any other relevant information as per [the charter spec](./charters.md) 
 
-From a data perspective, _unless otherwise specificied within the action itself_, any actions within this file are assumed to have the story/project of the directory name.
+all closed charters are stored in the `archive.ttl` file along with their children to keep a complete record
 
 ### Plans
 Plans can have their charter defined from within the structure
@@ -76,12 +76,32 @@ Planned acts are stored per-charter in two sibling Turtle files next to the `.ac
 - `<charter>.open.ttl` — upcoming and in-progress acts (e.g. `health.open.ttl`, `build_clearhead/build_clearhead.open.ttl`)
 - `<charter>.closed.ttl` — completed and cancelled acts for that charter
 
-When acts age out of the closed file they are swept into:
-- `archive.ttl` (same directory) — the ultimate destination for all closed acts
+When the plans that dictate those planned acts are completed, future planned acts in `<charter>.open.ttl` are removed and all closed planned acts within `<charter>.closed.ttl` are moved to `archive.ttl` at the root of the data directory:
 
 Charter stem derivation follows the same rules as plan name inference: `next.actions` uses the parent directory name; all other `.actions` files use the file stem. Unlike plan name inference, `inbox` is NOT skipped — `inbox.open.ttl` is valid.
 
 Planned acts are treated as data rather than human-readable files; they exist primarily so the system can query recurring and upcoming occurrences of a plan.
+
+## Workflows
+
+Now, its one thing to speak on the concrete file formats for each record type but the other piece to cover is the workflow that actually handled these various structures and dictates what happens when and where. for this, we are going to go a little more over the workflows that allow this format to be updated automatically or manually based on what people prefer
+
+### Archival
+
+One concept that is very important to the workspace format is the process of "archiving" things. weve covered the names above but its working from a reference point lets go from the beginning
+
+1. At the lowest level, we have the planned acts that are implementations of their parent plans. 
+  1. at first, these are all open, then as the user is closing the planned acts, the move from `<charter>.open.ttl` to `<charter>.closed.ttl` in order to remove the format of clutter and make the process of tracking closed planned acts easier for both humans to comprehend and for databases to ingest only the data they may need, this way open act queries can be fast, but full history searchs are still possible
+2. If we move a level up, we have the plans in `<charter>.actions`, again, all plans start open, and as plans are closed, users can choose to "archive" them by sending them to `<charter>.completed.actions`
+3. Finally, like plans, the charters themselves at `<charter>.md` can be archived themselves after they are closed. at this point the most complex process happens.
+  1. the contents of `<charter>.closed.ttl` are moved to the root `archive.ttl` file
+  2. the contents of `<charter>.completed.actions` are converted to turtle and moved to `archive.ttl`
+  3. the charter contents itself are converted to turtle and moved to `archive.ttl` for later review
+  4. the (now empty) `<charter>.actions`, `<charter>.completed.actions`, `<charter>.closed.ttl` and `<charter>.open.ttl` are removed from the workspace
+
+REMEMBER, per the [process specification](./process.md) it is assumed that all child plans are completed/cancelled which is why the open files above are expected to be empty or atleast emptyable before being moved to the central `archive.ttl`
+
+this is how we maintain a format that is able to evolve gracefully
 
 ## See Also
 

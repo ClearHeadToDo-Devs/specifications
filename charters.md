@@ -15,6 +15,13 @@ this is the only required field for now if a charter DOES exist within the platf
   - aliases are scoped within the namespace of their parent charter
 - parent: the reference of the parent charter, this allows for nesting charters within charters, and is optional because not all charters need to be nested
 - objectives: a list of references to objectives within the platform that this works in servie of
+- state: the current state of the charter which includes the following options
+  - New
+  - Active
+  - Blocked
+  - Closed
+
+Other states are permissable but these are the minimium states that charter implementors must support
 
 ## Content
 For the purpose of the content, charters only need a single header and content below it 
@@ -27,3 +34,7 @@ with some description text
 in this way, the first header serves as the title and the content serves as the description
 
 even the description is optional, as the title is the only required content for a charter to be valid, but the description can be used to give more context about the charter and its purpose
+
+### Extra Sections
+
+All subsections are included in the description while sibling sections are meant to be seen as extra content that can represent whatever is needed but will be saved separately when archived
