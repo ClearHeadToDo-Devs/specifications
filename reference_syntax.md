@@ -15,15 +15,11 @@ For programmatic structures, it is generally recommended to use the full UUID fo
 ### short UUID
 However, for user-facing references, we support a short UUID format that is the first 8 characters of the UUID, as this is generally enough to avoid collisions within a single workspace, and is easy to read for humans when necessary.
 
-## Title
-the second form of reference is by the title of the appropriate object.
+## Alias
+The second (and preferred) form of reference is by alias.
 
-the title is assumed to be unique within the workspace or atleast within its own namespace 
-
-this is generally not the strongest link but is a more readable link for things with short titles that are close at hand
-
-### Alias
-However, for ease of use, we also support short aliases that serve as the most readable option of all.
+Aliases are short, human-readable identifiers. They are the primary way to
+reference charters and plans in day-to-day use.
 
 in formats where the filesystem is used, this is often the name of the file or directory itself, again namespaced within the domain its kept within.
 
@@ -43,3 +39,18 @@ inbox.actions
 we can refer to sub as `something/sub` and if this were to be referenced with the charter we could write: `inbox/something/sub` to make reference of aliases easier
 
 this works because each element creates a new namespace so that two charters can have identical actions without being semantically different as their relationships distinguish them
+
+## Prefix Disambiguation
+In ambiguous cases or for tooling, you can prefix a reference to force the target type:
+
+- `c:<ref>` for charter
+- `p:<ref>` for plan
+- `a:<ref>` for act
+
+Prefixes are optional but recommended when a segment could resolve to multiple types.
+
+## Matching Rules
+- References match **aliases** or **UUIDs** only (full UUID or short UUID prefix).
+- References are **case-insensitive** for aliases.
+- **Titles are not used** for reference resolution.
+- Acts are referenced by UUID/short UUID only (since they are namespaced IDs).
