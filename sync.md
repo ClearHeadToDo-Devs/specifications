@@ -1,4 +1,8 @@
-# Sync Architecture Specification
+# Sync Architecture Specification (ARCHIVE)
+
+it has been decided that git will be the primary sync mechanism in clearhead, while this will be supported in the future, it should NOT be considered the primary sync mechanism for the initial release. 
+
+This is for if we ever explore doing more of an alternate CRDT sync mechanism in the future, but for now, is here for posterity and future reference.
 
 ## Overview
 

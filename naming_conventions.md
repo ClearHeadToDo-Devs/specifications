@@ -8,6 +8,20 @@ while the [file specification](./action_specification.md) defines how individual
 
 They are separate, because different implementors may choose to work with the format, but choose to avoid these conventions which is fine, this way implementors can absorb specifications a-la-carte and take on the complexity they want to consider
 
+## Scoping
+
+For our work we generally have 3 scopes to consder:
+- Machine-Wide Scope: Config
+- User Scope: Data + Config
+- Project Scope: Data + Config
+
+As is standard, each level is less prioritized than the next, so project scope overrides user scope which overrides machine-wide scope.
+
+The user-scope data is for data that belongs to the user of that actual machine but is not generally attached to a given project and its location is configured via the `XDG_DATA_HOME` environment variable, with a default of `~/.local/share/` for unix systems and `%APPDATA%` for windows systems.
+
+This defined by the presence of a `.clearhead` directory. This may be empty as to only express a desire for this to be designated a project-local scope
+- while the default will be that this is in the root of the git directory, the algorithm itself will simply look for the nearest `.clearhead` directory and designate that as the project root, this way we can have multiple projects within a single git repository if desired, or even have a project that is not attached to a git repository at all
+
 ## Workspace Structure
 
 All action files/folders should be organized into a directory that conforms with the standards of the given operating system 
@@ -21,6 +35,8 @@ By default, everyone should have an `inbox.actions` file within that workspace. 
 ### Objectives
 Objectives are all located in an `objectives` directory within the workspace where all objectives of the file format:
 `<objective-alias>.md` - a markdown file containing the description of the objective, its purpose, and any other relevant information as per [the objective spec](./objectives.md) 
+
+in a project-local scope, this should reside within `<project-root>/.clearhead/objectives/` while in a user-wide scope, this should reside within `objectives/` folder within the user workspace
 
 #### subobjectives
 objective files within the `objectives` directory are assumed to be a group of objectives,
@@ -42,6 +58,14 @@ To this end, we support the following conventions, with the assumption implement
 - `$workspace/<charter-name>/README.md` - A file containing a description of the charter, its purpose, and any other relevant information as per [the charter spec](./charters.md) 
 
 all closed charters are stored in the `archive.ttl` file along with their children to keep a complete record
+
+All subcharters within the project should be located within the .clearhead directory, whether that comes from designating plans in that folder, or new markdown files, as to not interfere with the natural structure of the project and its files
+
+While users are free to symlink the existing README files from the project root into the `.clearhead` directory, we want to avoid the situation where we have multiple README files in the project root as it can cause confusion and clutter, so we want to encourage users to keep these files within the `.clearhead` directory
+
+Another point is that unless a specific README is made for that project root, the alias of the charter is assumed to be the project name itself using the directory name by default but users can always override this by creating a README file with a specific alias, but this way we can have a default charter for the project without needing to create a separate file for it, and if users want to create a separate file for it they can do so without worrying about namespace collisions as the alias is scoped within the project root
+
+This makes searching for the workspace easy and scoped 
 
 ### Plans
 Plans can have their charter defined from within the structure
@@ -68,6 +92,8 @@ now, by default we have a few naming conventions
 
 be sure to review [The reference syntax](./reference_syntax.md) for guidance on working with sub charters and sub plans
 
+like above, project-local plans should be located within the `.clearhead` directory to avoid cluttering the project root, including the core `next.actions` file that are attached to the project as a charter while user-wide charters can be located at the root of the user workspace,
+
 ### Planned Acts
 Per the [Ontology](./ontology.md) specification, planned acts are the actual executions of plans.
 
@@ -81,6 +107,8 @@ When the plans that dictate those planned acts are completed, future planned act
 Charter stem derivation follows the same rules as plan name inference: `next.actions` uses the parent directory name; all other `.actions` files use the file stem. Unlike plan name inference, `inbox` is NOT skipped — `inbox.open.ttl` is valid.
 
 Planned acts are treated as data rather than human-readable files; they exist primarily so the system can query recurring and upcoming occurrences of a plan.
+
+And like above, project-local planned acts should be located within the `.clearhead` directory to avoid cluttering the project root, while user-wide planned acts can be located at the root of the user workspace
 
 ## Workflows
 

@@ -12,6 +12,16 @@ This specification defines how ClearHead implementations handle configuration, i
 
 ## Directory Structure
 
+### On Scoping
+
+The platform supports user-level data as well as project-specific data.
+
+please see [Naming Conventions](./naming_conventions.md) for details on how to name project-specific files and directories. but for the configuration, we want to allow users to avoid this entire process with the `default_to_user_scope` setting that will bypass this searching algorithm entirely and ONLY show the domain model for the user scope.
+
+#### Additional repos
+
+If users want to have multiple repos pulled into the same domain model, they can update the `additional_workspaces` setting with a list of paths that should point to directories that follow the same workspace structure as what would be expected in a regular `.clearhead` directory. This allows users to have multiple separate workspaces all pulled into the same domain model without having to worry about the file structure.
+
 ### XDG Base Directory Compliance
 
 All implementations MUST follow the XDG Base Directory specification:
@@ -23,7 +33,6 @@ All implementations MUST follow the XDG Base Directory specification:
 | State | `$XDG_STATE_HOME/clearhead` | `~/.local/state/clearhead` |
 | Cache (optional) | `$XDG_CACHE_HOME/clearhead` | `~/.cache/clearhead` |
 
-**Note:** State directory contains machine-specific runtime state (CRDT documents, events.db) that should NOT be synced via file-sync tools like Dropbox. See [Sync Architecture](./sync_architecture.md) for details.
 
 ### Default File Structure
 
@@ -32,12 +41,25 @@ All implementations MUST follow the XDG Base Directory specification:
   └── config.json          # Primary configuration file
 
 ~/.local/share/clearhead/
-  └── inbox.actions        # Default action file (projected from CRDT)
+  └── inbox.actions        # Default action file 
 
 ~/.local/state/clearhead/
-  ├── workspace.crdt       # CRDT document (source of truth)
+  ├── workspace.crdt       # CRDT document  (optional)
 ```
 
+#### On Project-Specific Config
+
+Within the example of a specific project, these subdirectories all reside within the .clearhead directory:
+
+```project_root/
+  └── .clearhead/
+      ├── config.json        # Project-specific configuration (optional)
+      ├── next.actions      # Project-specific action file (optional)
+      └── workspace.crdt   # Project-specific CRDT (optional)
+      |__ other files...        # Any other project-specific files
+
+
+```
 ## Configuration File Format
 
 ### Format Choice
@@ -94,6 +116,8 @@ All implementations MUST recognize these core settings:
 | `state_dir` | string | `~/.local/state/clearhead` | Directory for machine-specific state (CRDT, events.db) |
 | `default_file` | string | `inbox.actions` | Default action file name (relative to data_dir) |
 | `tag_hierarchies` | object | `{}` | Tag parent-child relationships for implicit inheritance |
+| `default_to_user_scope` | boolean | `false` | If true, only shows user-scoped actions (ignores project scope) |
+| `additional_workspaces` | array | `[]` | List of additional workspaces to include in the domain model |
 
 **Requirements:**
 - Core settings MUST support shell expansion (`~`, `$HOME`, environment variables)
