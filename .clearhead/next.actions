@@ -1,0 +1,4 @@
+[ ] Update the specification to support project-scoped workspaces  ^2026-03-31T01:00 #019d42e8-a5f8-74c2-b089-319586b4c7fb
+        >[ ] Clarify naming conventions for project root charter as `.clearhead/next.actions` (not `<project>.actions`)  $ align spec text with implementation and avoid dual root-file conventions $ ^2026-04-06T00:15 #ff8ba7c6-19a2-40e9-8f48-01883bcd6fea
+        >[ ] Add explicit workspace load/save contract examples for user scope vs project scope  $ include concrete trees and expected charter inference + parent mapping $ ^2026-04-06T00:15 #6e266ca4-2764-496a-bcee-f57f5ac95a56
+        >[ ] Add a testing guidance section recommending RON snapshots for normalized DomainModel and workspace manifests  $ improve tangibility and interoperability checks across implementations $ ^2026-04-06T00:15 #a7fd44e8-d2b7-4c90-b5e6-322029eab479
