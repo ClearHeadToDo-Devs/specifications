@@ -3,6 +3,16 @@ This is intended to be a space where key specifications can live, separated by t
 
 This enables those who wish to build upon the specifications, but avoid the tooling to do such without needing to carve out the relevant pieces from the implementation products.
 
+## Scope and Source of Truth
+
+The `specifications/` directory is implementation agnostic. It defines behavior and contracts that any conforming implementation can follow, regardless of language, runtime, storage engine, or framework.
+
+To avoid duplication and drift:
+
+- `ontology/` is the source of truth for ontology artifacts (terms, shapes, JSON-LD context/schema, and ontology-out contracts).
+- `specifications/` is the source of truth for platform-level interpretation and conformance guidance (how downstream tools should apply those ontology artifacts).
+- Implementation repositories (for example CLI or core libraries) are expected to document only implementation mechanics, and should reference these specifications for normative behavior.
+
 # ClearHead Platform Overview
 Many of these other specifications cover rather precise technical details, but i want to take a bit of time to cover the overarch process that is guiding much of these specifications as a way to bring meaning to the disperate parts.
 

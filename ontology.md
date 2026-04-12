@@ -20,3 +20,43 @@ Another use of the ontology is in the form of structs or classes that can mirror
 With this established, applications that use this format can start querying application data that is available through the lens of these domain objects using the SHACL shapes for validation of data in a graph database, and SPARQL queries for the primary querying technique for this work.
 
 in this way, we can have a normal query language that can be shared between applications and composed with different ontologies so that this work can be put into the context of a larger ecosystem of ontologies and data
+
+## Applied Ontology Contract (Implementation-Agnostic)
+
+This section defines how downstream implementations should apply the ontology in data pipelines, without assuming a specific programming language or codebase.
+
+### Canonical Semantic Bridge
+
+Implementations should provide a canonical bridge between an internal domain model and RDF graph data:
+
+- Domain data MUST be representable as RDF using the ontology terms.
+- RDF graph data MUST be reconstructable into equivalent domain data for the supported entity scope.
+- JSON-LD interchange SHOULD be produced from canonical graph semantics rather than ad hoc serializers.
+
+The bridge is considered foundational for CRUD flows, query layers, and downstream display/export tools.
+
+### Determinism Requirements
+
+To support reproducibility, testing, and contributor confidence:
+
+- Implementations SHOULD emit deterministic JSON-LD and graph-derived exports.
+- Graph node ordering SHOULD be stable and documented (for example, by type rank then lexical identifier).
+- Date-time literals SHOULD use a single canonical RFC3339 representation.
+
+### Validation Expectations
+
+Implementations SHOULD validate semantic constraints before publishing graph-derived interchange artifacts.
+
+At minimum, validation should cover:
+
+- Planned act lifecycle/status integrity
+- Plan-to-planned-act relationship integrity
+- Relationship constraints that prevent structurally invalid graphs
+
+Ontology shapes and schema artifacts remain the normative source for term-level and shape-level constraints.
+
+### Canonical Contract Artifacts
+
+The ontology repository remains the canonical location for term and schema artifacts. In particular, implementations should follow the current `v4` contract files there (for example JSON-LD context, schema, and ontology-out contract documentation).
+
+This specification does not redefine those artifacts; it defines how downstream tools should apply them consistently.
