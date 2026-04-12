@@ -62,11 +62,12 @@ The list of special characters that need to be escaped are below:
 6. `*` - Reserved for objectives/s
 7. `+` - Reserved for contexts
 8. `@` - Reserved for Do-Date-Time
-9. `^` - Reserved for Created Date
-10. `%` - Reserved for Completed Date
-11. `#` - Reserved for ID
-12. `<` - Reserved for Predecessors
-13. `>` - Reserved for Children
+9. `:` - Reserved for Due-Date-Time
+10. `^` - Reserved for Created Date
+11. `%` - Reserved for Completed Date
+12. `#` - Reserved for ID
+13. `<` - Reserved for Predecessors
+14. `>` - Reserved for Children
 
 ### Reference Styles
 
@@ -518,7 +519,13 @@ in order for a plan to have more than a single planned act, it needs a recurrenc
 
 When a plan has a recurrence rule, each occurrence is treated as a separate planned act with its own state and completion tracking.
 
+## Due-Date/Time (Optional)
+Plans can have a separate due date/time designated by the `:` character, complete with RRULE support.
+
+the syntactic difference is that the DUE date is when something NEEDS to be done as compared to the DO date which is when we plan to DO something. often these will be the same or one or the other date arent relevant however there is still good structure
+
 ## Completed Date (Optional)
+client.request is deprecated. Run ":checkhealth vim.deprecated" for more information
 
 Intended to be added automatically by tooling when the state is changed to completed.
 
