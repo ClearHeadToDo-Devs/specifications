@@ -67,7 +67,22 @@ Another point is that unless a specific README is made for that project root, th
 
 This makes searching for the workspace easy and scoped 
 
+#### Hierarchy
+While plans express hierarchy through the file format, charters express hierarchy through placement.
+
+Specifically, while we do support parent as front matter, the primary way that lineage is created is by placing subcharters and their plans in the directory of its parent.
+
+In this way, we can structure charters and subcharters
+
+#### On Scoping
+
+for project-scoped structures, we must remember that in the case of a project the format `<project-name>/.clearhead/next.actions` the charter is the name of the PROJECT folder
+same goes for `<project-name>/.clearhead/README.md` will be the core charter NOT the traditional README.
+
+users are free to symlink or do whatever else feels appropriate if they wish but this is not the default
+
 ### Plans
+
 Plans can have their charter defined from within the structure
 
 now, by default we have a few naming conventions
