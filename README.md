@@ -92,7 +92,7 @@ While all of these systems have their strengths and weaknesses, none of them ful
 
 Here is the index of specifications and their purpose within the whole:
 
-1. [Proccess Overvoiew](./process.md) - The most abstract overview of the process which outlines the key steps in a way that is implementation agnostic.
+1. [Process Overview](./process.md) - The most abstract overview of the process which outlines the key steps in a way that is implementation agnostic.
     1. This document serves as the high-level guide for how different tools should approach the handling of action files and user intentions, ensuring a consistent experience across the ecosystem.
 1. [Action File Format](./action_file_format.md) - The format for the action files that serve as the atomic core of the rest of the system. If you read nothing else, start here to understand how action files are defined.
     1. For Example, while [tree-sitter-actions](https://github.com/ClearHeadToDo-Devs/tree-sitter-actions) implements this specification using tree-sitter, it could just as easily be implemented using PEGS or any other parsing technology.
@@ -103,6 +103,5 @@ Here is the index of specifications and their purpose within the whole:
 4. [Json Schema](./json_schema.md) - The canonical JSON serialization format for action files. This allows different tools to exchange action data in a structured way, and also enables validation and storage in systems that require structured formats.
     1. For Example, while [clearhead-cli](https://github.com/ClearHeadToDo-Devs/clearhead-cli) can inject action files, it can export json files that conform to this specification for use in other systems.
         1. Great for those who want to build with data but dont want a full database. with knowledge they can be synced back to plaintext action files later.
-5. ~~[Database Schema](./sql_schema.md)~~ - *(DEPRECATED)* Previously defined schema for storing actions in a relational database. This has been superseded by the SPARQL query layer. See [DECISIONS.md](https://github.com/ClearHeadToDo-Devs/platform/blob/main/DECISIONS.md) and [sync_architecture.md](./sync_architecture.md) for the current architecture.
 6. [Ontology & Linked Data](./ontology.md) - Defines the semantic meaning of the data using the Actions Vocabulary (OWL) and explains the Context Map strategy.
     1. This specification ensures that while tools typically interact with simple JSON, the data remains semantically rigorous and interoperable with the broader Semantic Web (RDF/JSON-LD).
