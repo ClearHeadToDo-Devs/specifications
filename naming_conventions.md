@@ -83,21 +83,20 @@ users are free to symlink or do whatever else feels appropriate if they wish but
 
 ### Plans
 
-Plans can have their charter defined from within the structure
+Plans are stored in `.ics` files so that scheduling is encapsulated within the calendar format
 
 now, by default we have a few naming conventions
-- `<charter>`.actions for plans that are attached to a specific charter
-- `<charter>.completed.actions` represent completed actions attached to an open charter
-- `<charter>/next.actions` for charters that are in the form of folders, we can use the `next.actions` file to designate the primary actions file
+- `<charter>.ics` for plans that are attached to a specific charter
+- `<charter>/next.ics` for charters that are in the form of folders, we can use the `next.ics` file to designate the primary calendar file
   - do note, this accounts for sub-charters as well if people want to nest the structure
-  - specifically, anything NOT named `next.actions` is assumed to be a subcharter of the charter for which the folder is the name, this way we can easily create nested charter structures
+  - specifically, anything NOT named `next.ics` is assumed to be a subcharter of the charter for which the folder is the name, this way we can easily create nested charter structures
 
   so an example would be the following format:
 
-  - `inbox.actions`
-  - `other.actions`
-  - `new/next.actions`
-  - `new/subcharter.actions`
+  - `inbox.ics`
+  - `other.ics`
+  - `new/next.ics`
+  - `new/subcharter.ics`
 
   which has 4 charters:
   - inbox
@@ -110,18 +109,19 @@ be sure to review [The reference syntax](./reference_syntax.md) for guidance on 
 like above, project-local plans should be located within the `.clearhead` directory to avoid cluttering the project root, including the core `next.actions` file that are attached to the project as a charter while user-wide charters can be located at the root of the user workspace,
 
 ### Planned Acts
-Per the [Ontology](./ontology.md) specification, planned acts are the actual executions of plans.
+Per the [Ontology](./ontology.md) specification, planned acts are the actual executions of plans. and 
 
-Planned acts are stored per-charter in two sibling Turtle files next to the `.actions` file:
+planned acts are stored in the `.actions` files within the workspace and represent the lowest atomic unit of work within the system.
 
-- `<charter>.open.ttl` — upcoming and in-progress acts (e.g. `health.open.ttl`, `build_clearhead/build_clearhead.open.ttl`)
-- `<charter>.closed.ttl` — completed and cancelled acts for that charter
+- `<charter>.actions` — upcoming and in-progress acts for that charter
+- `<workspace>/.clearhead/next.actions` — upcoming and in-progress acts for the project charter
+- `<workspace>/inbox.actions` — upcoming and in-progress acts for the inbox charter in the user workspace
+- `<charter>.completed.actions` — completed and cancelled acts for that charter
+- `<charter>/next.actions` — upcoming and in-progress acts for that charter if the charter is a folder
 
-When the plans that dictate those planned acts are completed, future planned acts in `<charter>.open.ttl` are removed and all closed planned acts within `<charter>.closed.ttl` are moved to `archive.ttl` at the root of the data directory:
+When the plans that dictate those planned acts are completed, future planned acts in `<charter>.actions` are removed and all closed planned acts within `<charter>.completed.actions` are moved to `archive.ttl` at the root of the data directory:
 
-Charter stem derivation follows the same rules as plan name inference: `next.actions` uses the parent directory name; all other `.actions` files use the file stem. Unlike plan name inference, `inbox` is NOT skipped — `inbox.open.ttl` is valid.
-
-Planned acts are treated as data rather than human-readable files; they exist primarily so the system can query recurring and upcoming occurrences of a plan.
+Charter stem derivation follows the same rules as plan name inference: `next.actions` uses the parent directory name; all other `.actions` files use the file stem. Unlike plan name inference, `inbox` is NOT skipped — `inbox.actions` is valid.
 
 And like above, project-local planned acts should be located within the `.clearhead` directory to avoid cluttering the project root, while user-wide planned acts can be located at the root of the user workspace
 
@@ -134,13 +134,13 @@ Now, its one thing to speak on the concrete file formats for each record type bu
 One concept that is very important to the workspace format is the process of "archiving" things. weve covered the names above but its working from a reference point lets go from the beginning
 
 1. At the lowest level, we have the planned acts that are implementations of their parent plans. 
-  1. at first, these are all open, then as the user is closing the planned acts, the move from `<charter>.open.ttl` to `<charter>.closed.ttl` in order to remove the format of clutter and make the process of tracking closed planned acts easier for both humans to comprehend and for databases to ingest only the data they may need, this way open act queries can be fast, but full history searchs are still possible
-2. If we move a level up, we have the plans in `<charter>.actions`, again, all plans start open, and as plans are closed, users can choose to "archive" them by sending them to `<charter>.completed.actions`
+  1. at first, these are all open, then as the user is closing the planned acts, the move from `<charter>.actions` to `<charter>.completed.actions` in order to remove the format of clutter and make the process of tracking closed planned acts easier for both humans to comprehend and for databases to ingest only the data they may need, this way open act queries can be fast, but full history searchs are still possible
+2. If we move a level up, we have the plans in `<charter>.ics`, again, all plans start open
 3. Finally, like plans, the charters themselves at `<charter>.md` can be archived themselves after they are closed. at this point the most complex process happens.
-  1. the contents of `<charter>.closed.ttl` are moved to the root `archive.ttl` file
-  2. the contents of `<charter>.completed.actions` are converted to turtle and moved to `archive.ttl`
+  1. the contents of `<charter>.completed.actions` are moved to the root `archive.ttl` file
+  2. the contents of `<charcter>.ics` are converted to turtle and moved to `archive.ttl`
   3. the charter contents itself are converted to turtle and moved to `archive.ttl` for later review
-  4. the (now empty) `<charter>.actions`, `<charter>.completed.actions`, `<charter>.closed.ttl` and `<charter>.open.ttl` are removed from the workspace
+  4. the (now empty) `<charter>.actions`, `<charter>.completed.actions`, `<charter>.ics` are removed from the workspace
 
 REMEMBER, per the [process specification](./process.md) it is assumed that all child plans are completed/cancelled which is why the open files above are expected to be empty or atleast emptyable before being moved to the central `archive.ttl`
 

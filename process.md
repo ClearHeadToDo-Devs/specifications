@@ -7,6 +7,8 @@ This process covers the workflow to manage the state of said actions as they mov
 
 All of this process is assumed to be built around the [Actions File Format](./action_file_format.md) which can be easily translated into either [json data](./json_schema.md), [relational databases](./sql_schema.md), or even more visual formats like markdown files for easier human consumption.
 
+however much of this can be adapted to different implementation methods and backends
+
 ## Capture
 
 Like GTD, we can always start our actions in the "Inbox" whether that be a file, a binary format, or a physical tray a core piece of the system is the idea of an inbox where all the new stuff is aggregated.
@@ -55,181 +57,185 @@ Otherwise, we run the risk of over-scheduling ourselves and creating a system th
 
 As we move through the inbox, we either complete actions, or move them to the appropriate [action list](./naming_conventions.md)
 
-Like in other systems, its not about finishing everything necessarily its about putting them in the right place whether that be in the main workspace, a project folder, or even a someday/maybe list.
+    Like in other systems, its not about finishing everything necessarily its about putting them in the right place whether that be in the main workspace, a project folder, or even a someday/maybe list.
 
-This is also usually where we start setting due/do dates on the calendar (yes, we have both).
+    This is also usually where we start setting due/do dates on the calendar (yes, we have both).
 
-And for any recurring actions, we should write out RRULEs to make sure they are tracked properly in our calendar
+    And for any recurring actions, we should write out RRULEs to make sure they are tracked properly in our calendar
 
-I also think this is where we should start thinking about priorities which align to the eisenhower matrix of 1-4
+    I also think this is where we should start thinking about priorities which align to the eisenhower matrix of 1-4
 ### On IDs
-By the time we move the actions out of the inbox, it is recommended that each action is given a unique UUID so that it can be tracked throughout the system.
+    By the time we move the actions out of the inbox, it is recommended that each action is given a unique UUID so that it can be tracked throughout the system.
 
-While optional, this is a key feature that enables powerful features from analytics, to logging, to cross-referencing actions between lists in a deterministic way. 
+    While optional, this is a key feature that enables powerful features from analytics, to logging, to cross-referencing actions between lists in a deterministic way. 
 
-It is assumed this will be done with tooling, either automatically or as a script, but it can also be done manually if needed.
+    It is assumed this will be done with tooling, either automatically or as a script, but it can also be done manually if needed.
 
 ## Reflect
-This one is either part 4 or 5 depending on your perspective. 
+    This one is either part 4 or 5 depending on your perspective. 
 
-But this is also where GTD aligns with Agile in their emphasis on _regular reflection and review_.
+    But this is also where GTD aligns with Agile in their emphasis on _regular reflection and review_.
 
-Both systems stress the importance of periodic review and periodically doing the three steps above at the appropriate times:
-- Capture: Always happening, should be near effortless and be the first thing you do when something new comes up
-- Clarify: Requires the most decision making of the other steps
-  - Sometimes you are working with others and clarifying actions can be a group activity
-  - Other times it is benficial to clarify actions as soon as you write them while the context is fresh
-  - other times the purpose of the inbox is important and it is a mark of discipline to NOT clarify actions on particularly thorny days and save this work for more dedicated review times.
-- Organize: Like clarify, this often depends on the context but should be done in regular intervals
-  - If you do organize daily, restrict it to once or twice a day to avoid decision fatigue
-  - Weekly reviews are also a good default and when the bulk of the organizing is often done
-  - Monthly reviews can be good for full refactors of existing outcomes to ensure everything is still aligned with your goals
+    Both systems stress the importance of periodic review and periodically doing the three steps above at the appropriate times:
+    - Capture: Always happening, should be near effortless and be the first thing you do when something new comes up
+    - Clarify: Requires the most decision making of the other steps
+    - Sometimes you are working with others and clarifying actions can be a group activity
+    - Other times it is benficial to clarify actions as soon as you write them while the context is fresh
+    - other times the purpose of the inbox is important and it is a mark of discipline to NOT clarify actions on particularly thorny days and save this work for more dedicated review times.
+    - Organize: Like clarify, this often depends on the context but should be done in regular intervals
+    - If you do organize daily, restrict it to once or twice a day to avoid decision fatigue
+    - Weekly reviews are also a good default and when the bulk of the organizing is often done
+    - Monthly reviews can be good for full refactors of existing outcomes to ensure everything is still aligned with your goals
 
-The real importance of reflection is that it is done _regularly_ such that it becomes a core _habit_ you build within your system. This means it must be deeply aligned with your workflow and schedule and will be a core part of how the workflow is built around you rather than the other way around.
+    The real importance of reflection is that it is done _regularly_ such that it becomes a core _habit_ you build within your system. This means it must be deeply aligned with your workflow and schedule and will be a core part of how the workflow is built around you rather than the other way around.
 
-While a good default is a weekly review, agile does this process bi-weekly on average which is normal for teams doing this process, while some individuals fine building a daily ritual to be core to how they keep aligned through the day.
+    While a good default is a weekly review, agile does this process bi-weekly on average which is normal for teams doing this process, while some individuals fine building a daily ritual to be core to how they keep aligned through the day.
 
 ### On Analytics
-This is where a robust system of review is crucial for success. We want to be able to both look back at what we have done, while also planning for future intentions and as such this is often where we transition from working with the file format to things like [sql](./sql_schema.md) or [json](./json_schema.md) to get better insights into the state of our actions. and track these actions as they move through the system and to be able to find the relevant actions we need to focus on next.
+    This is where a robust system of review is crucial for success. We want to be able to both look back at what we have done, while also planning for future intentions and as such this is often where we transition from working with the file format to things like [sql](./sql_schema.md) or [json](./json_schema.md) to get better insights into the state of our actions. and track these actions as they move through the system and to be able to find the relevant actions we need to focus on next.
 
 #### Blocked and Dependent Actions
-One particular place where tooling makes this easier is the ability to identify when some actions may be blocked or depend upon one another which will help us identify bottlenecks in our workflow and ensure we are focusing on the right actions at the right time.
+    One particular place where tooling makes this easier is the ability to identify when some actions may be blocked or depend upon one another which will help us identify bottlenecks in our workflow and ensure we are focusing on the right actions at the right time.
 
-This process is difficult to do by hand with a file of strings, but trivially easy with even a simple database.
+    This process is difficult to do by hand with a file of strings, but trivially easy with even a simple database.
 
 ### On Scheduling
 
-This is also the stage where active use of the calendar bcomes key to managing the list of actions as reviewing both our upcoming and past intentions can often bring up new actions or remind us of key other actions we are trying to do
+    This is also the stage where active use of the calendar bcomes key to managing the list of actions as reviewing both our upcoming and past intentions can often bring up new actions or remind us of key other actions we are trying to do
 
 ## Engage
-Any other point in time that you are not doing one of the above phases, you are in the "Engage" phase where you are using your system as a declarative action system where you simply look at your list of actions and complete them as time permits
+    Any other point in time that you are not doing one of the above phases, you are in the "Engage" phase where you are using your system as a declarative action system where you simply look at your list of actions and complete them as time permits
 
-Here we are embodying the core principles of deep work to keep us aligned on the next action we want to focus on, knowing that we have reviewed the relevant inboxes and have decided what can and should be done ahead of time.
+    Here we are embodying the core principles of deep work to keep us aligned on the next action we want to focus on, knowing that we have reviewed the relevant inboxes and have decided what can and should be done ahead of time.
 
 ### Agenda View
-Another core usecase for the system is being able to generate an "agenda view" of the actions that need to be done today or in the near future.
+    Another core usecase for the system is being able to generate an "agenda view" of the actions that need to be done today or in the near future.
 
-This is not simply actions that are due/do today, but also represents actions that have no open dependencies, are within the proper context you are in, and are the top priority actions you want to focus on. All of this requires not just a data system, but a robust one that is able to leverage the relationships between actions as a graph and do the hard work of filtering down to the right actions for you to focus on.
+    This is not simply actions that are due/do today, but also represents actions that have no open dependencies, are within the proper context you are in, and are the top priority actions you want to focus on. All of this requires not just a data system, but a robust one that is able to leverage the relationships between actions as a graph and do the hard work of filtering down to the right actions for you to focus on.
 
-In many ways, this is the core "why" beind the whole system as we want to make generating, maintaining, and updating this list as easy and effortless as possible so that we are mostly focused on completing actions rather than managing the system itself.
+    In many ways, this is the core "why" beind the whole system as we want to make generating, maintaining, and updating this list as easy and effortless as possible so that we are mostly focused on completing actions rather than managing the system itself.
 
-If all goes well, this list should be where you spend the majority of your time as you work through your day.
+    If all goes well, this list should be where you spend the majority of your time as you work through your day.
 
-This list will include recurring and one-off actions, as well as actions that have no due date but are of high priority of which can be done within the current context/timeframe.
-
-# Workflow
-Now that we have covered the overarching stages, we want to get a bit more granular around the relationships between various properties around the actions and how they are meant to communicate our intent
-
-## Plans 
-
-Plans will be the primary record type that people will interact with day-to-day and as such understanding their workflow is key
-
-### State
-
-At any given time, an plan is of one of the following states:
-- Not Started 
-  - The default state when actions are created
-- In Progress
-  - Intended to express actions an agent is actively focused on
-- Blocked
-  - Expresses that an action cannot be worked on for some reason
-    - where possible, we would rather use proper dependencies to express state but this is often useful for external blockers
-- Completed
-  - The action has been finished successfully
-- Cancelled
-  - The action is no longer relevant and will not be completed
-    - Holding this distinction can be important for seeing when we wanted to do something but it was no longer relevant
-
-a normal workflow for an action would likely be:
-Not Started -> In Progress -> Completed
-
-While many more difficult actions could be:
-Not Started -> In Progress -> Blocked -> Cancelled
-
-These systems are not about judgement simply tracking this data as it moves through the traditional lifecyle
-
-### On Closure
-
-Closure is different from archiving which we will cover later.
-
-All formats should support closure and when we have completed a plan the most upcoming planned act, which is the only one except for the case of a recurring action, is also completed, while all projected planned acts are removed as they were simply projections and we dont want to clutter the archive with them
-
-
-### On Children Actions
-One important note is that unless otherwise specified, and where relevant, the state of parent actions are determined by their children actions.
-
-This means an action can be considered done if all the children are completed.
-  - This applies recursively up the tree such that an Action Plan is only done when all its sub-actions are done.
-
-The reverse is also true, we want to avoid closed parent actions with open children actions as this creates confusion around what is actually done.
-
-## Priority
-Generally, we focus on a 1-4 scale aligned to the Eisenhower matrix:
-1. Do: Urgent and Important
-2. Schedule: Not Urgent but Important
-3. Delegate: Urgent but Not Important
-4. Delete: Not Urgent and Not Important
-
-While your ability to delegate may vary on your circumstances, the core idea is that we will often want to AVOID doing things that are not important and not urgent as these are often distractions from the core work we want to be doing.
-
-This is where that cancelled state can be useful as it gives us an easy way to cancel actions in a thoughtful way
-
-## Recurring Actions
-
-Recurring actions are Plans with an RRULE that prescribe multiple PlannedActs over time. The template defines the pattern; instances are the individual occurrences.
-
-This affects the planned acts generated
-
-## Plans vs PlannedActs
-While plans can represent a recurring act or just a oneoff all plans have atleast one planned act the only question is where these planned acts are stored.
-
-planned acts, while important, are not intended for people to work on by hand, instead they are meant to be used for the CRDT structures for bookkeeping and allowing users to edit individual instances if they wish
-
-please review [the naming conventions](./naming_conventions.md) for the process of how they are moved from open, to closed, to archive within the file-based format
-
-please review the [ontology](./ontology.md) for more details on the relationship between plans and planned acts
-
-## Generation Horizon
-
-Instances are generated ahead based on configuration (default: 5 instances). This keeps the number proportional to recurrence frequency—5 weekly instances is ~1 month, 5 daily instances is ~1 week.
-
-See [Configuration](./configuration.md) for customizing the generation horizon.
-
-### Template Edits
-
-Editing a template (name, time, description, etc.) updates the next upcoming instance only:
-- **Past instances:** Unchanged (they're historical records)
-- **Next upcoming instance:** Updated to reflect template changes
-- **Future instances:** Regenerated from template when their turn comes
-
-This preserves history while allowing the template to evolve.
-
-### Children of Recurring Actions
-
-If a recurring action has children, each instance includes its own child instances.
-
-This depends on implementation but they will often be eithe different files or tables with one being plans and one being planned acts 
-
-## Charters
-
-Charters follow a fairly simple workflow as they are higher level than the plan and thus are expected to see less daily alteration. still, there is still some workflow to consider.
-
-### State
-
-Charters have the following states:
-- New
-- Active
-- Closed
-- Blocked
-
-While these states are relatively straightforward they enable a simple workflow that makes the process easier to see
-
-#### Closure
-
-Generally, before a charter should be closed the underlying plans should be either closed or cancelled so that decisions are made around which plans will or wont go forward.
-
-tooling providers may choose to do a flag that will auto cancel/complete child plans if they wish, but the default should be that charters are not closed until the all the child plans are dealt with
+    This list will include recurring and one-off actions, as well as actions that have no due date but are of high priority of which can be done within the current context/timeframe.
 
 ## Arhiving 
 
-Archival is a sparate activity from closure, a record can be closed however long we want to before it is "archived" and for some formats, the distinction isnt needed as much if the state is maintained within a database. however, for file-based interfaces it is often easier to move the closed records into some sort of "archive" for external storage and querying such that the whole graph can be queried at a a later time such as is outlined in the [file naming conventions](./naming_conventions.md)
+    Archival is a sparate activity from closure, a record can be closed however long we want to before it is "archived" and for some formats, the distinction isnt needed as much if the state is maintained within a database. however, for file-based interfaces it is often easier to move the closed records into some sort of "archive" for external storage and querying such that the whole graph can be queried at a a later time such as is outlined in the [file naming conventions](./naming_conventions.md)
+
+# Workflow
+    Now that we have covered the overarching stages, we want to get a bit more granular around the relationships between various properties around the actions and how they are meant to communicate our intent
+
+## Charters
+
+    Charters follow a fairly simple workflow as they are higher level than the plan and thus are expected to see less daily alteration. still, there is still some workflow to consider.
+
+### State
+
+    Charters have the following states:
+    - New
+    - Active
+    - Closed
+    - Blocked
+
+    While these states are relatively straightforward they enable a simple workflow that makes the process easier to see
+
+#### Closure
+
+    Generally, before a charter should be closed the underlying planned acts should be either closed or cancelled so that decisions are made around which planned acts will or wont go forward.
+
+    tooling providers may choose to do a flag that will auto cancel/complete child planned acts if they wish, but the default should be that charters are not closed until the all the child planned acts are dealt with
+
+
+
+## Plans
+    Templates for the planned acts where necessary they are how the "when" is determined leveraging the common pattern of the calendar RRULE for recurring actions, but they can also be used to plan one-off actions as well.
+
+### Recurring Actions
+
+    Recurring actions are Plans with an RRULE that prescribe multiple PlannedActs over time. The template defines the pattern; instances are the individual occurrences.
+
+    This affects the planned acts generated
+
+### Plans vs PlannedActs
+    While plans can represent a recurring act or just a oneoff all plans have atleast one planned act the only question is where these planned acts are stored.
+
+    please review [the naming conventions](./naming_conventions.md) for the process of how they are moved from open, to closed, to archive within the file-based format
+
+    please review the [ontology](./ontology.md) for more details on the relationship between plans and planned acts
+
+### Generation Horizon
+
+    Instances are generated ahead based on configuration (default: 5 instances). This keeps the number proportional to recurrence frequency—5 weekly instances is ~1 month, 5 daily instances is ~1 week.
+
+    See [Configuration](./configuration.md) for customizing the generation horizon.
+
+#### Schedule Edits
+
+    Editing a schedule (name, time, description, etc.) updates the next upcoming instance only:
+    - **Past instances:** Unchanged (they're historical records)
+    - **Next upcoming instance:** Updated to reflect template changes
+    - **Future instances:** Regenerated from template when their turn comes
+
+    This preserves history while allowing the template to evolve.
+
+### Children of Recurring Actions
+
+    plans from events can be a single line with a description but for more complex workflows one should review the [naming conventions](./naming_conventions.md) for how to leverage templates to generate more complex workflows.
+
+    instead of writing out the title within the vevent the event will instead contain a reference to the template which it wants to leverage so instead of generating a single planned act, the entire thing will instead be generated from the template for each instance within the structured 
+
+## Planned Acts 
+
+    Planned Acts will be the primary record type that people will interact with day-to-day and as such understanding their workflow is key
+
+### State
+
+    At any given time, a planned act is of one of the following states:
+    - Not Started 
+    - The default state when planned acts are created
+    - In Progress
+    - Intended to express planned acts an agent is actively focused on
+    - Blocked
+    - Expresses that a planned act cannot be worked on for some reason
+    - where possible, we would rather use proper dependencies to express state but this is often useful for external blockers
+    - Completed
+    - The planned act has been finished successfully
+    - Cancelled
+    - The planned act is no longer relevant and will not be completed
+    - Holding this distinction can be important for seeing when we wanted to do something but it was no longer relevant
+
+    a normal workflow for a planned act would likely be:
+    Not Started -> In Progress -> Completed
+
+    While many more difficult planned acts could be:
+    Not Started -> In Progress -> Blocked -> Cancelled
+
+    These systems are not about judgement simply tracking this data as it moves through the traditional lifecyle
+
+### On Closure
+
+    Closure is different from archiving which we will cover later.
+
+    All formats should support closure and when we have completed a plan the most upcoming planned act, which is the only one except for the case of a recurring action, is also completed, while all projected planned acts are removed as they were simply projections and we dont want to clutter the archive with them
+
+
+### On Children Planned Acts
+    One important note is that unless otherwise specified, and where relevant, the state of parent actions are determined by their children actions.
+
+    This means an action can be considered done if all the children are completed.
+    - This applies recursively up the tree such that an Action Plan is only done when all its sub-actions are done.
+
+    The reverse is also true, we want to avoid closed parent actions with open children actions as this creates confusion around what is actually done.
+
+### Priority
+    Generally, we focus on a 1-4 scale aligned to the Eisenhower matrix:
+    1. Do: Urgent and Important
+    2. Schedule: Not Urgent but Important
+    3. Delegate: Urgent but Not Important
+    4. Delete: Not Urgent and Not Important
+
+    While your ability to delegate may vary on your circumstances, the core idea is that we will often want to AVOID doing things that are not important and not urgent as these are often distractions from the core work we want to be doing.
+
+    This is where that cancelled state can be useful as it gives us an easy way to cancel actions in a thoughtful way
+

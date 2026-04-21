@@ -7,7 +7,7 @@ created: 2025-01-19T03:16:49-0800
 updated: 2025-01-20T00:04:29-0800
 version: 1.1.1
 ---
-This specification will lay out the formal specifications for the `plans` filetype, usually denoted by a `*.actions` file.
+This specification will lay out the formal specifications for the `actions` filetype, usually denoted by a `*.actions` file.
 
 # High-Level Guidelines
 This specification will attempt to maintain backwards compatibility. That is, we will only add backwards-compatible changes to prevent implement's from dealing with breaking changes in the specification.
@@ -19,7 +19,7 @@ This filetype is intended to represent a human-readable interface into data that
 
 In particular the three core entities we are thinking about are:
 - Objectives (placed in where people usually think of s/objectives)
-- Plans: These are the ACTUAL atomic units of work we are listing here so its more succinct to think of these as a list of plans
+- planned acts: These are the ACTUAL atomic units of work we are listing here so its more succinct to think of these as a list of planned acts
   - for the purposes of this specification, plan = plan wherever it is mentioned
 - Planned Acts: All plans have atleast one planned act as these are the parts that have actual state and are meant to be planable
   - This is primarily relevant when it comes to recurring plans as each occurrence is a planned act
@@ -29,11 +29,11 @@ This filetype does the best it can to represent all of these entities in one suc
 the way to see it is that actions are a way to abstract away the complexity of the ontology into a simple list of plans that can be easily read and written by humans in that `todo.txt` style format
 
 ## plaintext implications
-Fundamentally, the `actions` filetype is a list of Plans that can be formally parsed in a machine-readable way while still being readable and writable with any application the user chooses
+Fundamentally, the `actions` filetype is a list of Planned acts that can be formally parsed in a machine-readable way while still being readable and writable with any application the user chooses
 As such, great care is taken to minimize the amount of characters that need to be typed by a human, while being considerate to readability of the core file
 
 Special considerations should be made to the readable nature of the document, and how this can result in design decisions that would not normally be taken within a database.
-For example, the name should be considered a secondary key for the plan. While we will have an ID that will ensure universal uniqueness, the plaintext nature of this solution lends itself to using the name as a natural key
+For example, the name should be considered a secondary key for the planned act. While we will have an ID that will ensure universal uniqueness, the plaintext nature of this solution lends itself to using the name as a natural key
 
 We give many forms of reference as we want to make sure that users have many ways for one plan to refer to another plan without needing to remember a long UUID
 
@@ -97,7 +97,7 @@ plans with defined aliases can be referenced by that alias:
 
 See [Alias](#alias-optional) for how to define aliases.
 
-#### plan Name
+#### planned act Name
 Case-insensitive name matching within the workspace:
 ```actions
 [ ] Dry clothes < Wash clothes
@@ -200,87 +200,6 @@ By contrast, if we put the duration after a proper date, then there is no ambigu
 
 same goes for time and seconds due to leap seconds
 
-### Recurrence
-plans can repeat on a schedule using the RRULE (Recurrence Rule) syntax from [RFC 5545 section 3.3.10](https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.10).
-
-Recurrence is denoted with the `R:` prefix followed by standard RRULE syntax. The do-date/time serves as the DTSTART (start date) for the recurrence rule.
-
-When exported to calendar applications, this generates a recurrence set - the complete set of occurrences based on the rule.
-
-#### RRULE Syntax
-
-The RRULE format uses key-value pairs separated by semicolons:
-```
-R:FREQ=frequency[;RULE_PART=value]...
-```
-
-**Required Component:**
-- `FREQ` - The recurrence frequency. Must be one of:
-  - `SECONDLY` - Every second (rarely used)
-  - `MINUTELY` - Every minute
-  - `HOURLY` - Every hour
-  - `DAILY` - Every day
-  - `WEEKLY` - Every week
-  - `MONTHLY` - Every month
-  - `YEARLY` - Every year
-
-**Optional Components:**
-- `INTERVAL=n` - Repeat every n intervals (default: 1)
-  - Example: `FREQ=DAILY;INTERVAL=2` means every other day
-- `COUNT=n` - Maximum number of occurrences
-  - Example: `FREQ=WEEKLY;COUNT=10` means 10 weekly occurrences
-- `UNTIL=datetime` - End date/time for recurrence (ISO 8601 format)
-  - Example: `FREQ=DAILY;UNTIL=20251231T235959`
-  - Note: `COUNT` and `UNTIL` are mutually exclusive
-- `BYDAY=days` - Days of week (MO,TU,WE,TH,FR,SA,SU)
-  - Example: `FREQ=WEEKLY;BYDAY=MO,WE,FR` means every Monday, Wednesday, Friday
-  - Can include numeric prefix: `+1MO` (first Monday), `-1FR` (last Friday)
-- `BYMONTHDAY=days` - Days of month (1-31, or -1 to -31 for counting from end)
-  - Example: `FREQ=MONTHLY;BYMONTHDAY=1,15` means 1st and 15th of each month
-- `BYMONTH=months` - Months of year (1-12)
-  - Example: `FREQ=YEARLY;BYMONTH=1,7` means January and July each year
-- `BYHOUR=hours` - Hours of day (0-23)
-- `BYMINUTE=minutes` - Minutes of hour (0-59)
-- `BYSECOND=seconds` - Seconds of minute (0-59)
-- `BYSETPOS=n` - Limits to nth occurrence in period
-  - Example: `FREQ=MONTHLY;BYDAY=MO;BYSETPOS=1` means first Monday of each month
-
-#### Common Recurrence Patterns
-
-**Daily Examples:**
-- `R:FREQ=DAILY` - Every day
-- `R:FREQ=DAILY;INTERVAL=2` - Every other day
-- `R:FREQ=DAILY;BYDAY=MO,TU,WE,TH,FR` - Every weekday
-- `R:FREQ=DAILY;COUNT=30` - Daily for 30 days
-
-**Weekly Examples:**
-- `R:FREQ=WEEKLY` - Every week on the same day as DTSTART
-- `R:FREQ=WEEKLY;BYDAY=MO,WE,FR` - Every Monday, Wednesday, Friday
-- `R:FREQ=WEEKLY;INTERVAL=2;BYDAY=TU` - Every other Tuesday
-- `R:FREQ=WEEKLY;BYDAY=SA,SU` - Every weekend
-
-**Monthly Examples:**
-- `R:FREQ=MONTHLY` - Same day each month
-- `R:FREQ=MONTHLY;BYMONTHDAY=1` - First of every month
-- `R:FREQ=MONTHLY;BYDAY=2FR` - Second Friday of each month
-- `R:FREQ=MONTHLY;BYMONTHDAY=-1` - Last day of each month
-
-**Yearly Examples:**
-- `R:FREQ=YEARLY` - Same date every year
-- `R:FREQ=YEARLY;BYMONTH=1;BYMONTHDAY=1` - January 1st every year
-- `R:FREQ=YEARLY;BYMONTH=11;BYDAY=4TH` - Fourth Thursday in November (US Thanksgiving)
-
-#### Design Rationale
-
-This specification uses RFC 5545 RRULE syntax directly rather than inventing custom shorthand for several reasons:
-
-1. **Battle-tested standard** - RRULE handles edge cases (leap years, DST, invalid dates) that would be easy to miss in custom syntax
-2. **Calendar compatibility** - Direct 1:1 mapping to iCalendar export format without translation layer
-3. **Completeness** - Supports complex patterns (e.g., "last Friday of each quarter") without syntax extensions
-4. **Tooling ecosystem** - Libraries like [rrule.js](https://github.com/jkbrzt/rrule) already parse and expand RRULE
-5. **Unambiguous** - No corner cases where custom syntax behavior is undefined
-
-While RRULE syntax is verbose, editor tooling can provide natural language interfaces that generate RRULE strings, keeping the file format precise while maintaining usability.
 ## Depth (Required)
 Every child plan starts with atleast one `>` character. Children of a parent plan can be denoted by `>>` and so-on down to the official limit of 5 levels of depth. Now while nothing stops implementors from allowing arbitrary nesting, it should be assumed that 5 is the limit if there is indeed a limit.
 
@@ -325,7 +244,7 @@ This means descriptions can use any character they need to within the confines o
 like code blocks in other formats, we can designate an area that is free from the traditional rules around the format including being multiline since again, we DONT use whitespace as a meaningful part of the format
 
 ```actions
-[ ] Cool Plan
+[ ] Cool Planned act
     $ This is a description of the plan 
     special characters like ! @ # $ % ^ & * ( ) _ + - = { } [ ] | \ ; ' " : , . < > / ? can all be used here without needing to escape them
     $
@@ -514,11 +433,6 @@ Do date/time makes the most use of the date and time formats laid out above.
 
 it ALSO includes recurrence information if needed as described in the recurrence section above
 
-### Planned Acts
-in order for a plan to have more than a single planned act, it needs a recurrence rule as described above.
-
-When a plan has a recurrence rule, each occurrence is treated as a separate planned act with its own state and completion tracking.
-
 ## Due-Date/Time (Optional)
 Plans can have a separate due date/time designated by the `:` character, complete with RRULE support.
 
@@ -546,6 +460,8 @@ Since ClearHead uses UUID v7, which encodes a millisecond-precision time stamp, 
 
 ## Id (Optional)
 for this we are going to be using the V7 of the UUID standard.
+
+for the children of recurring plans, then v5 uuids should be used that use the event id from the calendar event as the namespace and the date of the occurrence as the name to ensure that each occurrence has a stable, deterministic UUID that can be referenced across systems and time without needing to worry about collisions
 
 the icon for this is `#` but is optional as we want to support the ability to create plans WITHOUT forcing the user to add a UUID manually before it is interpreted
 
