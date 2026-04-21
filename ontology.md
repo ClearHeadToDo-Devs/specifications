@@ -50,7 +50,7 @@ Implementations SHOULD validate semantic constraints before publishing graph-der
 At minimum, validation should cover:
 
 - Planned act lifecycle/status integrity
-- Plan-to-planned-act relationship integrity
+- Plan-to-planned-act relationship integrity (where a plan link exists)
 - Relationship constraints that prevent structurally invalid graphs
 
 Ontology shapes and schema artifacts remain the normative source for term-level and shape-level constraints.
@@ -60,3 +60,28 @@ Ontology shapes and schema artifacts remain the normative source for term-level 
 The ontology repository remains the canonical location for term and schema artifacts. In particular, implementations should follow the current `v4` contract files there (for example JSON-LD context, schema, and ontology-out contract documentation).
 
 This specification does not redefine those artifacts; it defines how downstream tools should apply them consistently.
+
+## Source Boundary: Core Ontology vs Integration Profiles
+
+To preserve portability and avoid coupling the core model to a specific scheduling format:
+
+- Core ontology/domain terms should remain source-agnostic.
+- Integration profiles (such as `.ics`) may carry source-specific semantics.
+
+### Neutral External Identity Bridge
+
+When planned acts are generated from external scheduling systems, implementations should preserve linkage via neutral fields:
+
+- `externalScheduleId` - series-level external identifier
+- `externalOccurrenceKey` - instance-level external identifier
+
+These fields are optional and do not imply that every planned act has an external schedule source.
+
+### ICS Mapping (Profile-Level)
+
+In the ICS integration profile, these map as follows:
+
+- `externalScheduleId <- VEVENT.UID`
+- `externalOccurrenceKey <- RECURRENCE-ID` (or canonicalized occurrence datetime when recurrence-id is absent)
+
+This mapping belongs to the integration contract, not the core ontology definition.

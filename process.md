@@ -149,16 +149,20 @@ As we move through the inbox, we either complete actions, or move them to the ap
 
 
 ## Plans
-    Templates for the planned acts where necessary they are how the "when" is determined leveraging the common pattern of the calendar RRULE for recurring actions, but they can also be used to plan one-off actions as well.
+    Plans are schedule definitions represented in `.ics` files. They define timing and recurrence, while `.actions` files hold the generated or manually-created planned acts.
 
 ### Recurring Actions
 
-    Recurring actions are Plans with an RRULE that prescribe multiple PlannedActs over time. The template defines the pattern; instances are the individual occurrences.
+    Recurring actions are schedules with recurrence in `VEVENT` (`RRULE`) that prescribe multiple planned acts over time.
 
-    This affects the planned acts generated
+    Template references may expand each occurrence into richer act structures.
 
 ### Plans vs PlannedActs
-    While plans can represent a recurring act or just a oneoff all plans have atleast one planned act the only question is where these planned acts are stored.
+    Plans/schedules and planned acts are distinct concerns:
+    - Plans/schedules live in `.ics`
+    - Planned acts live in `.actions`
+
+    Not all planned acts must have a formal schedule source (ad-hoc acts are valid).
 
     please review [the naming conventions](./naming_conventions.md) for the process of how they are moved from open, to closed, to archive within the file-based format
 
@@ -166,24 +170,38 @@ As we move through the inbox, we either complete actions, or move them to the ap
 
 ### Generation Horizon
 
-    Instances are generated ahead based on configuration (default: 5 instances). This keeps the number proportional to recurrence frequency—5 weekly instances is ~1 month, 5 daily instances is ~1 week.
+    Instances are generated ahead based on configuration (recommended default: 14 days).
 
-    See [Configuration](./configuration.md) for customizing the generation horizon.
+    This keeps generated act volume bounded while still surfacing near-term work.
+
+    See [Configuration](./configuration.md) for implementation-specific horizon settings.
+
+### Expand Acts Workflow
+
+    The schedule expansion lifecycle is:
+
+    1. Read schedules from `.ics`
+    2. Compute due/upcoming instances within horizon
+    3. Resolve template (charter-local first, then workspace root)
+    4. Generate or upsert planned acts into `.actions`
+
+    This process must be idempotent: rerunning expansion for the same schedule window must not duplicate acts.
 
 #### Schedule Edits
 
-    Editing a schedule (name, time, description, etc.) updates the next upcoming instance only:
-    - **Past instances:** Unchanged (they're historical records)
-    - **Next upcoming instance:** Updated to reflect template changes
-    - **Future instances:** Regenerated from template when their turn comes
+    Editing a schedule updates future generation behavior.
 
-    This preserves history while allowing the template to evolve.
+    - **Past acts:** remain historical records
+    - **Existing generated future acts:** implementation policy decides mutate vs replace
+    - **Not-yet-generated future acts:** reflect latest schedule/template state
+
+    Implementations should document their policy and keep behavior deterministic.
 
 ### Children of Recurring Actions
 
-    plans from events can be a single line with a description but for more complex workflows one should review the [naming conventions](./naming_conventions.md) for how to leverage templates to generate more complex workflows.
+    For complex recurring workflows, schedules can reference templates (for example using `X-CLEARHEAD-TEMPLATE` in VEVENT).
 
-    instead of writing out the title within the vevent the event will instead contain a reference to the template which it wants to leverage so instead of generating a single planned act, the entire thing will instead be generated from the template for each instance within the structured 
+    Rather than generating one flat act, expansion can generate a structured act tree per occurrence.
 
 ## Planned Acts 
 
@@ -238,4 +256,3 @@ As we move through the inbox, we either complete actions, or move them to the ap
     While your ability to delegate may vary on your circumstances, the core idea is that we will often want to AVOID doing things that are not important and not urgent as these are often distractions from the core work we want to be doing.
 
     This is where that cancelled state can be useful as it gives us an easy way to cancel actions in a thoughtful way
-

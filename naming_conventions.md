@@ -106,12 +106,16 @@ now, by default we have a few naming conventions
 
 be sure to review [The reference syntax](./reference_syntax.md) for guidance on working with sub charters and sub plans
 
+For schedule semantics and VEVENT mapping, see [ics_schedule_spec.md](./ics_schedule_spec.md).
+
 like above, project-local plans should be located within the `.clearhead` directory to avoid cluttering the project root, including the core `next.actions` file that are attached to the project as a charter while user-wide charters can be located at the root of the user workspace,
 
 ### Planned Acts
 Per the [Ontology](./ontology.md) specification, planned acts are the actual executions of plans. and 
 
 planned acts are stored in the `.actions` files within the workspace and represent the lowest atomic unit of work within the system.
+
+`.actions` files do not define recurrence rules. Recurrence and schedule timing are represented in `.ics` files and materialized into planned acts through expansion workflows.
 
 - `<charter>.actions` — upcoming and in-progress acts for that charter
 - `<workspace>/.clearhead/next.actions` — upcoming and in-progress acts for the project charter
@@ -161,4 +165,3 @@ this is how we maintain a format that is able to evolve gracefully
 - [Process](./process.md) - Workflow including recurring action behavior
 - [Sync Architecture](./sync_architecture.md) - CRDT sync and state management
 - [Action File Format](./action_file_format.md) - DSL syntax
-
