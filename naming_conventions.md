@@ -129,6 +129,15 @@ And like above, project-local planned acts should be located within the `.clearh
 
 Now, its one thing to speak on the concrete file formats for each record type but the other piece to cover is the workflow that actually handled these various structures and dictates what happens when and where. for this, we are going to go a little more over the workflows that allow this format to be updated automatically or manually based on what people prefer
 
+### Tempates
+Templates are a list of planned acts in the form of `<name>.actions` files that are stored in a `templates/` directory at the root of the workspace. these are meant to be used as templates for generating planned acts either through schedules or on demand.
+
+it is assumed that the filename will be the reference for the template, so if we have a `weekly-review.actions` file in the `templates/` directory, then the reference for that template will be `weekly-review` and this is what will be used in the `X-CLEARHEAD-TEMPLATE` property of the VEVENT in the `.ics` files
+
+this will also allow for on demand generation of planned acts either as a side-effect to charter creation or through a command like `apply template` which will allow users to generate planned acts from templates on demand without needing to wait for the schedule to trigger them
+
+
+
 ### Archival
 
 One concept that is very important to the workspace format is the process of "archiving" things. weve covered the names above but its working from a reference point lets go from the beginning
