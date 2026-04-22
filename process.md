@@ -199,7 +199,7 @@ As we move through the inbox, we either complete actions, or move them to the ap
 
 ### Children of Recurring Actions
 
-    For complex recurring workflows, schedules can reference templates (for example using `X-CLEARHEAD-TEMPLATE` in VEVENT).
+    For complex recurring workflows, schedules can reference templates via the VEVENT DESCRIPTION field (first line: `template: <name>`).
 
     Rather than generating one flat act, expansion can generate a structured act tree per occurrence.
 

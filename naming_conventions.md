@@ -136,7 +136,7 @@ Now, its one thing to speak on the concrete file formats for each record type bu
 ### Tempates
 Templates are a list of planned acts in the form of `<name>.actions` files that are stored in a `templates/` directory at the root of the workspace. these are meant to be used as templates for generating planned acts either through schedules or on demand.
 
-it is assumed that the filename will be the reference for the template, so if we have a `weekly-review.actions` file in the `templates/` directory, then the reference for that template will be `weekly-review` and this is what will be used in the `X-CLEARHEAD-TEMPLATE` property of the VEVENT in the `.ics` files
+it is assumed that the filename will be the reference for the template, so if we have a `weekly-review.actions` file in the `templates/` directory, then the reference for that template will be `weekly-review` and this is what will be used in the VEVENT DESCRIPTION field as `template: weekly-review` (first line of the event notes in any standard calendar app)
 
 this will also allow for on demand generation of planned acts either as a side-effect to charter creation or through a command like `apply template` which will allow users to generate planned acts from templates on demand without needing to wait for the schedule to trigger them
 

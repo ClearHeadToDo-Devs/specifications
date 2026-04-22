@@ -23,7 +23,7 @@ This document covers:
 
 - `.ics` discovery and charter scope expectations
 - VEVENT field mapping into schedule records
-- Template linkage via custom properties
+- Template linkage via DESCRIPTION convention
 - Expansion horizon behavior
 - Idempotent generation requirements
 - External linkage keys carried onto generated acts
@@ -52,7 +52,7 @@ Required/expected fields:
 - `DTSTART` (required for expansion): anchor datetime
 - `RRULE` (optional): recurrence semantics
 - `DURATION` (optional): schedule-level duration hint
-- `X-CLEARHEAD-TEMPLATE` (optional): template reference for structural instantiation
+- `DESCRIPTION` (optional): if the first line starts with `template: <name>`, it binds a template for structural instantiation; remaining text is the plan description
 
 If `RRULE` is absent, VEVENT is treated as a one-off schedule.
 
@@ -76,7 +76,7 @@ ICS mapping:
 
 1. Read schedule VEVENTs for charter scope.
 2. Compute due/upcoming instances within configured horizon.
-3. Resolve template, if `X-CLEARHEAD-TEMPLATE` exists.
+3. Resolve template, if DESCRIPTION contains a `template: <name>` binding.
 4. Generate or upsert planned acts into target `.actions` file.
 
 Default horizon is implementation-configurable; `14 days` is a recommended default.
@@ -99,7 +99,7 @@ Ad-hoc acts (not schedule-derived):
 
 # Template Resolution
 
-When `X-CLEARHEAD-TEMPLATE` is present, resolve templates in this order:
+When a `template: <name>` binding is present in the DESCRIPTION, resolve templates in this order:
 
 1. Charter-local `templates/`
 2. Workspace/platform-root `templates/`
