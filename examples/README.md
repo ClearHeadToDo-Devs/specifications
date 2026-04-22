@@ -22,12 +22,10 @@ This directory contains example `.actions` files demonstrating various features 
 - **with_story_path.actions** - Hierarchical story paths (`*work/clearhead/cli`)
 - **with_new_features.actions** - Comprehensive example combining all new features
 
-## Recurring Actions
+## Scheduling Note
 
-- **recurring_templates.actions** - Comprehensive recurrence patterns (daily, weekly, monthly, yearly)
-- **recurring_log_example.actions** - Logging completed recurrence instances
-- **with_recurring_daily_do_date.actions** - Simple daily recurrence
-- **with_recurring_weekly_do_date.actions** - Simple weekly recurrence
+Recurring schedules are defined in `.ics` files. `.actions` examples in this directory
+represent planned acts (including generated occurrences), not schedule definitions.
 
 ## Calendar Export
 
@@ -36,12 +34,10 @@ The `export` command converts actions with due dates into iCalendar (`.ics`) for
 ### Example Files
 
 - **calendar_export_example.actions** - Comprehensive demonstration including:
-  - Daily, weekly, monthly, and quarterly recurring events
+  - Multiple scheduled planned acts suitable for calendar export
   - All action states (pending, in-progress, blocked, completed, cancelled)
   - Priority mapping, categories, and descriptions
-  - Complex recurrence patterns (first Monday of month, etc.)
-
-- **recurring_templates.actions** - Collection of common recurrence patterns
+  - Mixed work/personal planning examples
 
 ### Example Usage
 
@@ -56,7 +52,7 @@ clearhead export calendar_export_example.actions --open-only -o calendar.ics
 clearhead export calendar_export_example.actions | less
 
 # Export from stdin
-cat recurring_templates.actions | clearhead export > recurring.ics
+cat calendar_export_example.actions | clearhead export > calendar.ics
 ```
 
 ### Importing to Calendar Apps
@@ -81,7 +77,6 @@ cat recurring_templates.actions | clearhead export > recurring.ics
 
 The calendar export supports:
 
-- **Recurring events** - RRULE patterns are preserved (FREQ, INTERVAL, COUNT, UNTIL, BYDAY, etc.)
 - **Event times** - `do_date_time` becomes DTSTART
 - **Duration** - `do_duration` sets event length (default 15 minutes)
 - **Descriptions** - Action descriptions become event descriptions

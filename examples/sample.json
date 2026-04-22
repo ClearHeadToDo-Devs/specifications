@@ -63,12 +63,7 @@
       "priority": 3,
       "contexts": ["personal", "planning"],
       "doDate": {
-        "datetime": "2025-01-20",
-        "recurrence": {
-          "frequency": "weekly",
-          "interval": 1,
-          "byDay": ["Sat"]
-        }
+        "datetime": "2025-01-20"
       },
       "id": "01951111-cfa6-718d-b303-d7107f4005b7"
     }

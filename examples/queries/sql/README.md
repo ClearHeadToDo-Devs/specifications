@@ -43,7 +43,7 @@ Contains frequently-used queries organized by category:
 - **Hierarchical Queries** - Parents, children, tree traversal
 - **Aggregate Queries** - Statistics, completion rates, distributions
 - **Complex Combined Queries** - Multi-criteria filters
-- **Recurring Actions** - Query recurrence rules
+- **Schedule-Derived Analysis** - Query timing and context patterns on planned acts
 - **Reporting Queries** - Dashboard summaries, top lists
 
 ### `import-json.sql`
@@ -239,14 +239,14 @@ tree-sitter parse tasks.actions | \
 
 - Use `TIMESTAMP` instead of `TEXT` for dates
 - Native array types: `TEXT[]` for contexts
-- JSONB for recurrence fields
+- JSONB for extension fields
 - Better full-text search with `tsvector`
 - Window functions for advanced analytics
 
 ### MySQL
 
 - Use `DATETIME` for date fields
-- JSON type for recurrence fields
+- JSON type for extension fields
 - `ENUM` type for state (optional)
 - Different date functions: `CURDATE()`, `DATE_ADD()`
 

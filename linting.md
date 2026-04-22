@@ -65,15 +65,14 @@ These rules detect logical inconsistencies that block core functionality. These 
 
     **Rationale:** A duration without a start time is nonsensical.
 
-#### E002: Recurrence Without Do-Date
+#### E002: Recurrence Without Do-Date (Retired)
     **Fixable:** No
 
-    Recurrence (`R:`) requires a do-date (`@`) as the starting point.
+    This rule is retired as of Decision 21.
 
-    ```actions
-    [ ] Task R:FREQ=DAILY
-    [ ] Task @2025-01-20 R:FREQ=DAILY
-    ```
+    Recurrence is no longer represented in `.actions` lines, so `R:`-based linting
+    checks are not part of the active rule set. Recurrence/schedule semantics now
+    live in `.ics` schedule files.
 
 #### E003: Empty Context Tag
     **Fixable:** No
@@ -368,7 +367,7 @@ These rules detect logical inconsistencies that block core functionality. These 
     **Severity:** Info
     **Fixable:** Yes (if auto-reordering is enabled)
 
-    Metadata should follow canonical order: `$` → `!` → `*` → `+` → `@` → `D` → `R:` → `%` → `#`.
+    Metadata should follow canonical order: `$` → `!` → `*` → `+` → `@` → `D` → `%` → `#`.
 
     ```actions
     [ ] Task !1 $ Desc  # Priority before description
@@ -509,5 +508,4 @@ These rules detect logical inconsistencies that block core functionality. These 
     ```
 
     **Rationale:** An alias marker without a name serves no purpose.
-
 

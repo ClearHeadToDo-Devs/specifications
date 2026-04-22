@@ -61,7 +61,7 @@ As we move through the inbox, we either complete actions, or move them to the ap
 
     This is also usually where we start setting due/do dates on the calendar (yes, we have both).
 
-    And for any recurring actions, we should write out RRULEs to make sure they are tracked properly in our calendar
+    And for any recurring actions, we should define them in `.ics` schedules so calendar timing stays canonical and expansion into `.actions` remains deterministic
 
     I also think this is where we should start thinking about priorities which align to the eisenhower matrix of 1-4
 ### On IDs

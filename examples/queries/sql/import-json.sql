@@ -67,40 +67,6 @@ FROM json_import,
 WHERE json_extract(action.value, '$.contexts') IS NOT NULL;
 
 -- =============================================================================
--- Import Recurrence Rules
--- =============================================================================
-
-INSERT INTO action_recurrence (
-    action_id,
-    frequency,
-    interval,
-    count,
-    until_date,
-    by_minute,
-    by_hour,
-    by_day,
-    by_month_day,
-    by_month
-)
-SELECT
-    COALESCE(
-        json_extract(action.value, '$.id'),
-        lower(hex(randomblob(16)))
-    ) as action_id,
-    json_extract(action.value, '$.doDate.recurrence.frequency'),
-    CAST(json_extract(action.value, '$.doDate.recurrence.interval') AS INTEGER),
-    CAST(json_extract(action.value, '$.doDate.recurrence.count') AS INTEGER),
-    json_extract(action.value, '$.doDate.recurrence.until'),
-    json_extract(action.value, '$.doDate.recurrence.byMinute'),
-    json_extract(action.value, '$.doDate.recurrence.byHour'),
-    json_extract(action.value, '$.doDate.recurrence.byDay'),
-    json_extract(action.value, '$.doDate.recurrence.byMonthDay'),
-    json_extract(action.value, '$.doDate.recurrence.byMonth')
-FROM json_import,
-     json_each(json_import.json_data, '$.actions') as action
-WHERE json_extract(action.value, '$.doDate.recurrence') IS NOT NULL;
-
--- =============================================================================
 -- Import Child Actions (Depth 1)
 -- =============================================================================
 
@@ -166,7 +132,7 @@ SELECT 'Child actions imported:', COUNT(*) FROM actions WHERE depth > 0
 UNION ALL
 SELECT 'Total contexts:', COUNT(*) FROM action_contexts
 UNION ALL
-SELECT 'Recurring actions:', COUNT(*) FROM action_recurrence;
+SELECT 'Actions with schedule datetime:', COUNT(*) FROM actions WHERE do_datetime IS NOT NULL;
 
 -- Check for orphaned children (should be 0)
 SELECT 'Orphaned children (should be 0):' as description, COUNT(*) as count

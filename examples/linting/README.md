@@ -40,7 +40,6 @@ These rules detect semantic correctness issues that likely indicate mistakes:
 | E004 | Invalid UUID Format | UUIDs must follow standard format |
 | E005 | Duplicate ID | Action IDs must be unique |
 | E006 | Duration Without Do-Date | `D` requires `@` |
-| E007 | Recurrence Without Do-Date | `R:` requires `@` |
 | E008 | Empty Context Tag | Context tags cannot be empty |
 | E009 | Hierarchy Depth Exceeded | Maximum depth is 5 levels |
 | E010 | Orphaned Child Marker | Children must have proper parents |
@@ -80,6 +79,12 @@ These rules enforce style conventions and best practices:
 | I010 | All Caps Name | Use priority instead of shouting |
 
 ## Important Notes
+
+### Retired Rule Fixture
+
+`legacy_E002_recurrence_without_do_date/` is retained as a legacy fixture only.
+Decision 21 removed recurrence syntax (`R:`) from `.actions`, so this fixture
+documents a retired lint rule and should not be used for active conformance.
 
 ### All Examples Use Valid Syntax
 

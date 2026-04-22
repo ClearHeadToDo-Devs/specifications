@@ -219,25 +219,25 @@ WHERE state != 'completed'
 ORDER BY days_overdue DESC;
 
 -- =============================================================================
--- Recurring Actions
+-- Schedule-Derived Timing Queries
 -- =============================================================================
 
--- All recurring actions
-SELECT a.*, r.frequency
-FROM actions a
-JOIN action_recurrence r ON a.id = r.action_id;
+-- Actions with a concrete scheduled datetime
+SELECT *
+FROM actions
+WHERE do_datetime IS NOT NULL;
 
--- Daily recurring actions
-SELECT a.*
-FROM actions a
-JOIN action_recurrence r ON a.id = r.action_id
-WHERE r.frequency = 'daily';
+-- Morning actions (before noon)
+SELECT *
+FROM actions
+WHERE do_datetime IS NOT NULL
+  AND CAST(strftime('%H', do_datetime) AS INTEGER) < 12;
 
--- Recurring actions that repeat on specific days
-SELECT a.*, r.by_day
-FROM actions a
-JOIN action_recurrence r ON a.id = r.action_id
-WHERE r.by_day IS NOT NULL;
+-- Weekend actions (0=Sunday, 6=Saturday in SQLite)
+SELECT *
+FROM actions
+WHERE do_datetime IS NOT NULL
+  AND strftime('%w', do_datetime) IN ('0', '6');
 
 -- =============================================================================
 -- Useful Reporting Queries
