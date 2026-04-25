@@ -152,9 +152,9 @@ this will also allow for on demand generation of planned acts either as a side-e
 
 One concept that is very important to the workspace format is the process of "archiving" things. weve covered the names above but its working from a reference point lets go from the beginning
 
-1. At the lowest level, we have the planned acts that are implementations of their parent plans. 
+1. At the lowest level, we have the planned acts that are implementations of their (optional) parent plans. 
   1. at first, these are all open, then as the user is closing the planned acts, the move from `<charter>.actions` to `<charter>.completed.actions` in order to remove the format of clutter and make the process of tracking closed planned acts easier for both humans to comprehend and for databases to ingest only the data they may need, this way open act queries can be fast, but full history searchs are still possible
-2. If we move a level up, we have the plans in `<charter>.ics`, again, all plans start open
+2. If we move a level up, we have the plans in `<charter>.ics`, again, all plans start open but schedules simple "are no longer scheduled" they have no state explicitly however they are still logged asan example of a schedule 
 3. Finally, like plans, the charters themselves at `charters/<charter>.md` can be archived after they are closed. at this point the most complex process happens.
   1. the contents of `charters/<charter>.completed.actions` are moved to `archive.ttl` at the workspace root
   2. the contents of `charters/<charter>.ics` are converted to turtle and moved to `archive.ttl`
