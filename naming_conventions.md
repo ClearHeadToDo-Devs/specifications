@@ -33,7 +33,7 @@ In general the data should reside in `XDG_DATA_HOME/clearhead/`. The workspace r
 ```
 <workspace>/
 ├── archive.ttl        ← the only TTL file; holds all closed history
-├── charters/          ← all charter content lives here (acts, plans, markdown)
+├── charters/          ← all charter content lives here (acts, plans, markdown, json sidecars)
 ├── objectives/        ← objectives live here
 └── templates/         ← act templates live here
 ```
@@ -93,11 +93,13 @@ The charter name is inferred from the project directory name. `next.actions` at 
 
 #### Sidecar for data
 
-we can also add the `<charter>.json` sidecar file that allows users to place data that is relevant to the charter but not something that should be Ept in the files themselves.
+we can also add the `.<charter>.json` sidecar file that allows users to place data that is relevant to the charter but not something that should be kept in the files themselves.
 
 This will cover all the pieces we will be going over and has various properties to link different objects together at a data level without cluttering the core files themselves
 
 please review the [charter sidecar schema](./schemas/charter_metadata.schema.json) for more details on how to use this file and its properties.
+
+Note: we use the hidden file convention here to indicate that this is a sidecar file meant to be read and written by tools as a companion to the charter, but should not be directly interacted with by users.
 
 #### Plans
 
@@ -110,9 +112,9 @@ Any charter with plans requires directory form. The `plans/` directory itself si
 All paths are relative to `charters/`. An example:
 
   - `charters/inbox/plans/weekly-review.ics`
-  - `charters/inbox/plans/daily-standup.ics`
-  - `charters/work/plans/sprint-planning.ics`
-  - `charters/work/feature/plans/design-review.ics`
+  - `charters/inbox/plans/<uid>.ics`
+  - `charters/work/plans/<uid>.ics`
+  - `charters/work/feature/plans/<uid>.ics`
 
   which has 3 charters with plans:
   - inbox
