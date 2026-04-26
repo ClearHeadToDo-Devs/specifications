@@ -86,33 +86,34 @@ In this way, we can structure charters and subcharters
 
 For project-scoped structures, the root charter is the project directory itself. Its files live at:
 - `<project>/.clearhead/charters/next.actions` — root charter acts
-- `<project>/.clearhead/charters/next.ics` — root charter plans
+- `<project>/.clearhead/charters/plans/` — root charter plans (vdir directory)
 - `<project>/.clearhead/charters/README.md` — root charter description (optional)
 
-The charter name is inferred from the project directory name. `next.actions` and `next.ics` at the root of `charters/` are the signal that this is the root charter rather than a named sub-charter.
+The charter name is inferred from the project directory name. `next.actions` and `plans/` at the root of `charters/` are the signal that this is the root charter rather than a named sub-charter.
 
 #### Plans
 
-Plans are stored in `.ics` files so that scheduling is encapsulated within the calendar format
+Plans are stored as individual `.ics` files within a `plans/` directory per charter. Each `.ics` file contains a single `VCALENDAR` with a single `VEVENT`, and is named by its VEVENT `UID` (e.g., `a1b2c3d4.ics`).
 
-now, by default we have a few naming conventions
-- `<charter>.ics` for plans that are attached to a specific charter
-- `<charter>/next.ics` for charters that are in the form of folders, we can use the `next.ics` file to designate the primary calendar file
-  - do note, this accounts for sub-charters as well if people want to nest the structure
-  - specifically, anything NOT named `next.ics` is assumed to be a subcharter of the charter for which the folder is the name, this way we can easily create nested charter structures
+This one-event-per-file layout (commonly known as "vdir" format) is directly compatible with calendar tools like khal and CalDAV sync tools like vdirsyncer, enabling calendar applications to read and write plans in-place without format conversion.
 
-  All paths are relative to `charters/`. An example:
+Any charter with plans requires directory form. The `plans/` directory itself signals that a charter has schedule data.
 
-  - `charters/inbox.ics`
-  - `charters/other.ics`
-  - `charters/new/next.ics`
-  - `charters/new/subcharter.ics`
+All paths are relative to `charters/`. An example:
 
-  which has 4 charters:
+  - `charters/inbox/plans/weekly-review.ics`
+  - `charters/inbox/plans/daily-standup.ics`
+  - `charters/work/plans/sprint-planning.ics`
+  - `charters/work/feature/plans/design-review.ics`
+
+  which has 3 charters with plans:
   - inbox
-  - other
-  - new
-  - new/subcharter
+  - work
+  - work/feature
+
+Sub-charter inference follows from directory structure: any subdirectory with its own `plans/` directory or `next.actions` file is a sub-charter.
+
+Multi-event `.ics` files (e.g., bulk exports from Google Calendar) are an import format, not a storage format. Implementations should provide an import path that splits multi-event files into individual files within the target charter's `plans/` directory.
 
 Be sure to review [The reference syntax](./reference_syntax.md) for guidance on working with sub charters and sub plans.
 
@@ -154,12 +155,12 @@ One concept that is very important to the workspace format is the process of "ar
 
 1. At the lowest level, we have the planned acts that are implementations of their (optional) parent plans. 
   1. at first, these are all open, then as the user is closing the planned acts, the move from `<charter>.actions` to `<charter>.completed.actions` in order to remove the format of clutter and make the process of tracking closed planned acts easier for both humans to comprehend and for databases to ingest only the data they may need, this way open act queries can be fast, but full history searchs are still possible
-2. If we move a level up, we have the plans in `<charter>.ics`, again, all plans start open but schedules simple "are no longer scheduled" they have no state explicitly however they are still logged asan example of a schedule 
+2. If we move a level up, we have the plans in `<charter>/plans/`, again, all plans start open but schedules simply "are no longer scheduled" they have no state explicitly however they are still logged as an example of a schedule 
 3. Finally, like plans, the charters themselves at `charters/<charter>.md` can be archived after they are closed. at this point the most complex process happens.
   1. the contents of `charters/<charter>.completed.actions` are moved to `archive.ttl` at the workspace root
-  2. the contents of `charters/<charter>.ics` are converted to turtle and moved to `archive.ttl`
+  2. the individual `.ics` files in `charters/<charter>/plans/` are converted to turtle and moved to `archive.ttl`
   3. the charter contents itself are converted to turtle and moved to `archive.ttl` for later review
-  4. the (now empty) `charters/<charter>.actions`, `charters/<charter>.completed.actions`, `charters/<charter>.ics` are removed from the workspace
+  4. the (now empty) `charters/<charter>.actions`, `charters/<charter>.completed.actions`, `charters/<charter>/plans/` are removed from the workspace
 
 REMEMBER, per the [process specification](./process.md) it is assumed that all child plans are completed/cancelled which is why the open files above are expected to be empty or atleast emptyable before being moved to the central `archive.ttl`
 
