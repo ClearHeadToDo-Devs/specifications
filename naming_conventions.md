@@ -48,7 +48,7 @@ Objectives are all located in an `objectives` directory within the workspace whe
 
 in a project-local scope, this should reside within `<project-root>/.clearhead/objectives/` while in a user-wide scope, this should reside within `objectives/` folder within the user workspace
 
-#### subobjectives
+#### Sub Objectives
 objective files within the `objectives` directory are assumed to be a group of objectives,
 
 with:
