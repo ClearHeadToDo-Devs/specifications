@@ -32,7 +32,7 @@ In general the data should reside in `XDG_DATA_HOME/clearhead/`. The workspace r
 
 ```
 <workspace>/
-├── archive.ttl        ← the only TTL file; holds all closed charter history
+├── archive.ttl        ← the only TTL file; holds all closed history
 ├── charters/          ← all charter content lives here (acts, plans, markdown)
 ├── objectives/        ← objectives live here
 └── templates/         ← act templates live here
@@ -53,11 +53,11 @@ objective files within the `objectives` directory are assumed to be a group of o
 
 with:
 - `<objective-alias>/README.md` - a markdown file containing the description of the objective group, its purpose, and any other relevant information as per [the objective spec](./objectives.md)
-- `<objective-alias>/<subobjective-alias>.md` - a markdown file containing the description of the subobjective, its purpose, and any other relevant information as per [the objective spec
+- `<objective-alias>/<subobjective-alias>.md` - a markdown file containing the description of the subobjective, its purpose, and any other relevant information as per [the objective spec](./objectives.md)
 
 this allows implementors to organize subobjectives within the directories without worrying about namespace colisions as the alias is scoped within the parent objective alias
 
-### Charter Naming
+### Charters
 
 charters belong in the dedicated `charters` directory within the workspace, where each charter is represented as a markdown file or a directory containing a `README.md` file.
 
@@ -89,7 +89,15 @@ For project-scoped structures, the root charter is the project directory itself.
 - `<project>/.clearhead/charters/plans/` — root charter plans (vdir directory)
 - `<project>/.clearhead/charters/README.md` — root charter description (optional)
 
-The charter name is inferred from the project directory name. `next.actions` and `plans/` at the root of `charters/` are the signal that this is the root charter rather than a named sub-charter.
+The charter name is inferred from the project directory name. `next.actions` at the root of `charters/` are the signal that this is the root charter rather than a named sub-charter.
+
+#### Sidecar for data
+
+we can also add the `<charter>.json` sidecar file that allows users to place data that is relevant to the charter but not something that should be Ept in the files themselves.
+
+This will cover all the pieces we will be going over and has various properties to link different objects together at a data level without cluttering the core files themselves
+
+please review the [charter sidecar schema](./schemas/charter_metadata.schema.json) for more details on how to use this file and its properties.
 
 #### Plans
 
