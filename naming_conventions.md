@@ -42,6 +42,11 @@ This scoping makes discovery trivial: implementors scan `charters/` for charter 
 
 By default, everyone should have a `charters/inbox.actions` file within that workspace. This file serves as the default location for uncategorized acts.
 
+### Example
+So if we go over the structure of the work we can see this as an example with a global and project workspace at the [examples directory](./examples/workspaces/)
+
+this shows both the project and user scope for examples of mixed layouts that would be representative of real world usage
+
 ### Objectives
 Objectives are all located in an `objectives` directory within the workspace where all objectives of the file format:
 `<objective-alias>.md` - a markdown file containing the description of the objective, its purpose, and any other relevant information as per [the objective spec](./objectives.md) 
@@ -93,13 +98,14 @@ The charter name is inferred from the project directory name. `next.actions` at 
 
 #### Sidecar for data
 
-we can also add the `.<charter>.json` sidecar file that allows users to place data that is relevant to the charter but not something that should be kept in the files themselves.
+we can also add the `.<charter-name>.json` sidecar file that allows users to place data that is relevant to the charter but not something that should be kept in the files themselves.
 
 This will cover all the pieces we will be going over and has various properties to link different objects together at a data level without cluttering the core files themselves
 
 please review the [charter sidecar schema](./schemas/charter_metadata.schema.json) for more details on how to use this file and its properties.
 
 Note: we use the hidden file convention here to indicate that this is a sidecar file meant to be read and written by tools as a companion to the charter, but should not be directly interacted with by users.
+
 
 #### Plans
 
@@ -109,21 +115,26 @@ This one-event-per-file layout (commonly known as "vdir" format) is directly com
 
 Any charter with plans requires directory form. The `plans/` directory itself signals that a charter has schedule data.
 
+to make it so that plans dont necessarily only confer to folder-based subcharters the `<charer-name>.plans/` forlder can be created to serve the same purpose
+
 All paths are relative to `charters/`. An example:
 
-  - `charters/inbox/plans/weekly-review.ics`
+  - `charters/inbox/plans/<uid>.ics`
   - `charters/inbox/plans/<uid>.ics`
   - `charters/work/plans/<uid>.ics`
   - `charters/work/feature/plans/<uid>.ics`
+  - `charters/subproject.plans/<uid>.ics`
 
   which has 3 charters with plans:
   - inbox
   - work
   - work/feature
+  - subproject with some plans in a folder
 
 Sub-charter inference follows from directory structure: any subdirectory with its own `plans/` directory or `next.actions` file is a sub-charter.
 
 Multi-event `.ics` files (e.g., bulk exports from Google Calendar) are an import format, not a storage format. Implementations should provide an import path that splits multi-event files into individual files within the target charter's `plans/` directory.
+
 
 Be sure to review [The reference syntax](./reference_syntax.md) for guidance on working with sub charters and sub plans.
 
