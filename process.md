@@ -142,31 +142,31 @@ As we move through the inbox, we either complete actions, or move them to the ap
 
 #### Closure
 
-    Generally, before a charter should be closed the underlying planned acts should be either closed or cancelled so that decisions are made around which planned acts will or wont go forward.
+    Generally, before a charter should be closed the underlying actions should be either closed or cancelled so that decisions are made around which actions will or wont go forward.
 
-    tooling providers may choose to do a flag that will auto cancel/complete child planned acts if they wish, but the default should be that charters are not closed until the all the child planned acts are dealt with
+    tooling providers may choose to do a flag that will auto cancel/complete child actions if they wish, but the default should be that charters are not closed until all the child actions are dealt with
 
 
 
 ## Plans
-    Plans are schedule definitions represented in `.ics` files. They define timing and recurrence, while `.actions` files hold the generated or manually-created planned acts.
+    Plans are schedule definitions represented in `.ics` files. They define timing and recurrence, while `.actions` files hold the generated or manually-created actions.
 
 ### Recurring Actions
 
-    Recurring actions are schedules with recurrence in `VEVENT` (`RRULE`) that prescribe multiple planned acts over time.
+    Recurring actions are schedules with recurrence in `VEVENT` (`RRULE`) that prescribe multiple actions over time.
 
     Template references may expand each occurrence into richer act structures.
 
-### Plans vs PlannedActs
-    Plans/schedules and planned acts are distinct concerns:
+### Plans vs Actions
+    Plans/schedules and actions are distinct concerns:
     - Plans/schedules live in `.ics`
-    - Planned acts live in `.actions`
+    - Actions live in `.actions`
 
-    Not all planned acts must have a formal schedule source (ad-hoc acts are valid).
+    Not all actions must have a formal schedule source (ad-hoc actions are valid).
 
     please review [the naming conventions](./naming_conventions.md) for the process of how they are moved from open, to closed, to archive within the file-based format
 
-    please review the [ontology](./ontology.md) for more details on the relationship between plans and planned acts
+    please review the [ontology](./ontology.md) for more details on the relationship between plans and actions
 
 ### Generation Horizon
 
@@ -183,7 +183,7 @@ As we move through the inbox, we either complete actions, or move them to the ap
     1. Read schedules from `.ics`
     2. Compute due/upcoming instances within horizon
     3. Resolve template (charter-local first, then workspace root)
-    4. Generate or upsert planned acts into `.actions`
+    4. Generate or upsert actions into `.actions`
 
     This process must be idempotent: rerunning expansion for the same schedule window must not duplicate acts.
 
@@ -203,30 +203,30 @@ As we move through the inbox, we either complete actions, or move them to the ap
 
     Rather than generating one flat act, expansion can generate a structured act tree per occurrence.
 
-## Planned Acts 
+## Actions
 
-    Planned Acts will be the primary record type that people will interact with day-to-day and as such understanding their workflow is key
+    Actions will be the primary record type that people will interact with day-to-day and as such understanding their workflow is key
 
 ### State
 
-    At any given time, a planned act is of one of the following states:
+    At any given time, an action is in one of the following states:
     - Not Started 
-    - The default state when planned acts are created
+    - The default state when actions are created
     - In Progress
-    - Intended to express planned acts an agent is actively focused on
+    - Intended to express actions an agent is actively focused on
     - Blocked
-    - Expresses that a planned act cannot be worked on for some reason
+    - Expresses that an action cannot be worked on for some reason
     - where possible, we would rather use proper dependencies to express state but this is often useful for external blockers
     - Completed
-    - The planned act has been finished successfully
+    - The action has been finished successfully
     - Cancelled
-    - The planned act is no longer relevant and will not be completed
+    - The action is no longer relevant and will not be completed
     - Holding this distinction can be important for seeing when we wanted to do something but it was no longer relevant
 
-    a normal workflow for a planned act would likely be:
+    a normal workflow for an action would likely be:
     Not Started -> In Progress -> Completed
 
-    While many more difficult planned acts could be:
+    While many more difficult actions could be:
     Not Started -> In Progress -> Blocked -> Cancelled
 
     These systems are not about judgement simply tracking this data as it moves through the traditional lifecyle
@@ -235,10 +235,10 @@ As we move through the inbox, we either complete actions, or move them to the ap
 
     Closure is different from archiving which we will cover later.
 
-    All formats should support closure and when we have completed a plan the most upcoming planned act, which is the only one except for the case of a recurring action, is also completed, while all projected planned acts are removed as they were simply projections and we dont want to clutter the archive with them
+    All formats should support closure and when we have completed a plan the most upcoming action, which is the only one except for the case of a recurring action, is also completed, while all projected actions are removed as they were simply projections and we dont want to clutter the archive with them
 
 
-### On Children Planned Acts
+### On Children Actions
     One important note is that unless otherwise specified, and where relevant, the state of parent actions are determined by their children actions.
 
     This means an action can be considered done if all the children are completed.

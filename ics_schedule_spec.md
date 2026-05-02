@@ -1,6 +1,6 @@
 ---
 title: ics schedule specification
-description: Plan/schedule semantics in .ics files for planned act generation
+description: Plan/schedule semantics in .ics files for action generation
 author: primary_desktop
 categories: Reference
 created: 2026-04-20T00:00:00-0800
@@ -8,14 +8,14 @@ updated: 2026-04-20T00:00:00-0800
 version: 1.0.0
 ---
 
-This specification defines how `.ics` files represent schedules/plans and how they map into generated planned acts.
+This specification defines how `.ics` files represent schedules/plans and how they map into generated actions.
 
 The core principle is separation of concerns:
 
 - `.ics` owns schedule timing semantics.
-- `.actions` owns planned-act execution records.
+- `.actions` owns action execution records.
 
-See [action_file_format.md](./action_file_format.md) for planned-act syntax.
+See [action_file_format.md](./action_file_format.md) for action syntax.
 
 # Scope
 
@@ -57,7 +57,7 @@ If `RRULE` is absent, VEVENT is treated as a one-off schedule.
 
 # External Identity Bridge
 
-To avoid making core ontology calendar-specific while preserving deterministic behavior, generated planned acts should carry neutral linkage fields:
+To avoid making core ontology calendar-specific while preserving deterministic behavior, generated actions should carry neutral linkage fields:
 
 - `externalScheduleId` (series-level identifier)
 - `externalOccurrenceKey` (instance-level identifier)
@@ -76,7 +76,7 @@ ICS mapping:
 1. Read schedule VEVENTs for charter scope.
 2. Compute due/upcoming instances within configured horizon.
 3. Resolve template, if DESCRIPTION contains a `template: <name>` binding.
-4. Generate or upsert planned acts into target `.actions` file.
+4. Generate or upsert actions into target `.actions` file.
 
 Default horizon is implementation-configurable; `14 days` is a recommended default.
 

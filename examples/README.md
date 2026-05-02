@@ -25,7 +25,7 @@ This directory contains example `.actions` files demonstrating various features 
 ## Scheduling Note
 
 Recurring schedules are defined in `.ics` files. `.actions` examples in this directory
-represent planned acts (including generated occurrences), not schedule definitions.
+represent actions (including generated occurrences), not schedule definitions.
 
 ## Calendar Export
 
@@ -34,7 +34,7 @@ The `export` command converts actions with due dates into iCalendar (`.ics`) for
 ### Example Files
 
 - **calendar_export_example.actions** - Comprehensive demonstration including:
-  - Multiple scheduled planned acts suitable for calendar export
+  - Multiple scheduled actions suitable for calendar export
   - All action states (pending, in-progress, blocked, completed, cancelled)
   - Priority mapping, categories, and descriptions
   - Mixed work/personal planning examples

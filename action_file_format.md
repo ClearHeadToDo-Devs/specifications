@@ -1,6 +1,6 @@
 ---
 title: actions file specification
-description: File specification for planned acts in .actions files
+description: File specification for actions in .actions files
 author: primary_desktop
 categories: Reference
 created: 2025-01-19T03:16:49-0800
@@ -10,12 +10,12 @@ version: 2.0.0
 
 This specification defines the `*.actions` format.
 
-Under Decision 21, `.actions` files represent **planned acts** only (the executable units of work).
+Under Decision 21, `.actions` files represent **actions** only (the executable units of work).
 Recurring schedules and other plan timing logic are represented in `.ics` files. See [ICS Schedule Specification](./ics_schedule_spec.md).
 
 # Scope and Principles
 
-- `.actions` is a plaintext interface for planned acts.
+- `.actions` is a plaintext interface for actions.
 - It must remain easy to read and write by hand.
 - Parsers should be whitespace-tolerant and symbol-driven.
 - The format should remain backwards-parseable over time.
@@ -24,7 +24,7 @@ Recurring schedules and other plan timing logic are represented in `.ics` files.
 
 - **Objectives** are higher-level outcomes.
 - **Plans/Schedules** live in `.ics` files.
-- **Planned acts** live in `.actions` files.
+- **Actions** live in `.actions` files.
 
 This split keeps scheduling concerns in calendar tooling and keeps `.actions` focused on actionable execution records.
 
@@ -106,7 +106,7 @@ Whitespace indentation is presentation only and should not affect parsing.
 
 ## Name (required)
 
-Primary human-readable label for the planned act.
+Primary human-readable label for the action.
 
 ## Description (optional)
 

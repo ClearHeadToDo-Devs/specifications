@@ -1,5 +1,5 @@
 # Charter Documentation 
-Charters are the primary way that we organize plans within the platform. they are prose markdown documents that leverage combination of frontmatter and content to give users a way to organize plans and planned acts around a particular domain of concern.
+Charters are the primary way that we organize plans within the platform. they are prose markdown documents that leverage combination of frontmatter and content to give users a way to organize plans and actions around a particular domain of concern.
 
 ## Frontmatter
 for the purposes of organization and reading, frontmatter allows charters to contain some important metadata, while still remaining largely a prose document for human consumption

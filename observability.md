@@ -15,7 +15,7 @@ This specification defines observability conventions for ClearHead tooling. It c
 
 **Observability is NOT for:**
 - Current state (that's the CRDT/domain data)
-- PlannedAct instances (that's `.recurring.actions` files)
+- Action instances (that's `.recurring.actions` files)
 - Sync coordination (that's the CRDT layer)
 
 ## Relationship to Other Concerns
@@ -98,7 +98,7 @@ All events include:
 
 | Event | When Emitted | Additional Fields |
 |-------|--------------|-------------------|
-| `instance_generated` | New PlannedAct created | `template_uuid`, `occurrence_date` |
+| `instance_generated` | New Action created | `template_uuid`, `occurrence_date` |
 | `instance_completed` | Recurring instance completed | `template_uuid`, `scheduled_date`, `completed_date` |
 | `instance_skipped` | User skips occurrence | `template_uuid`, `occurrence_date`, `reason` |
 | `template_edited` | Recurring template modified | `template_uuid`, `fields_changed` |

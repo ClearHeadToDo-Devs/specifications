@@ -4,9 +4,9 @@ Please feel free to review the full ontology and docs at [the full ontology repo
 For this we have a few primary entities that will align how much of the specifications are structured and understood:
 
 - **Objectives**: Desired outcomes written down for the sake of planning towards them
-- **Charters**: Declarations of scope for a particular domain of concern, these are the "containers" for plans and planned acts
-- **Plans**: the formalized perscriptions that describe the intended execution of a plan, these are the "templates" for planned acts
-- **Planned Acts**: the actual executions of plans, these are the "instances" of plans 
+- **Charters**: Declarations of scope for a particular domain of concern, these are the containers for plans and actions
+- **Plans**: Formalized prescriptions that describe intended execution patterns or schedule-backed prescriptions
+- **Actions**: The actual executable work items, whether prescribed by a plan or created directly
 
 many of our structure map to these domain objects
 
@@ -49,8 +49,8 @@ Implementations SHOULD validate semantic constraints before publishing graph-der
 
 At minimum, validation should cover:
 
-- Planned act lifecycle/status integrity
-- Plan-to-planned-act relationship integrity (where a plan link exists)
+- Action lifecycle/status integrity
+- Plan-to-action relationship integrity (where a plan link exists)
 - Relationship constraints that prevent structurally invalid graphs
 
 Ontology shapes and schema artifacts remain the normative source for term-level and shape-level constraints.
@@ -70,12 +70,12 @@ To preserve portability and avoid coupling the core model to a specific scheduli
 
 ### Neutral External Identity Bridge
 
-When planned acts are generated from external scheduling systems, implementations should preserve linkage via neutral fields:
+When actions are generated from external scheduling systems, implementations should preserve linkage via neutral fields:
 
 - `externalScheduleId` - series-level external identifier
 - `externalOccurrenceKey` - instance-level external identifier
 
-These fields are optional and do not imply that every planned act has an external schedule source.
+These fields are optional and do not imply that every action has an external schedule source.
 
 ### ICS Mapping (Profile-Level)
 

@@ -43,7 +43,7 @@ Contains frequently-used queries organized by category:
 - **Hierarchical Queries** - Parents, children, tree traversal
 - **Aggregate Queries** - Statistics, completion rates, distributions
 - **Complex Combined Queries** - Multi-criteria filters
-- **Schedule-Derived Analysis** - Query timing and context patterns on planned acts
+- **Schedule-Derived Analysis** - Query timing and context patterns on actions
 - **Reporting Queries** - Dashboard summaries, top lists
 
 ### `import-json.sql`

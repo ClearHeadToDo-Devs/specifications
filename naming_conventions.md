@@ -140,12 +140,12 @@ Be sure to review [The reference syntax](./reference_syntax.md) for guidance on 
 
 For schedule semantics and VEVENT mapping, see [ics_schedule_spec.md](./ics_schedule_spec.md).
 
-#### Planned Acts
-Per the [Ontology](./ontology.md) specification, planned acts are the actual executions of plans. and 
+#### Actions
+Per the [Ontology](./ontology.md) specification, actions are the actual executable work items in the system, whether they are generated from plans or created directly.
 
-planned acts are stored in the `.actions` files within the workspace and represent the lowest atomic unit of work within the system.
+Actions are stored in the `.actions` files within the workspace and represent the lowest atomic unit of work within the system.
 
-`.actions` files do not define recurrence rules. Recurrence and schedule timing are represented in `.ics` files and materialized into planned acts through expansion workflows.
+`.actions` files do not define recurrence rules. Recurrence and schedule timing are represented in `.ics` files and materialized into actions through expansion workflows.
 
 All paths are relative to `charters/`:
 
@@ -155,7 +155,7 @@ All paths are relative to `charters/`:
 - `charters/<charter>.completed.actions` — completed and cancelled acts for that charter
 - `charters/<charter>/next.actions` — root acts for a folder-form charter
 
-When a charter is closed, all closed planned acts within `charters/<charter>.completed.actions` are swept into `archive.ttl` at the workspace root (`.clearhead/archive.ttl`). This is the only TTL file in the workspace — everything else is either in `charters/`, `objectives/`, or `templates/`.
+When a charter is closed, all closed actions within `charters/<charter>.completed.actions` are swept into `archive.ttl` at the workspace root (`.clearhead/archive.ttl`). This is the only TTL file in the workspace — everything else is either in `charters/`, `objectives/`, or `templates/`.
 
 Charter stem derivation follows the same rules as plan name inference: `next.actions` uses the parent directory name; all other `.actions` files use the file stem. Unlike plan name inference, `inbox` is NOT skipped — `charters/inbox.actions` is valid.
 
@@ -164,18 +164,18 @@ Charter stem derivation follows the same rules as plan name inference: `next.act
 Now, its one thing to speak on the concrete file formats for each record type but the other piece to cover is the workflow that actually handled these various structures and dictates what happens when and where. for this, we are going to go a little more over the workflows that allow this format to be updated automatically or manually based on what people prefer
 
 ### Tempates
-Templates are a list of planned acts in the form of `<name>.actions` files that are stored in a `templates/` directory at the root of the workspace. these are meant to be used as templates for generating planned acts either through schedules or on demand.
+Templates are a list of actions in the form of `<name>.actions` files that are stored in a `templates/` directory at the root of the workspace. these are meant to be used as templates for generating actions either through schedules or on demand.
 
 it is assumed that the filename will be the reference for the template, so if we have a `weekly-review.actions` file in the `templates/` directory, then the reference for that template will be `weekly-review` and this is what will be used in the VEVENT DESCRIPTION field as `template: weekly-review` (first line of the event notes in any standard calendar app)
 
-this will also allow for on demand generation of planned acts either as a side-effect to charter creation or through a command like `apply template` which will allow users to generate planned acts from templates on demand without needing to wait for the schedule to trigger them
+this will also allow for on demand generation of actions either as a side-effect to charter creation or through a command like `apply template` which will allow users to generate actions from templates on demand without needing to wait for the schedule to trigger them
 
 ### Archival
 
 One concept that is very important to the workspace format is the process of "archiving" things. weve covered the names above but its working from a reference point lets go from the beginning
 
-1. At the lowest level, we have the planned acts that are implementations of their (optional) parent plans. 
-  1. at first, these are all open, then as the user is closing the planned acts, the move from `<charter>.actions` to `<charter>.completed.actions` in order to remove the format of clutter and make the process of tracking closed planned acts easier for both humans to comprehend and for databases to ingest only the data they may need, this way open act queries can be fast, but full history searchs are still possible
+1. At the lowest level, we have the actions that are implementations of their optional parent plans.
+  1. at first, these are all open, then as the user is closing the actions, they move from `<charter>.actions` to `<charter>.completed.actions` in order to remove clutter and make the process of tracking closed actions easier for both humans and databases to comprehend, this way open act queries can be fast, but full history searches are still possible
 2. If we move a level up, we have the plans in `<charter>/plans/`, again, all plans start open but schedules simply "are no longer scheduled" they have no state explicitly however they are still logged as an example of a schedule 
 3. Finally, like plans, the charters themselves at `charters/<charter>.md` can be archived after they are closed. at this point the most complex process happens.
   1. the contents of `charters/<charter>.completed.actions` are moved to `archive.ttl` at the workspace root
