@@ -36,7 +36,7 @@ Plan/schedule files are `.ics` files discovered using naming conventions in [nam
 
 Plans are stored as individual `.ics` files (one VEVENT per file) within a `plans/` directory per charter:
 
-- `<charter>/plans/<uid>.ics`
+- `/plans/<charter-name>/<uid>.ics`
 
 Each file within a charter's `plans/` directory is scoped to that charter. See [naming_conventions.md](./naming_conventions.md) for full directory structure.
 

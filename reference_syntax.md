@@ -40,6 +40,9 @@ we can refer to sub as `something/sub` and if this were to be referenced with th
 
 this works because each element creates a new namespace so that two charters can have identical actions without being semantically different as their relationships distinguish them
 
+##### Alternate separators
+while the `/` separator is the default for paths, alternate separators can be used if necessary to avoid conflicts with aliases that may contain `/`. For example, `.` or `-` could be used as separators in such cases.
+
 ## Prefix Disambiguation
 In ambiguous cases or for tooling, you can prefix a reference to force the target type:
 
