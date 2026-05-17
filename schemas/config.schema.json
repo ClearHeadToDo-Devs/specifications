@@ -1,71 +1,106 @@
 {
-       "$schema": "http://json-schema.org/draft-07/schema#",
-       "$id": "https://github.com/ClearHeadToDo-Devs/specifications/schemas/config.schema.json",
-       "title": "ClearHead Core Configuration",
-       "description": "Core configuration schema for ClearHead implementations. Implementations may extend this schema with their own namespaced settings (e.g., cli_*, nvim_*, web_*).",
-       "type": "object",
-       "properties": {
-              "data_dir": {
-                     "type": "string",
-                     "description": "Global directory for user data and action files. Supports shell expansion (~, $HOME, etc.)",
-                     "default": "XDG_DATA_HOME/clearhead",
-                     "examples": [
-                            "~/.local/share/clearhead",
-                            "~/Documents/clearhead",
-                            "$HOME/Dropbox/clearhead"
-                     ]
-              },
-              "config_dir": {
-                     "type": "string",
-                     "description": "Global directory for configuration files. Supports shell expansion (~, $HOME, etc.)",
-                     "default": "$XDG_CONFIG_HOME/clearhead",
-                     "examples": [
-                            "$XDG_CONFIG_HOME/clearhead",
-                            "~/.config/clearhead",
-                            "~/Documents/clearhead/config"
-                     ]
-              },
-              "state_dir": {
-                     "type": "string",
-                     "description": "Global directory for user data and action files. Supports shell expansion (~, $HOME, etc.)",
-                     "default": "XDG_STATE_HOME/clearhead",
-                     "examples": [
-                            "~/.local/state/clearhead",
-                            "~/Documents/clearhead"
-                     ]
-              },
-              "cache_dir": {
-                     "type": "string",
-                     "description": "Global directory for user data and action files. Supports shell expansion (~, $HOME, etc.)",
-                     "default": "XDG_CACHE_HOME/clearhead",
-                     "examples": [
-                            "~/.cache/clearhead",
-                            "~/Documents/clearhead"
-                     ]
-              },
-              "default_file": {
-                     "type": "string",
-                     "description": "Default action file name. Can be relative (resolved from data_dir) or absolute.",
-                     "default": "inbox.actions",
-                     "examples": [
-                            "inbox.actions",
-                            "work.actions",
-                            "absolute/path/to/actions.actions"
-                     ]
-              }
-       },
-       "additionalProperties": true,
-       "examples": [
-              {
-                     "data_dir": "~/.local/share/clearhead",
-                     "config_dir": "~/.config/clearhead",
-                     "default_file": "inbox.actions"
-              },
-              {
-                     "data_dir": "~/Dropbox/clearhead",
-                     "default_file": "work.actions",
-                     "cli_format": "table",
-                     "nvim_auto_normalize": true
-              }
-       ]
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/ClearHeadToDo-Devs/specifications/schemas/config.schema.json",
+  "title": "ClearHead Core Configuration",
+  "description": "Core configuration schema for ClearHead implementations. Defines settings with semantic meaning shared across all tools. Implementations extend this schema with their own namespaced settings (e.g., cli_*, nvim_*, web_*).",
+  "type": "object",
+  "properties": {
+    "data_dir": {
+      "type": "string",
+      "description": "Global directory for user data and action files. Supports shell expansion (~, $HOME, etc.)",
+      "default": "$XDG_DATA_HOME/clearhead",
+      "examples": [
+        "~/.local/share/clearhead",
+        "~/Documents/clearhead",
+        "$HOME/Dropbox/clearhead"
+      ]
+    },
+    "config_dir": {
+      "type": "string",
+      "description": "Global directory for configuration files. Supports shell expansion (~, $HOME, etc.)",
+      "default": "$XDG_CONFIG_HOME/clearhead",
+      "examples": [
+        "$XDG_CONFIG_HOME/clearhead",
+        "~/.config/clearhead"
+      ]
+    },
+    "state_dir": {
+      "type": "string",
+      "description": "Directory for machine-specific state (CRDT, event log). Keep local even if data_dir syncs via Dropbox etc.",
+      "default": "$XDG_STATE_HOME/clearhead",
+      "examples": [
+        "~/.local/state/clearhead"
+      ]
+    },
+    "cache_dir": {
+      "type": "string",
+      "description": "Directory for ephemeral cache data.",
+      "default": "$XDG_CACHE_HOME/clearhead",
+      "examples": [
+        "~/.cache/clearhead"
+      ]
+    },
+    "default_file": {
+      "type": "string",
+      "description": "Default action file name. Relative paths are resolved from data_dir.",
+      "default": "inbox.actions",
+      "examples": [
+        "inbox.actions",
+        "work.actions"
+      ]
+    },
+    "tag_hierarchies": {
+      "type": "object",
+      "description": "Tag parent-child relationships for implicit context inheritance. When an action is tagged with a child tag it implicitly inherits all ancestor tags. Traversal is transitive: +neovim → +terminal → +computer. Used by all tools for query expansion and by the graph layer to emit contextBroader/contextNarrower triples.",
+      "additionalProperties": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "List of child tags that inherit from this parent tag."
+      },
+      "default": {},
+      "examples": [
+        {
+          "computer": ["terminal", "browser", "ide"],
+          "terminal": ["neovim", "tmux", "shell"],
+          "driving": ["grocery_store", "gas_station", "pharmacy"],
+          "low_energy": ["email", "reading", "filing"]
+        }
+      ]
+    },
+    "default_to_user_scope": {
+      "type": "boolean",
+      "description": "When true, workspace discovery ignores project-scoped .clearhead directories and only loads user-scoped data from data_dir. Useful when you only want your global inbox regardless of cwd.",
+      "default": false
+    },
+    "additional_workspaces": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Additional workspace directories to include in the domain model. Each path should point to a directory following the .clearhead layout. Supports shell expansion.",
+      "default": [],
+      "examples": [
+        ["~/work-projects/.clearhead", "~/personal/.clearhead"]
+      ]
+    }
+  },
+  "additionalProperties": true,
+  "examples": [
+    {
+      "data_dir": "~/.local/share/clearhead",
+      "default_file": "inbox.actions",
+      "tag_hierarchies": {
+        "computer": ["terminal", "browser"],
+        "terminal": ["neovim", "tmux"]
+      }
+    },
+    {
+      "data_dir": "~/Dropbox/clearhead",
+      "default_to_user_scope": false,
+      "additional_workspaces": ["~/work/.clearhead"],
+      "tag_hierarchies": {
+        "work": ["project_a", "project_b"]
+      },
+      "cli_format": "table",
+      "nvim_auto_normalize": true
+    }
+  ]
 }
