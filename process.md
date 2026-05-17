@@ -168,24 +168,45 @@ As we move through the inbox, we either complete actions, or move them to the ap
 
     please review the [ontology](./ontology.md) for more details on the relationship between plans and actions
 
-### Generation Horizon
+### Instance-Count Generation
 
-    Instances are generated ahead based on configuration (recommended default: 14 days).
+    Instances are generated per schedule based on two configured counts rather than a date horizon. This keeps generation cadence-agnostic: a daily habit and a quarterly review both produce a predictable number of queued instances regardless of recurrence frequency.
 
-    This keeps generated act volume bounded while still surfacing near-term work.
+    The two values (see [Configuration](./configuration.md)):
+    - `expansion_total_instances` (default: `2`) — total instances generated per schedule
+    - `expansion_primary_instances` (default: `1`) — how many land in the primary `.actions` file; the rest go to `.upcoming.actions`
 
-    See [Configuration](./configuration.md) for implementation-specific horizon settings.
+    Both can be overridden per-schedule via the `upcoming:` directive in the VEVENT DESCRIPTION.
+
+    See [ICS Schedule Spec](./ics_schedule_spec.md) for expansion details.
 
 ### Expand Acts Workflow
 
     The schedule expansion lifecycle is:
 
     1. Read schedules from `.ics`
-    2. Compute due/upcoming instances within horizon
+    2. For each schedule, count open instances already in `.actions` and `.upcoming.actions`
     3. Resolve template (charter-local first, then workspace root)
-    4. Generate or upsert actions into `.actions`
+    4. Generate or upsert instances up to `expansion_total_instances`, placing the first `expansion_primary_instances` into `<charter>.actions` and the remainder into `<charter>.upcoming.actions`
 
-    This process must be idempotent: rerunning expansion for the same schedule window must not duplicate acts.
+    This process must be idempotent: rerunning expansion for the same schedule must not duplicate acts or change the placement of already-existing instances.
+
+### Upcoming Actions Workflow
+
+    Managing upcoming actions follows three stages:
+
+    **1. Expand**
+    Run `expand` (or equivalent) to ensure each schedule has its full complement of instances across both files. This is the entry point — the move command will warn if expansion has not been run.
+
+    **2. Archive**
+    Complete or cancel actions normally. Closed actions in `<charter>.actions` move to `<charter>.completed.actions` as usual. Closed or cancelled actions in `<charter>.upcoming.actions` are also moved to `<charter>.completed.actions` — they are never promoted to the primary file retroactively.
+
+    **3. Move**
+    Run the `move` command (or equivalent) to promote instances from `<charter>.upcoming.actions` into `<charter>.actions` when the primary file has open slots below `expansion_primary_instances` for a given schedule. The move command checks this invariant per schedule and pulls the next chronological instance from upcoming to fill each empty slot.
+
+    The move command will warn if `expand` has not been run and there are not enough upcoming instances to fill the slots.
+
+    These commands are the primary interface. Users who want a tighter conveyor belt can wire expand and move together (e.g. run both after closing actions), but they remain separate by default so that generation and promotion are explicit and debuggable.
 
 #### Schedule Edits
 

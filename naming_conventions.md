@@ -146,13 +146,14 @@ Actions are stored in the `.actions` files within the workspace and represent th
 
 All paths are relative to `charters/`:
 
-- `charters/<charter>.actions` — upcoming and in-progress acts for that charter
+- `charters/<charter>.actions` — active acts for that charter (capped at `expansion_primary_instances` per schedule)
+- `charters/<charter>.upcoming.actions` — future generated instances beyond the primary cap, not yet in the active set
 - `charters/next.actions` — root charter acts (project or user workspace root)
 - `charters/inbox.actions` — inbox charter acts
 - `charters/<charter>.completed.actions` — completed and cancelled acts for that charter
 - `charters/<charter>/next.actions` — root acts for a folder-form charter
 
-When a charter is closed, all closed actions within `charters/<charter>.completed.actions` are swept into `archive.ttl` at the workspace root (`.clearhead/archive.ttl`). This is the only TTL file in the workspace — everything else is either in `charters/`, `objectives/`, or `templates/`.
+When a charter is closed, all closed actions within `charters/<charter>.completed.actions` are swept into `archive.ttl` at the workspace root (`.clearhead/archive.ttl`). Any remaining open or cancelled actions in `charters/<charter>.upcoming.actions` are also cancelled and swept into `archive.ttl` at this time. This is the only TTL file in the workspace — everything else is either in `charters/`, `objectives/`, or `templates/`.
 
 Charter stem derivation follows the same rules as plan name inference: `next.actions` uses the parent directory name; all other `.actions` files use the file stem. Unlike plan name inference, `inbox` is NOT skipped — `charters/inbox.actions` is valid.
 

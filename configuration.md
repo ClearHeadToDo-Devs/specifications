@@ -118,6 +118,8 @@ All implementations MUST recognize these core settings:
 | `tag_hierarchies` | object | `{}` | Tag parent-child relationships for implicit inheritance |
 | `default_to_user_scope` | boolean | `false` | If true, only shows user-scoped actions (ignores project scope) |
 | `additional_workspaces` | array | `[]` | List of additional workspaces to include in the domain model |
+| `expansion_total_instances` | integer | `2` | Total instances generated per schedule across both `<charter>.actions` and `<charter>.upcoming.actions`. Must be greater than `expansion_primary_instances`. |
+| `expansion_primary_instances` | integer | `1` | Instances placed in `<charter>.actions`; remainder go to `<charter>.upcoming.actions`. Must be less than `expansion_total_instances`. |
 
 **Requirements:**
 - Core settings MUST support shell expansion (`~`, `$HOME`, environment variables)

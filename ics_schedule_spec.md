@@ -74,13 +74,48 @@ ICS mapping:
 `expand acts` (or equivalent workflow) should:
 
 1. Read schedule VEVENTs for charter scope.
-2. Compute due/upcoming instances within configured horizon.
-3. Resolve template, if DESCRIPTION contains a `template: <name>` binding.
-4. Generate or upsert actions into target `.actions` file.
+2. For each schedule, count open instances already present across both `<charter>.actions` and `<charter>.upcoming.actions` (open = `[ ]` not-started or `[-]` in-progress; cancelled `[_]` and completed `[x]` do not count).
+3. Resolve the per-schedule `upcoming:` directive from VEVENT DESCRIPTION if present (see [DESCRIPTION Directives](#description-directives)); otherwise use the workspace-level `expansion_total_instances` and `expansion_primary_instances` from configuration.
+4. Generate instances up to `total_instances` for this schedule (respecting the RRULE end date or count if present).
+5. Resolve template, if DESCRIPTION contains a `template: <name>` binding.
+6. Place the first `primary_instances` instances (by scheduled date ascending) into `<charter>.actions`; place remaining instances into `<charter>.upcoming.actions`.
+7. Upsert — do not duplicate instances that already exist (matched by deterministic UUID).
 
-Default horizon is implementation-configurable; `14 days` is a recommended default.
+This process must be idempotent: rerunning expansion for the same schedule must not create duplicates or change placement of already-existing instances.
 
-# Idempotency and Deterministic IDs
+## Instance Bounds
+
+Generation is bounded by instance count, not by a date horizon. This makes expansion cadence-agnostic: a daily habit and a quarterly review both produce a predictable number of instances regardless of their recurrence frequency.
+
+The two relevant config values (see [Configuration](./configuration.md)):
+
+- `expansion_total_instances` (default: `2`) — total instances generated per schedule across both files. Must be > `expansion_primary_instances`.
+- `expansion_primary_instances` (default: `1`) — how many of those land in the primary `<charter>.actions` file.
+
+For a schedule where `total=2, primary=1`: the next upcoming occurrence lands in `<charter>.actions`; the one after lands in `<charter>.upcoming.actions`.
+
+## DESCRIPTION Directives
+
+The VEVENT DESCRIPTION field supports a block of `key: value` directives at the top before the human-readable description body. The parser reads leading lines that match `key: value` until it hits a blank line or a non-matching line.
+
+Supported directives:
+
+| Directive | Type | Description |
+|---|---|---|
+| `template` | string | Template name to expand per occurrence (e.g. `template: weekly-review`) |
+| `upcoming` | integer | Per-schedule override for `expansion_primary_instances` — how many instances of this schedule stay in the primary file |
+
+Example DESCRIPTION:
+```
+template: weekly-review
+upcoming: 2
+
+Notes about this recurring review go here.
+```
+
+If `upcoming:` is set on a schedule, it overrides the global `expansion_primary_instances` for that schedule only. `expansion_total_instances` continues to apply globally unless also overridden — a future directive key (`total:`) may be introduced for that purpose.
+
+Calendar applications that do not understand these directives will simply display them as part of the event notes, which is acceptable.
 
 Expansion must be idempotent.
 
