@@ -24,7 +24,7 @@ This document covers:
 - `.ics` discovery and charter scope expectations
 - VEVENT field mapping into schedule records
 - Template linkage via DESCRIPTION convention
-- Expansion horizon behavior
+- Instance-count generation bounds
 - Idempotent generation requirements
 - External linkage keys carried onto generated acts
 
