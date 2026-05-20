@@ -11,7 +11,7 @@ As well as being after the [Formatting](../formatting.md) phase, which means tha
 Now, [linting](../linting.md) can happen either before or after processing depending on the use case. For example, a linter could be used to check for issues before processing to prevent bad data from entering the system, or it could be used after processing to ensure that certain process level checks outlined in [process](../process.md) are being followed.
 
 ### Embracing Minimal Structure
-In order to avoid stuffing implementors with design details, we instead leverage the filesystem itself for much of how we handle this process. for example, [naming conventions](../naming_conventions.md) are used to determine which files are considered part of the process without needing to define complex structures within the files themselves.
+In order to avoid stuffing implementors with design details, we instead leverage the filesystem itself for much of how we handle this process. for example, [workspace conventions](../workspace.md) are used to determine which files are considered part of the process without needing to define complex structures within the files themselves.
 
 All of this can be configured according to the [configuration specification](../configuration.md) to allow people to control the process no matter what tool they are using, and implementors need only respect this shared configuration in order to allow users to move seamlessly between different tools.
 

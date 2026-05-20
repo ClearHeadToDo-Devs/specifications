@@ -661,7 +661,7 @@ Issues to resolve in future revisions:
 
 - [Configuration](./configuration.md) - XDG paths, `state_dir` setting
 - [Sync Architecture](./sync_architecture.md) - How events.db fits in CRDT architecture
-- [Naming Conventions](./naming_conventions.md) - Workspace structure
+- [Workspace](../workspace.md) - Workspace structure
 - [Action File Format](./action_file_format.md) - DSL syntax for actions
 
 ---

@@ -13,7 +13,7 @@ however much of this can be adapted to different implementation methods and back
 
 Like GTD, we can always start our actions in the "Inbox" whether that be a file, a binary format, or a physical tray a core piece of the system is the idea of an inbox where all the new stuff is aggregated.
 
-Normally, it is assumed that people will be writing to the "inbox.actions" file located at the workspace root which you can read more about in the [Naming conventions specification](./naming_conventions.md).
+Normally, it is assumed that people will be writing to the "inbox.actions" file located at the workspace root which you can read more about in the [Workspace specification](./workspace.md).
 
 Remember, we arent putting all the details in yet, just get it out of your head and into the inbox.
 
@@ -55,7 +55,7 @@ Regular actions that dont need a due date should simply rely on the priority and
 Otherwise, we run the risk of over-scheduling ourselves and creating a system that is more rigid than it needs to be.
 ## Organize
 
-As we move through the inbox, we either complete actions, or move them to the appropriate [action list](./naming_conventions.md)
+As we move through the inbox, we either complete actions, or move them to the appropriate [action list](./workspace.md)
 
     Like in other systems, its not about finishing everything necessarily its about putting them in the right place whether that be in the main workspace, a project folder, or even a someday/maybe list.
 
@@ -121,7 +121,7 @@ As we move through the inbox, we either complete actions, or move them to the ap
 
 ## Arhiving 
 
-    Archival is a sparate activity from closure, a record can be closed however long we want to before it is "archived" and for some formats, the distinction isnt needed as much if the state is maintained within a database. however, for file-based interfaces it is often easier to move the closed records into some sort of "archive" for external storage and querying such that the whole graph can be queried at a a later time such as is outlined in the [file naming conventions](./naming_conventions.md)
+    Archival is a sparate activity from closure, a record can be closed however long we want to before it is "archived" and for some formats, the distinction isnt needed as much if the state is maintained within a database. however, for file-based interfaces it is often easier to move the closed records into some sort of "archive" for external storage and querying such that the whole graph can be queried at a a later time such as is outlined in the [workspace spec](./workspace.md)
 
 # Workflow
     Now that we have covered the overarching stages, we want to get a bit more granular around the relationships between various properties around the actions and how they are meant to communicate our intent
@@ -164,7 +164,7 @@ As we move through the inbox, we either complete actions, or move them to the ap
 
     Not all actions must have a formal schedule source (ad-hoc actions are valid).
 
-    please review [the naming conventions](./naming_conventions.md) for the process of how they are moved from open, to closed, to archive within the file-based format
+    please review [the workspace spec](./workspace.md) for the process of how they are moved from open, to closed, to archive within the file-based format
 
     please review the [ontology](./ontology.md) for more details on the relationship between plans and actions
 

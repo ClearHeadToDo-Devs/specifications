@@ -32,13 +32,13 @@ This document does not redefine RFC 5545.
 
 # File Location and Discovery
 
-Plan/schedule files are `.ics` files discovered using naming conventions in [naming_conventions.md](./naming_conventions.md).
+Plan/schedule files are `.ics` files discovered using naming conventions in [workspace.md](./workspace.md).
 
 Plans are stored as individual `.ics` files (one VEVENT per file) within a `plans/` directory per charter:
 
 - `/plans/<charter-name>/<uid>.ics`
 
-Each file within a charter's `plans/` directory is scoped to that charter. See [naming_conventions.md](./naming_conventions.md) for full directory structure.
+Each file within a charter's `plans/` directory is scoped to that charter. See [workspace.md](./workspace.md) for full directory structure.
 
 # VEVENT Mapping
 

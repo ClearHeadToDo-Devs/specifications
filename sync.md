@@ -488,5 +488,5 @@ Same architecture applies:
 - [Actions Ontology](https://clearhead.us/vocab/actions/v3) - ActionPlan/ActionProcess semantics from BFO/CCO
 - [ActionProcess Specification](./action_process_specification.md) - Process state semantics
 - [configuration.md](./configuration.md) - Config file format
-- [naming_conventions.md](./naming_conventions.md) - Workspace structure
+- [workspace.md](./workspace.md) - Workspace structure
 - [DECISIONS.md - Oxigraph](https://github.com/ClearHeadToDo-Devs/platform/blob/main/DECISIONS.md#oxigraph-as-query-layer-and-cache) - Graph store decision

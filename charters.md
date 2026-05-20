@@ -16,7 +16,7 @@ this is the only required field for now if a charter DOES exist within the platf
 - parent: the reference of the parent charter, this allows for nesting charters within charters, and is optional because not all charters need to be nested
   - parents must be denoted with either the reference syntax or through the UUID of the parent
     - however this model is SECONDARY to the model outlined in things like the naming conventions
-  - **Note:** in a file-based workspace you almost never need this field — directory placement is the primary and preferred way to express charter hierarchy (see [naming_conventions.md](./naming_conventions.md)). This field exists for non-filesystem contexts or genuinely disconnected structures where placement cannot express the relationship.
+  - **Note:** in a file-based workspace you almost never need this field — directory placement is the primary and preferred way to express charter hierarchy (see [workspace.md](./workspace.md)). This field exists for non-filesystem contexts or genuinely disconnected structures where placement cannot express the relationship.
 - objectives: a list of references to objectives within the platform that this works in servie of
 - state: the current state of the charter which includes the following options
   - New

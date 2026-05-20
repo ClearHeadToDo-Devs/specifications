@@ -16,7 +16,7 @@ This specification defines how ClearHead implementations handle configuration, i
 
 The platform supports user-level data as well as project-specific data.
 
-please see [Naming Conventions](./naming_conventions.md) for details on how to name project-specific files and directories. but for the configuration, we want to allow users to avoid this entire process with the `default_to_user_scope` setting that will bypass this searching algorithm entirely and ONLY show the domain model for the user scope.
+please see [Workspace](./workspace.md) for details on how to name project-specific files and directories. but for the configuration, we want to allow users to avoid this entire process with the `default_to_user_scope` setting that will bypass this searching algorithm entirely and ONLY show the domain model for the user scope.
 
 #### Additional repos
 
@@ -438,7 +438,7 @@ An implementation is conformant with this specification if it:
 ## See Also
 
 - [Action File Format](./action_specification.md) - Core file format
-- [Naming Conventions](./naming_conventions.md) - File and directory naming
+- [Workspace](./workspace.md) - File and directory naming
 - [Sync Architecture](./sync_architecture.md) - CRDT sync and state management
 
 ## Changelog
