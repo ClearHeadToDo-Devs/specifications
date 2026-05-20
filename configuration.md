@@ -18,9 +18,19 @@ The platform supports user-level data as well as project-specific data.
 
 please see [Workspace](./workspace.md) for details on how to name project-specific files and directories. but for the configuration, we want to allow users to avoid this entire process with the `default_to_user_scope` setting that will bypass this searching algorithm entirely and ONLY show the domain model for the user scope.
 
-#### Additional repos
+#### Additional workspaces
 
-If users want to have multiple repos pulled into the same domain model, they can update the `additional_workspaces` setting with a list of paths that should point to directories that follow the same workspace structure as what would be expected in a regular `.clearhead` directory. This allows users to have multiple separate workspaces all pulled into the same domain model without having to worry about the file structure.
+If users want to have multiple repos pulled into the same domain model, they can update the `additional_workspaces` setting with a list of entries pointing to directories that follow the standard `.clearhead` workspace layout. Each workspace retains its own named graph in the RDF store so charters and actions can be attributed to their source when displaying multi-workspace results.
+
+Entries support three formats, all through the same interface:
+
+| Format | Example | Use case |
+|--------|---------|----------|
+| Relative path | `"../sibling-project"` | Sub-projects or sibling repos on the same machine |
+| Absolute path | `"~/work/other-project"` | Workspaces elsewhere on the filesystem; `~` and environment variables are expanded |
+| URL *(planned)* | `"https://example.com/team-workspace"` | Remote workspaces; not yet implemented |
+
+Relative paths are resolved from the directory containing `config.json`. Shell expansion (`~`, `$HOME`, `$VAR`) applies to all path-based entries.
 
 ### XDG Base Directory Compliance
 
@@ -117,7 +127,7 @@ All implementations MUST recognize these core settings:
 | `default_file` | string | `inbox.actions` | Default action file name (relative to data_dir) |
 | `tag_hierarchies` | object | `{}` | Tag parent-child relationships for implicit inheritance |
 | `default_to_user_scope` | boolean | `false` | If true, only shows user-scoped actions (ignores project scope) |
-| `additional_workspaces` | array | `[]` | List of additional workspaces to include in the domain model |
+| `additional_workspaces` | array | `[]` | Additional workspaces to merge into the domain model. Entries may be relative paths, absolute paths (with `~` / env-var expansion), or URLs (planned). See [Additional workspaces](#additional-workspaces). |
 | `expansion_total_instances` | integer | `2` | Total instances generated per schedule across both `<charter>.actions` and `<charter>.upcoming.actions`. Must be greater than `expansion_primary_instances`. |
 | `expansion_primary_instances` | integer | `1` | Instances placed in `<charter>.actions`; remainder go to `<charter>.upcoming.actions`. Must be less than `expansion_total_instances`. |
 
