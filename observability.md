@@ -14,19 +14,20 @@ This specification defines observability conventions for ClearHead tooling. It c
 - Distributed tracing (sync operations, cross-device coordination)
 
 **Observability is NOT for:**
-- Current state (that's the CRDT/domain data)
+- Current state (that's the domain data)
 - Action instances (that's `.recurring.actions` files)
-- Sync coordination (that's the CRDT layer)
+- Sync coordination (that's git)
 
 ## Relationship to Other Concerns
 
 ```
-CRDT (Automerge)         → Coordination, conflict resolution
-Domain Specific Language Files (.actions)   → Human-readable state, queryable
-Observability (this)     → Debugging, analytics, audit trail
+Git                       → Sync, version history, conflict resolution
+Domain Model              → Current semantic state (charters, actions, plans)
+DSL Files (.actions, .md) → Human-readable projections, queryable
+Observability (this)      → Debugging, analytics, audit trail
 ```
 
-These are complementary. CRDT tracks *operational* history (insertions, deletions). Observability tracks *semantic* history (what those operations meant in domain terms).
+These are complementary. Git tracks *file-level* history. Observability tracks *semantic* history (what those file changes meant in domain terms).
 
 ## Framework
 
@@ -106,24 +107,21 @@ All events include:
 
 ### Sync Events
 
-| Event | When Emitted | Additional Fields |
-|-------|--------------|-------------------|
-| `sync_started` | Sync operation begins | `remote`, `direction` |
-| `sync_completed` | Sync operation succeeds | `remote`, `changes_sent`, `changes_received` |
-| `sync_failed` | Sync operation fails | `remote`, `error` |
-| `conflict_resolved` | CRDT conflict resolved | `action_uuid`, `resolution` |
+> Sync events are deferred to the future sync server implementation. Git is the current sync
+> mechanism; file-level history is available via `git log`. These event types are reserved for
+> when a sync server (CRDT-based or otherwise) is introduced.
 
 ### Semantic Patch / Projection Events
 
-These events help explain how user intent (DSL edits) becomes CRDT updates and how CRDT updates become projected files. They are especially useful for debugging multi-device behavior without relying on low-level CRDT operation history.
+These events trace how a named semantic operation becomes a domain model change and how that change is projected to files. They are especially useful for debugging why a file ended up in a particular state.
 
 | Event | When Emitted | Additional Fields |
 |-------|--------------|-------------------|
-| `patch_derived` | A semantic change set is derived from an editor save | `file_path`, `patch_id`, `operation_count` |
-| `patch_applied` | A semantic change set is applied to the CRDT | `patch_id`, `applied_count`, `skipped_count`, `reason` (optional) |
-| `projection_written` | A projected DSL file is rewritten from CRDT state | `file_path`, `bytes_written`, `reason` (e.g., on_save, manual_apply) |
+| `patch_derived` | A semantic change set is produced by a named operation with resolved targets | `operation`, `patch_id`, `operation_count` |
+| `patch_applied` | A semantic change set is applied to the domain model | `patch_id`, `applied_count`, `skipped_count`, `reason` (optional) |
+| `projection_written` | A projected DSL file is written from domain model state | `file_path`, `bytes_written`, `reason` (e.g., on_save, manual_apply) |
 
-**Correlation:** Implementations SHOULD correlate `patch_*` and `sync_*` events using tracing identifiers (e.g., OpenTelemetry trace/span IDs) so operators can answer: "what did we pull/push, what patch did we derive, what did we apply, what did we project".
+**Correlation:** Implementations SHOULD correlate `patch_*` events using tracing identifiers (e.g., OpenTelemetry trace/span IDs) so operators can answer: "what operation was requested, what change set was derived, what was applied, what was projected".
 
 ### System Events
 
@@ -146,5 +144,4 @@ Telemetry settings can be aggregated via a sync server but that is not required 
 ## See Also
 
 - [Process](./process.md) — Workflow and action lifecycle
-- [Sync Architecture](./sync_architecture.md) — CRDT coordination
 - [Configuration](./configuration.md) — Settings including telemetry options
