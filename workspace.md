@@ -163,33 +163,43 @@ Each workspace maps 1-1 to an RDF named graph. This enables querying a single wo
 
 ### Workspace Identity
 
-Every workspace has a stable UUID stored in `.clearhead/config.json`:
+Every workspace has a stable identity stored in `.clearhead/config.json` alongside other workspace-level config:
 
 ```json
-{ "workspace_id": "<uuid>" }
+{
+  "workspace_id": "019e43e4-...",
+  "workspace_name": "platform",
+  "created_at": "2026-05-31"
+}
 ```
 
-This UUID is generated once by the `init` command and must never be regenerated — it is the durable identity of the workspace's named graph. Regenerating it would silently break named graph identity for any archived or shared data derived from that workspace.
+`workspace_id` is generated once by `clearhead init` and must never be regenerated — it is the durable identity of the workspace's named graph. Regenerating it would silently break named graph identity for any archived or shared data derived from that workspace.
 
-The named graph URI is derived as: `urn:clearhead:workspace:<uuid>`
+`workspace_name` is the display name used in multi-workspace output and cross-workspace reference syntax (`name:charter/action`). Inferred from the project directory name by `init`; can be overridden manually.
+
+`created_at` records when the workspace was initialized. Informational only.
+
+The named graph URI is derived as: `urn:clearhead:workspace:<workspace_id>`
+
+For workspaces without a `config.json` or `workspace_id`, implementations should fall back to a deterministic UUIDv5 derived from the root path rather than failing. This ensures uninitialized workspaces remain functional while making explicit initialization the recommended path.
 
 ### Query Scope
 
-Query scope is determined by the `extra_workspaces` configuration:
+Query scope is determined by the `additional_workspaces` configuration:
 
 - **Single workspace (default):** Only the current workspace's named graph is loaded and queried.
-- **Multi-workspace:** When `extra_workspaces` lists additional workspace paths, all of them are loaded into the same store alongside the current workspace — each in its own named graph. Queries span all loaded named graphs.
+- **Multi-workspace:** When `additional_workspaces` lists additional workspace paths, all of them are loaded into the same store alongside the current workspace — each in its own named graph. Queries span all loaded named graphs.
 
-The scope is declared in config, not per-command. A user who configures extra workspaces intends cross-workspace visibility by default. This means the platform repository, which lists all submodule workspaces as extra workspaces, will query across all of them without any additional flags.
+The scope is declared in config, not per-command. A user who configures additional workspaces intends cross-workspace visibility by default. This means the platform repository, which lists all submodule workspaces as `additional_workspaces`, queries across all of them without any additional flags.
 
 ### Initialization
 
-The `init` command bootstraps a workspace:
+`clearhead init` bootstraps a workspace:
 
-1. Generates a UUID and writes `.clearhead/config.json` (skipped if already present)
+1. Generates a UUIDv7 and writes `workspace_id`, `workspace_name`, `created_at` to `.clearhead/config.json` (skipped if `workspace_id` already present)
 2. Creates the `charters/` directory structure (skipped if already present)
 
-`init` is idempotent — rerunning it on an already-initialized workspace is safe and makes no changes.
+`init` is idempotent — rerunning it on an already-initialized workspace is safe and makes no changes. Pass `--force` to regenerate identity fields (destructive — breaks named graph continuity).
 
 ## Workflows
 
