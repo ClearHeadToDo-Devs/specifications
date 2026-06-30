@@ -63,13 +63,22 @@ Within the example of a specific project, these subdirectories all reside within
 
 ```project_root/
   └── .clearhead/
-      ├── config.json        # Project-specific configuration (optional)
+      ├── config.json        # Project configuration, committed and shared (optional)
+      ├── config.local.json  # Personal override, git-ignored (optional)
+      ├── .gitignore         # Ignores config.local.json (written by `clearhead init`)
       ├── next.actions      # Project-specific action file (optional)
       └── workspace.crdt   # Project-specific CRDT (optional)
       |__ other files...        # Any other project-specific files
 
 
 ```
+
+`config.json` is committed so the whole team shares workspace settings
+(`workspace_id`, `workspace_name`, `additional_workspaces`, …). `config.local.json`
+sits beside it as a git-ignored personal override: a single developer can set
+their own values (e.g. their own `plan_path`) without touching the shared file.
+The local file wins over the committed one. `clearhead init` writes a scoped
+`.clearhead/.gitignore` so the personal override stays out of version control.
 ## Configuration File Format
 
 ### Format Choice
@@ -128,6 +137,7 @@ All implementations MUST recognize these core settings:
 | `tag_hierarchies` | object | `{}` | Tag parent-child relationships for implicit inheritance |
 | `default_to_user_scope` | boolean | `false` | If true, only shows user-scoped actions (ignores project scope) |
 | `additional_workspaces` | array | `[]` | Additional workspaces to merge into the domain model. Entries may be relative paths, absolute paths (with `~` / env-var expansion), or URLs (planned). See [Additional workspaces](#additional-workspaces). |
+| `plan_path` | string | _(unset → `<data_root>/plans`)_ | Directory where plan `.ics` files are written, flat as `<plan_path>/<charter>/<uid>.ics`. A CalDAV server can point at the same directory to share plans. When unset, plans live under the workspace's own `plans/`. |
 | `expansion_total_instances` | integer | `2` | Total instances generated per schedule across both `<charter>.actions` and `<charter>.upcoming.actions`. Must be greater than `expansion_primary_instances`. |
 | `expansion_primary_instances` | integer | `1` | Instances placed in `<charter>.actions`; remainder go to `<charter>.upcoming.actions`. Must be less than `expansion_total_instances`. |
 
@@ -142,10 +152,17 @@ Implementations MUST follow this precedence order (lowest to highest priority):
 
 1. **Built-in defaults** - Hardcoded in the application
 2. **Global configuration** - `$XDG_CONFIG_HOME/clearhead/config.json`
-3. **Environment variables** - `CLEARHEAD_*` prefix
-4. **Command-line arguments** - Highest priority (CLI tools only)
+3. **Project configuration** - `<project-root>/.clearhead/config.json` (committed, shared)
+4. **Project-local configuration** - `<project-root>/.clearhead/config.local.json` (git-ignored, personal)
+5. **Environment variables** - `CLEARHEAD_*` prefix
+6. **Command-line arguments** - Highest priority (CLI tools only)
 
 Later sources override earlier ones. Missing values fall through to the next level.
+
+The two project layers let a committed `config.json` carry the shared workspace
+settings while each developer keeps personal overrides in a git-ignored
+`config.local.json` beside it — the local file wins. Both are optional and only
+apply when the invocation resolves to a project workspace.
 
 ### Layering Example
 
@@ -437,7 +454,7 @@ An implementation is conformant with this specification if it:
 1. Follows XDG Base Directory specification for config, data, and state locations
 2. Reads configuration from `config.json` in JSON format
 3. Respects all core settings (`data_dir`, `config_dir`, `state_dir`, `default_file`)
-4. Implements configuration precedence correctly (defaults → global config → env → args)
+4. Implements configuration precedence correctly (defaults → global config → project config → project.local config → env → args)
 5. Uses `CLEARHEAD_*` prefix for environment variables
 6. Handles missing/invalid configuration gracefully with defaults
 7. Supports shell expansion in path values

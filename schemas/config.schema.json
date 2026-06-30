@@ -80,6 +80,14 @@
       "examples": [
         ["~/work-projects/.clearhead", "~/personal/.clearhead"]
       ]
+    },
+    "plan_path": {
+      "type": "string",
+      "description": "Directory where plan .ics files are written, laid out flat as <plan_path>/<charter>/<uid>.ics. A CalDAV server (e.g. radicale) can point at this same directory to share plans through the files themselves. The server owns the calendar collection (its .Radicale.props); ClearHead only writes .ics into it. When unset, plans live under the workspace's own <data_root>/plans. Supports shell expansion.",
+      "examples": [
+        "~/.local/share/clearhead/plans",
+        "~/calendars/clearhead"
+      ]
     }
   },
   "additionalProperties": true,
