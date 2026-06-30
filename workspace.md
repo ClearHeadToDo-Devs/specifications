@@ -221,9 +221,10 @@ One concept that is very important to the workspace format is the process of "ar
 2. If we move a level up, we have the plans in `plans/<charter-name>/`, again, all plans start open but schedules simply "are no longer scheduled" they have no state explicitly however they are still logged as an example of a schedule
 3. Finally, like plans, the charters themselves at `charters/<charter>.md` can be archived after they are closed. at this point the most complex process happens.
   1. the contents of `charters/<charter>.completed.actions` are moved to `archive.ttl` at the workspace root
-  2. the individual `.ics` files in `plans/<charter-name>/` are converted to turtle and moved to `archive.ttl`
-  3. the charter contents itself are converted to turtle and moved to `archive.ttl` for later review
-  4. the (now empty) `charters/<charter>.actions`, `charters/<charter>.completed.actions`, `plans/<charter-name>/` are removed from the workspace
+  2. the charter contents itself are converted to turtle and moved to `archive.ttl` for later review
+  3. the (now empty) `charters/<charter>.actions`, `charters/<charter>.completed.actions`, and the charter `.md` are removed from the workspace
+
+The `.ics` files in `plans/<charter-name>/` are **not** touched by archival. Per [decision 31][decisions] the `plans/` directory is a shared vdir that a CalDAV server may own; once a plan's `.ics` exists, deleting it would destroy data the other application owns. The action records already in `archive.ttl` carry the scheduling source of truth (`scheduled_at` / `due_at`), so the `.ics` is a redundant calendar projection, not history we need to preserve. Archival therefore leaves the calendar files in place; the user clears them through the calendar application. Any `.ics` that outlives its charter resurfaces on the next load as an implicit charter — an honest reflection that the calendar still holds those events until the user removes them.
 
 REMEMBER, per the [process spec][process] it is assumed that all child plans are completed/cancelled which is why the open files above are expected to be empty or atleast emptyable before being moved to the central `archive.ttl`
 
@@ -245,6 +246,7 @@ this is how we maintain a format that is able to evolve gracefully
 [charters]: ./charters.md
 [configuration]: ./configuration.md
 [decision-28]: ../DECISIONS.md
+[decisions]: ../DECISIONS.md
 [examples]: ./examples/workspaces/
 [ics-schedule-spec]: ./ics_schedule_spec.md
 [objectives]: ./objectives.md
