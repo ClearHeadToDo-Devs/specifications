@@ -4,7 +4,7 @@ description: Canonical formatting rules for .actions files
 author: primary_desktop
 categories: Reference
 created: 2026-01-01
-version: 2.1.0
+version: 3.1.0
 ---
 
 # Actions File Formatting Specification
@@ -45,14 +45,28 @@ Child actions should be indented to reflect their hierarchy within the action li
 
 ### Metadata Spacing
 
-While the formatter doesn't enforce these, the following are recommended for readability:
+The formatter enforces exactly one space at every boundary between distinct fields:
 
 - Space after state brackets: `[x] Task` rather than `[x]Task`
-- Space before metadata: `Task !1` rather than `Task!1`
+- Space before each metadata field: `Task !1 +tag #id` rather than `Task!1+tag#id`
 
-These can be checked via linter rules (info severity) if desired.
+It does **not** add a space between a field's own icon and its value: `!1`, `#id`, `*StoryName` stay compact. Only the boundary *between* fields is owned by the formatter; the inside of a field is not.
+
+This is enforced at two levels, and both matter for idempotency:
+
+- The grammar (`tree-sitter-actions/patterns.js`) never lets a text-bearing token (name, story, tags, predecessor names) absorb a leading or trailing whitespace run into its own byte range -- interior spaces (multi-word names) are untouched, but the space right before the next sigil is never silently swallowed into the preceding token.
+- The Topiary query (`queries/actions/formatting.scm`) then unconditionally prepends one space at every `name`/`metadata` field boundary.
+
+Because no token can absorb the boundary space itself, the two never compete, and `format(format(x)) == format(x)` for spacing.
 
 ## Version History
+
+### 3.1.0 (2026-07-03)
+- **Breaking:** Formatter now enforces horizontal spacing at field boundaries (reverses the 2.1.0 decision to leave this to lint-only)
+- Root cause of the earlier inconsistent double-spacing: `notChars()`-based grammar tokens (name, story, tags, predecessor names) greedily absorbed boundary whitespace into their own byte range, so a topiary `@prepend_space` directive could double up with whitespace already baked into the preceding token
+- Fixed at the grammar level with `notCharsTrimmed()`, which never lets a token start or end on whitespace while still allowing interior spaces
+- `formatting.scm` now uses two blanket rules covering state->name and every field->field boundary
+- Icon->value spacing within a single field (`!1`, `#id`) remains unenforced/compact -- unchanged from prior versions
 
 ### 3.0.0 (2026-01-31)
 - **Breaking:** Formatter now enforces indentation based on action depth
