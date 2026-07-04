@@ -139,13 +139,23 @@ Objective path notation is allowed, for example: `*work/clearhead/docs`.
 
 ## Context tags (optional)
 
-Contexts are designated by `+` tags:
+Contexts are designated by `+` tags. The **canonical** form is a single `+`
+group with comma-separated tags, which is what formatters emit:
+
+```actions
+[ ] Prepare deck +work,meeting,client
+```
+
+The space-separated form is also **accepted** and parsed losslessly — every
+`+` group is collected, not just the last:
 
 ```actions
 [ ] Prepare deck +work +meeting +client
 ```
 
-Tag hierarchies are configured in [configuration.md](./configuration.md).
+Parsers must collect tags from all context nodes; keeping only the final group
+is silent data loss (see DECISIONS.md Decision 33). Tag hierarchies are
+configured in [configuration.md](./configuration.md).
 
 ## Alias (optional)
 
