@@ -119,12 +119,17 @@ These rules detect logical inconsistencies that block core functionality. These 
     ```actions
     [ ] Task #not-a-uuid
     [ ] Task #123
-    [ ] Task #01950000-0000-7000-8000-000000000001
+    [ ] Task #abc-def-abc-def
     ```
 
     UUIDs are critical for the unique identification of actions across files and systems.
 
     V7 adds the benefit of being time-sortable, which is useful for tracking creation order.
+
+    A half-typed but well-formed uuid prefix (`#01950000-0000-7000-8000`) is *not*
+    an E006 error — it is the live-buffer case handled by W013 (Incomplete UUID).
+    E006 is reserved for ids that no further typing repairs into a uuid at that
+    position.
 
 #### E007: No State Brackets
     **Fixable:** Yes
@@ -295,6 +300,29 @@ These rules detect logical inconsistencies that block core functionality. These 
     ```
 
     **Rationale:** The sequential marker only affects child actions. Using it on a leaf action has no effect and may indicate a mistake.
+
+#### W013: Incomplete UUID
+    **Fixable:** No (requires user input)
+
+    A `#id` that is a well-formed *prefix* of a full UUID but stops short — the
+    live-buffer case of a uuid still being typed. Distinguished from E006 (an
+    invalid id) by shape: the characters so far all sit in their template slots
+    (hex where the template is hex, `-` at positions 8/13/18/23) and at least one
+    `-` is present.
+
+    ```actions
+    [ ] Task with a uuid still being typed #12345678-1234
+    [ ] Task with a truncated hyphenated uuid #01950000-0000-7000-8000
+    ```
+
+    **Rationale:** The grammar accepts a malformed `#id` permissively rather than
+    erroring the whole line (Decision 6, relaxed parser / strict linter), so a
+    half-typed id reaches the linter as raw text. An id mid-edit is not a mistake
+    to error on — so this warns rather than errors. It still matters: an
+    unfinished id is replaced by a generated UUIDv7 on load, so the author's
+    intended id is lost if they never finish it. Contrast E006, which errors on a
+    genuinely invalid id (`#123`, `#abc-def`, `#not-a-uuid`) that no amount of
+    further typing turns into the uuid at that position.
 
 
 ### 3. Style and Conventions (Info)
