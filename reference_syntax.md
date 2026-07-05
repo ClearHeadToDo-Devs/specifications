@@ -10,6 +10,7 @@ now, within our system we generally do:
 - UUIDv7 as a default
 - UUIDv5 for actions that can deterministically be namespaced to a particular plan.
 
+
 For programmatic structures, it is generally recommended to use the full UUID format for clarity and to have the least option for collisions, especially by two indpendent applications.
 
 ### short UUID
