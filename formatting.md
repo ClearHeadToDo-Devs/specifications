@@ -54,12 +54,15 @@ It does **not** add a space between a field's own icon and its value: `!1`, `#id
 
 This is enforced at two levels, and both matter for idempotency:
 
-- The grammar (`tree-sitter-actions/patterns.js`) never lets a text-bearing token (name, story, tags, predecessor names) absorb a leading or trailing whitespace run into its own byte range -- interior spaces (multi-word names) are untouched, but the space right before the next sigil is never silently swallowed into the preceding token.
+- The grammar (`tree-sitter-actions/patterns.js`) never lets a text-bearing token (name, description text, story, tags, predecessor names) absorb a leading or trailing whitespace run into its own byte range -- interior spaces (multi-word names) are untouched, but the space right before the next sigil, or on either side of a link, is never silently swallowed into the preceding token.
 - The Topiary query (`queries/actions/formatting.scm`) then unconditionally prepends one space at every `name`/`metadata` field boundary.
 
 Because no token can absorb the boundary space itself, the two never compete, and `format(format(x)) == format(x)` for spacing.
 
 ## Version History
+
+### 3.1.1 (2026-07-05)
+- `description_text` is now trimmed like the other freeform tokens. Previously it swallowed the spaces around links inside a `$...$` block, so topiary's reconstructed spacing stacked on top and produced a non-idempotent double space (`text  [[link]]  text`) that failed topiary's idempotence check. Descriptions now hug their `$` markers (`$text$`, icon->value compact) and links inside get a single owned space on each side.
 
 ### 3.1.0 (2026-07-03)
 - **Breaking:** Formatter now enforces horizontal spacing at field boundaries (reverses the 2.1.0 decision to leave this to lint-only)
