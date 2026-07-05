@@ -13,7 +13,9 @@ now, within our system we generally do:
 For programmatic structures, it is generally recommended to use the full UUID format for clarity and to have the least option for collisions, especially by two indpendent applications.
 
 ### short UUID
-However, for user-facing references, we support a short UUID format that is the first 8 characters of the UUID, as this is generally enough to avoid collisions within a single workspace, and is easy to read for humans when necessary.
+However, for user-facing references, we support a short UUID format that is _at least_ the first 4 characters of the UUID, as this is generally enough to avoid collisions within a single workspace, and is easy to read for humans when necessary.
+
+in the cases where there are multiple uuids with the same 8 characters, the structure is such that we match to _as many characters as is needed to disambiguate_ meaning that clients MUST accept short uuids longer than 8 characters to ensure that the references do not actually collide when necessary
 
 ## Alias
 The second (and preferred) form of reference is by alias.
