@@ -22,9 +22,7 @@ query output *applies* them. Node identity conventions follow
 
 A query emits **one** JSON-LD document. There is no per-consumer serialization.
 Simple clients read the `@graph` array and ignore the rest; semantic consumers honor
-the `@context`. Forking the payload by consumer is prohibited — a bespoke shape for a
-client that differs from what an integration partner receives is the drift this
-contract exists to prevent. Meaning travels with the data everywhere; consumers **opt
+the `@context`. Forking the payload by consumer is discouraged —  Meaning travels with the data everywhere; consumers **opt
 out of depth**, never into it.
 
 # Scope
