@@ -1,5 +1,20 @@
 # Changelog - Actions Specifications
 
+## 2026-07-05
+
+### Added
+
+**Query Output Specification v1.0.0** (`query_output.md`)
+- Defines the single JSON-LD output contract for query/view results: one payload for
+  all consumers (clients and integration partners); simple clients read `@graph` and
+  ignore `@context`. No per-consumer serialization.
+- `@id` is the canonical identity and the address mutation verbs target.
+- Query form follows data shape — `SELECT` for ordered lists/trees, `CONSTRUCT` for
+  networks — while serialization stays JSON-LD either way.
+- Ordering carried both as `@graph` array position and as sort-key node properties.
+- Establishes the stateless-producer + verbs-by-`@id` seam; client widgets (quickfix,
+  DOT) are explicitly client concerns.
+
 ## 2026-01-24
 ### Refactor: move older specifications to archive
 Moved a few specifications to `Archive` folder as we move to an RDF-centric approach:
