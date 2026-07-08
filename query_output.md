@@ -43,16 +43,26 @@ Does **not** cover:
 
 # The Contract
 
-## Identity is `@id`
+## Identity is semantic `@id`, exported as client-facing `id`
 
-Every node carries an `@id` equal to its **canonical workspace identity** (the IRI the
-graph knows it by; see [reference_syntax.md](./reference_syntax.md)). `@id` is:
+Every node carries the **canonical workspace identity** the graph knows it by (see
+[reference_syntax.md](./reference_syntax.md)). Semantically, in JSON-LD, that identity is
+`@id`. For simple clients, producers **SHOULD compact** `@id` to plain `id` via the
+payload's `@context` so direct JSON readers do not need to special-case an `@` key.
+
+So the rule is:
+
+- **`@id`** — the JSON-LD meaning,
+- **`id`** — the compacted client surface simple readers use.
+
+That identity is:
 
 - the join key between a displayed entry and the thing it refers to,
 - the address a mutation verb targets,
 - **never** a throwaway or presentation-local identifier.
 
-A consumer holding a node's `@id` can act on exactly that node.
+A consumer holding a node's canonical identity (`id` in the compacted payload,
+`@id` semantically) can act on exactly that node.
 
 ## Query form follows data shape
 
@@ -60,7 +70,7 @@ Serialization is JSON-LD regardless; the SPARQL *form* follows the natural shape
 data:
 
 - **`SELECT`** — for ordered lists and trees. Bindings are framed into `@graph` nodes;
-  one projected variable binds the node IRI (`@id`).
+  one projected variable binds the node IRI (exported as `id`, semantically `@id`).
 - **`CONSTRUCT`** — for genuine networks (nodes with many edges). Emits an RDF graph
   serialized directly as JSON-LD.
 
@@ -70,7 +80,8 @@ Choosing JSON-LD does **not** force `CONSTRUCT`. Order-bearing views stay `SELEC
 ## Shape is edge count
 
 List, tree, and network are not distinct formats. They are the same node-set differing
-only in how many `@id`-valued edge properties each node carries:
+only in how many canonical-identity-valued edge properties each node carries (`id` in
+compacted client form, `@id` semantically):
 
 - **list** — no edge properties,
 - **tree** — one hierarchical edge (e.g. `parent`),
@@ -104,12 +115,14 @@ inject, or repair: a query either satisfies its contract or fails loudly.
 The query engine is a **stateless producer**. It runs SPARQL and emits the JSON-LD
 document; it holds no session and no mutable result set.
 
-Mutation is a separate set of **verbs addressed by `@id`** (complete, update,
-cancel, …), each a targeted, single-node, single-file write.
+Mutation is a separate set of **verbs addressed by canonical identity** (complete,
+update, cancel, …) — `id` in the compacted payload, `@id` semantically — each a
+targeted, single-node, single-file write.
 
 "Living" views are not an engine feature. They are the client composing
-**read → act → re-read**: run the query, fire a verb by `@id`, re-run the query. A human
-editor, an agent, and a GUI drive the *identical* loop over the *identical* primitives.
+**read → act → re-read**: run the query, fire a verb by canonical identity (`id` /
+`@id`), re-run the query. A human editor, an agent, and a GUI drive the *identical*
+loop over the *identical* primitives.
 This is the test of the seam: if any consumer needs an endpoint the others don't get,
 the seam has leaked.
 

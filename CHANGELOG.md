@@ -8,11 +8,11 @@
 - Defines the single JSON-LD output contract for query/view results: one payload for
   all consumers (clients and integration partners); simple clients read `@graph` and
   ignore `@context`. No per-consumer serialization.
-- `@id` is the canonical identity and the address mutation verbs target.
+- Canonical identity is semantic `@id`, exported to simple clients as compacted `id`; that identity is what mutation verbs target.
 - Query form follows data shape — `SELECT` for ordered lists/trees, `CONSTRUCT` for
   networks — while serialization stays JSON-LD either way.
 - Ordering carried both as `@graph` array position and as sort-key node properties.
-- Establishes the stateless-producer + verbs-by-`@id` seam; client widgets (quickfix,
+- Establishes the stateless-producer + verbs-by-identity seam; client widgets (quickfix,
   DOT) are explicitly client concerns.
 
 ## 2026-01-24
