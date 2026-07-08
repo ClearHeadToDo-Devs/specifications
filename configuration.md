@@ -146,6 +146,20 @@ All implementations MUST recognize these core settings:
 - Relative paths in `default_file` MUST be resolved from `data_dir`
 - Absolute paths MUST be used as-is
 
+## Workspace Resolution
+
+Which workspace an invocation operates on is resolved by most-local context
+first, independent of configuration precedence below:
+
+1. **Project workspace** — walk up from the working directory to the first
+   ancestor containing a `.clearhead/` directory ([Workspace](./workspace.md)).
+2. **Configured user workspace** — the `data_dir` setting, when set.
+3. **Default user workspace** — `$XDG_DATA_HOME/clearhead`.
+
+`data_dir` relocates the *fallback* user workspace only; it MUST NOT override
+a detected project workspace. Bypassing project detection is an explicit
+choice via `default_to_user_scope`, never a side effect of other settings.
+
 ## Configuration Precedence
 
 Implementations MUST follow this precedence order (lowest to highest priority):
