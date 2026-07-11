@@ -1,6 +1,6 @@
 {
        "$schema": "http://json-schema.org/draft-07/schema#",
-       "$id": "https://github.com/ClearHeadToDo-Devs/specifications/schemas/charter_metadata.schema.json",
+       "$id": "https://raw.githubusercontent.com/ClearHeadToDo-Devs/specifications/master/schemas/charter_metadata.schema.json",
        "title": "Charter Metadata",
        "description": "Per-charter sidecar for machine-oriented metadata that does not belong in human-readable .actions or .ics files. Keyed by domain concept (charter, actions, plans) with entries keyed by identifier.",
        "type": "object",

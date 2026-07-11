@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://github.com/ClearHeadToDo-Devs/specifications/schemas/config.schema.json",
+  "$id": "https://raw.githubusercontent.com/ClearHeadToDo-Devs/specifications/master/schemas/config.schema.json",
   "title": "ClearHead Core Configuration",
   "description": "Core configuration schema for ClearHead implementations. Defines settings with semantic meaning shared across all tools. Implementations extend this schema with their own namespaced settings (e.g., cli_*, nvim_*, web_*).",
   "type": "object",
