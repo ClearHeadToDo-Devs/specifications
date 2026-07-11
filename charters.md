@@ -23,8 +23,11 @@ this is the only required field for now if a charter DOES exist within the platf
   - Active
   - Blocked
   - Closed
+  - Cancelled
 
 Other states are permissable but these are the minimium states that charter implementors must support
+
+`Closed` and `Cancelled` are both terminal states: either makes a charter eligible for archival (see [Archive](./Archive)).
 
 ## Content
 For the purpose of the content, charters only need a single header and content below it 
