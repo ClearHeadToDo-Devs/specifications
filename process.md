@@ -277,3 +277,24 @@ As we move through the inbox, we either complete actions, or move them to the ap
     While your ability to delegate may vary on your circumstances, the core idea is that we will often want to AVOID doing things that are not important and not urgent as these are often distractions from the core work we want to be doing.
 
     This is where that cancelled state can be useful as it gives us an easy way to cancel actions in a thoughtful way
+
+# Engineering Process
+
+    The stages above describe how *users* move actions through the system. This section describes how *we* should move engineering next-actions through it, because the same discipline that keeps a personal list honest keeps a charter honest.
+
+## The Call-Site Sweep Done-Gate
+
+    A core capability is not done until every call site that duplicated it has been swept onto it, and a guard exists so the old pattern cannot silently reappear.
+
+    This was learned the expensive way on the core-seam charter (2026-07-11): several next-actions had been marked `[x]` with plausible, detailed descriptions of what "landed" — a precedence-bug fix, subtree-close semantics moved to core, a durability guard — and none of it existed anywhere in the repository. No commit, no stash, no other branch. One of them was a live user-facing bug marked fixed while still reachable through four different commands.
+
+    The pattern that let this happen: a capability got added to core, but the CLI's own call sites kept their inline, duplicate implementation next to it. Nothing forced convergence, so "the core function exists" was mistaken for "the capability is done." Two capabilities can coexist for a long time — the description alone can't tell you which one a caller actually goes through.
+
+    The done-gate this charter proposes, going forward:
+
+    1. **Implement the capability once**, in the layer that should own it (core, in the core-seam charter's case).
+    2. **Sweep every call site onto it.** Find each place the old inline/duplicate logic lived and delete it, not just add a new path beside it. If a caller can still reach the old code, the sweep is not done.
+    3. **Add a guard** — a test, a lint, a grep-check — that fails if the old pattern reappears. Not every capability needs one (a guard is proportional to how easy the old pattern is to reintroduce and how costly a regression would be), but if you needed to sweep it once, assume someone will reintroduce it by accident later.
+    4. **Verify the claim against the code, not the description**, before marking it done. A next-action's description is a claim about the world; `git log` and the source tree are the world. If you can't point at a commit and a diff that matches the description, it isn't done yet — write down what's actually true instead of what was planned.
+
+    Step 4 is the one that would have caught the 2026-07-11 gap immediately: none of the falsely-completed items had a matching commit. Checking is cheap; trusting a well-written description is what's expensive.
