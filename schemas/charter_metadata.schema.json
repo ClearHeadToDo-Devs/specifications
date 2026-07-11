@@ -9,6 +9,11 @@
                      "type": "object",
                      "description": "Metadata about the charter itself",
                      "properties": {
+                            "id": {
+                                   "type": "string",
+                                   "format": "uuid",
+                                   "description": "The charter's identity, recorded so the sidecar re-joins its charter by id rather than by file path (move-safe, and works for a charter with no actions). A reference: the charter's own declaration (frontmatter `id`, or the file itself for an action-only charter) is authoritative and doctor verifies agreement."
+                            },
                             "created": {
                                    "type": "string",
                                    "description": "ISO 8601 creation timestamp"
