@@ -2,7 +2,7 @@
        "$schema": "http://json-schema.org/draft-07/schema#",
        "$id": "https://github.com/ClearHeadToDo-Devs/specifications/schemas/charter_metadata.schema.json",
        "title": "Charter Metadata",
-       "description": "Per-charter sidecar for machine-oriented metadata that does not belong in human-readable .actions or .ics files. Keyed by domain concept (charter, acts, plans) with entries keyed by identifier.",
+       "description": "Per-charter sidecar for machine-oriented metadata that does not belong in human-readable .actions or .ics files. Keyed by domain concept (charter, actions, plans) with entries keyed by identifier.",
        "type": "object",
        "properties": {
               "charter": {
@@ -21,12 +21,12 @@
                      },
                      "additionalProperties": true
               },
-              "acts": {
+              "actions": {
                      "type": "object",
-                     "description": "Metadata keyed by act identifier",
+                     "description": "Metadata keyed by action identifier",
                      "additionalProperties": {
                             "type": "object",
-                            "description": "Metadata for a single planned act",
+                            "description": "Metadata for a single planned action",
                             "properties": {
                                    "created": {
                                           "type": "string",
@@ -34,15 +34,15 @@
                                    },
                                    "source_vevent": {
                                           "type": "string",
-                                          "description": "UID of the VEVENT that generated this act"
+                                          "description": "UID of the VEVENT that generated this action"
                                    },
                                    "scheduled_at_sync": {
                                           "type": "string",
-                                          "description": "The act's scheduled_at as of the last CalDAV reconcile — the 'B' merge base for the three-way sync (decision 31). Machine-owned: only the reconcile engine writes it. Absent means 'never synced'."
+                                          "description": "The action's scheduled_at as of the last CalDAV reconcile — the 'B' merge base for the three-way sync (decision 31). Machine-owned: only the reconcile engine writes it. Absent means 'never synced'."
                                    },
                                    "due_date_sync": {
                                           "type": "string",
-                                          "description": "The act's due_date as of the last CalDAV reconcile — the 'B' merge base for the deadline. Machine-owned; absent means 'never synced'."
+                                          "description": "The action's due_date as of the last CalDAV reconcile — the 'B' merge base for the deadline. Machine-owned; absent means 'never synced'."
                                    }
                             },
                             "additionalProperties": true
