@@ -1,1 +1,1 @@
-
+[ ] align configuration.md project layout example with the charters decision\: all actions files live under charters/, never at the data root (stale .clearhead/next.actions example) !2 #019f54cf-34a0-7f72-a6f7-83f87ba55fed

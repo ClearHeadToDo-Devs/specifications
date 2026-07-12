@@ -1,2 +1,1 @@
-[x] align configuration.md project layout example with the charters decision\: all actions files live under charters/, never at the data root (stale .clearhead/next.actions example) !2 %2026-07-11T22:52 #019f54cf-34a0-7f72-a6f7-83f87ba55fed
 [x] specify user-workspace identity\: root is data_dir (XDG data default); decide where workspace_id lives (global config vs config.json at root) so init has a defined target !2 %2026-07-11T22:52 #019f54cf-540c-7530-aa16-1c8b712d644f
