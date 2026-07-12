@@ -158,32 +158,36 @@ These rules detect logical inconsistencies that block core functionality. These 
 
     This may or may not be a breaking issue depending on parser implementation. but either way, the process also discourages deep nesting for clarity.
 
-#### W002: Completed Parent with Uncompleted Children
+#### W002: Closed Parent with Open Children
     **Fixable:** No
 
-    A parent action cannot be marked as completed if it has children that are still active.
+    A parent action cannot be marked as closed if it has children that are still active.
+    Here, "closed" means either completed (`[x]`) or cancelled (`[_]`).
 
     ```actions
     [x] Parent
-    >[ ] Uncompleted child
+    >[ ] Open child
+    [_] Parent
+    >[ ] Open child
     [x] Parent
-    >[x] Completed child
+    >[_] Cancelled child
     ```
 
-    **Rationale:** Archiving and completion logic typically operates on trees. A "completed" parent with "active" work is semantically inconsistent.
+    **Rationale:** Archiving and completion logic typically operates on trees. A closed parent with active child work is semantically inconsistent.
 
-#### W003: Uncompleted Parent with All Children Completed
+#### W003: Open Parent with All Children Closed
     **Fixable:** No
 
-    A parent action that is not completed but has all its children marked as completed should likely be completed as well.
+    A parent action that remains open while all of its children are closed should likely be closed as well.
+    Here, "closed" means either completed (`[x]`) or cancelled (`[_]`).
 
     ```actions
     [ ] Parent
     >[x] Child 1
-    >[x] Child 2
+    >[_] Child 2
     [x] Parent
     >[x] Child 1
-    >[x] Child 2
+    >[_] Child 2
     ```
 
     **Rationale:** Serves as a nudge to the user to wrap up the parent action once all its sub-tasks are finished.
@@ -327,35 +331,38 @@ These rules detect logical inconsistencies that block core functionality. These 
 
 ### 3. Style and Conventions (Info)
 
-#### I001: Completed State Requires Completed Date
+#### I001: Closed State Requires Completed Date
     **Severity:** Info
     **Fixable:** No (requires user input)
 
-    Actions with state `[x]` (completed) must have a completed date (`%`).
+    Actions in a closed state — completed (`[x]`) or cancelled (`[_]`) — must have a completed date (`%`).
 
     ```actions
     [x] Task $ Description !1
+    [_] Cancelled task $ Description
     [x] Task $ Description !1 %2025-01-20T15:00
+    [_] Cancelled task $ Description %2025-01-20T15:00
     ```
 
-    **Rationale:** Completion tracking requires knowing *when* the action was completed.
+    **Rationale:** Closure tracking requires knowing *when* the action left the open set, whether by completion or cancellation.
 
-    **Fix suggestion:** Add `%YYYY-MM-DDTHH:MM` or change state to `[ ]`.
+    **Fix suggestion:** Add `%YYYY-MM-DDTHH:MM` or change state to an open state such as `[ ]`.
 
-#### I002: Completed Date Requires Completed State
+#### I002: Completed Date Requires Closed State
     **Severity:** Info
     **Fixable:** No
 
-    Actions with completed date (`%`) must have state `[x]`.
+    Actions with completed date (`%`) must have a closed state: `[x]` (completed) or `[_]` (cancelled).
 
     ```actions
     [ ] Task %2025-01-20
     [x] Task %2025-01-20
+    [_] Cancelled task %2025-01-20
     ```
 
-    **Rationale:** A completed date without completed state is contradictory.
+    **Rationale:** A completed date without a closed state is contradictory.
 
-    We may consider reopen date if requested but for now it is assumed that actions are completed if they have a completed date.
+    We may consider a distinct reopen date if requested, but for now `%` means the action was closed at that timestamp.
 
 #### I003: Invalid Priority Level
     **Severity:** Info
