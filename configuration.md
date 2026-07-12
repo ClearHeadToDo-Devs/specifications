@@ -50,11 +50,9 @@ All implementations MUST follow the XDG Base Directory specification:
 ~/.config/clearhead/
   └── config.json          # Primary configuration file
 
-~/.local/share/clearhead/
+~/.local/share/clearhead/charters/
   └── inbox.actions        # Default action file 
-
-~/.local/state/clearhead/
-  ├── workspace.crdt       # CRDT document  (optional)
+  |-- README.md             # Default Charter
 ```
 
 #### On Project-Specific Config
@@ -66,9 +64,10 @@ Within the example of a specific project, these subdirectories all reside within
       ├── config.json        # Project configuration, committed and shared (optional)
       ├── config.local.json  # Personal override, git-ignored (optional)
       ├── .gitignore         # Ignores config.local.json (written by `clearhead init`)
-      ├── next.actions      # Project-specific action file (optional)
-      └── workspace.crdt   # Project-specific CRDT (optional)
-      |__ other files...        # Any other project-specific files
+      charters/
+          |-- README.md         # Project Root Charter
+          ├── next.actions      # Project-specific action file (optional)
+          |__ other files...        # Any other project-specific files
 
 
 ```
@@ -83,14 +82,12 @@ The local file wins over the committed one. `clearhead init` writes a scoped
 
 ### Format Choice
 
-Configuration MUST be stored in JSON format at `$XDG_CONFIG_HOME/clearhead/config.json`.
+Configuration MUST be stored in a Format that supports conversion to-and-from JSON format at `$XDG_CONFIG_HOME/clearhead/config.json`.
 
 **Rationale for JSON:**
 - Universal support across all languages and platforms
-- Native support in Neovim and most editors
+- Native support in most editors
 - Simple, well-understood format
-- Easy programmatic manipulation
-- No additional parsing libraries required
 
 ### Configuration Structure
 
@@ -162,16 +159,15 @@ choice via `default_to_user_scope`, never a side effect of other settings.
 
 ## Configuration Precedence
 
-Implementations MUST follow this precedence order (lowest to highest priority):
+Implementations MUST follow this precedence order (highest to lowest):
 
+1. **Command-line arguments** - Highest priority (CLI tools only)
+2. **Environment variables** - `CLEARHEAD_*` prefix
+3. **Project-local configuration** - `<project-root>/.clearhead/config.local.json` (git-ignored, personal)
+4. **Project configuration** - `<project-root>/.clearhead/config.json` (committed, shared)
+5. **Global configuration** - `$XDG_CONFIG_HOME/clearhead/config.json`
 1. **Built-in defaults** - Hardcoded in the application
-2. **Global configuration** - `$XDG_CONFIG_HOME/clearhead/config.json`
-3. **Project configuration** - `<project-root>/.clearhead/config.json` (committed, shared)
-4. **Project-local configuration** - `<project-root>/.clearhead/config.local.json` (git-ignored, personal)
-5. **Environment variables** - `CLEARHEAD_*` prefix
-6. **Command-line arguments** - Highest priority (CLI tools only)
 
-Later sources override earlier ones. Missing values fall through to the next level.
 
 The two project layers let a committed `config.json` carry the shared workspace
 settings while each developer keeps personal overrides in a git-ignored
@@ -414,7 +410,6 @@ All other settings use defaults.
 
 ### Full Configuration
 
-A comprehensive configuration using multiple implementations:
 
 ```json
 {
@@ -422,25 +417,8 @@ A comprehensive configuration using multiple implementations:
   "config_dir": "~/.config/clearhead",
   "state_dir": "~/.local/state/clearhead",
   "default_file": "inbox.actions",
-
-  "cli_format": "table",
-  "cli_indent_style": "tabs",
-  "cli_indent_width": 2,
-
-  "nvim_auto_normalize": true,
-  "nvim_format_on_save": true,
-  "nvim_inbox_file": "~/Dropbox/clearhead/inbox.actions",
-  "nvim_lsp_enable": true,
-  "nvim_lsp_binary_path": "/usr/local/bin/clearhead_cli",
-
-  "sync_enabled": true,
-  "sync_relay_url": "wss://sync.clearhead.io",
-  "sync_interval_seconds": 30,
-  "sync_on_save": true
 }
 ```
-
-**Note:** While `data_dir` can point to a file-sync service like Dropbox for the DSL files, `state_dir` should remain local. The CRDT handles cross-device sync; file-syncing the CRDT would cause conflicts.
 
 ### Environment Variable Overrides
 
