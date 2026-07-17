@@ -61,6 +61,7 @@ Within the example of a specific project, these subdirectories all reside within
 
 ```project_root/
   └── .clearhead/
+      ├── workspace.json     # Workspace manifest: identity facts, committed (see below)
       ├── config.json        # Project configuration, committed and shared (optional)
       ├── config.local.json  # Personal override, git-ignored (optional)
       ├── .gitignore         # Ignores config.local.json (written by `clearhead init`)
@@ -72,12 +73,23 @@ Within the example of a specific project, these subdirectories all reside within
 
 ```
 
-`config.json` is committed so the whole team shares workspace settings
-(`workspace_id`, `workspace_name`, `additional_workspaces`, …). `config.local.json`
+`config.json` is committed so the whole team shares workspace *behavior*
+(`additional_workspaces`, `tag_hierarchies`, `plan_path`, …). `config.local.json`
 sits beside it as a git-ignored personal override: a single developer can set
 their own values (e.g. their own `plan_path`) without touching the shared file.
 The local file wins over the committed one. `clearhead init` writes a scoped
 `.clearhead/.gitignore` so the personal override stays out of version control.
+
+Workspace *identity* — `workspace_id`, `workspace_name`, `created_at` — does **not**
+live in `config.json`. It lives in a separate `.clearhead/workspace.json` **manifest**.
+The two are split because they behave differently: `config.json` is human-authored
+behavior that layers through the precedence chain below, while the manifest is a
+tool-managed fact about one workspace that must not layer (a `workspace_id` in a
+*global* config, or a `CLEARHEAD_WORKSPACE_ID` env override, is meaningless). The
+manifest is committed and near-static — it changes on `init` and rename, essentially
+never otherwise — and holds workspace-level facts only; per-charter metadata stays in
+its co-located sidecar. See [Workspace Identity](./workspace.md#workspace-identity)
+and the [manifest schema](./schemas/workspace.schema.json).
 ## Configuration File Format
 
 ### Format Choice

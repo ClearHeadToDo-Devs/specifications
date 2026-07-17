@@ -157,13 +157,39 @@ When a charter is closed, all closed actions within `charters/<charter>.complete
 
 Charter stem derivation follows the same rules as plan name inference: `next.actions` uses the parent directory name; all other `.actions` files use the file stem. Unlike plan name inference, `inbox` is NOT skipped — `charters/inbox.actions` is valid.
 
+## Concept Identity
+
+Every concept in a workspace — the workspace itself, its charters, its plans, and its actions — carries a durable identity that survives renames, moves, and edits. Identity belongs to the *concept*, never to its file path or title, so a reference resolves to the same thing after the target is renamed, reordered, or moved (including into an archive).
+
+One lifecycle governs all four:
+
+> **mint or derive once → persist to the concept's anchor → read from persistence → `doctor` reconciles drift**
+
+They differ only in *where* the identity is persisted:
+
+| Concept   | Anchor                                             | Specified in |
+|-----------|----------------------------------------------------|--------------|
+| Workspace | `workspace_id` in `.clearhead/workspace.json`      | [Workspace Identity](#workspace-identity) |
+| Charter   | frontmatter `id`, mirrored in the sidecar          | [Charters] |
+| Plan      | the `VEVENT` `UID` (also the `.ics` filename)      | [ICS Schedule Spec] |
+| Action    | inline id on the line, plus an optional charter id | [Action File Format] |
+
+Two rules keep this honest:
+
+- **Tool-managed, not typed.** Humans never write a UUID; `init`, the CLI, and the LSP mint and maintain them. "Invisible" means unobtrusive, not absent — a mutable action line carries its id quietly rather than re-deriving one on every read.
+- **Derivation is a bootstrap, never a live recompute.** An identity may be *derived once* to fill a gap and then persisted as truth. Recomputing an id from mutable content — from a title, from a path — is forbidden: change the content and you silently change the identity, orphaning every reference to it. A broken reference must fail *loudly*, into a dangling id that `doctor` can report, rather than rebinding silently to a different concept.
+
+### Actions carry their charter
+
+An action may record its charter's id alongside its own, denormalizing the action→charter link so it survives independently of which file the action currently sits in. The embedded charter id is authoritative when present; the file's location is the fallback when it is absent. `doctor` reconciles the two on conflict.
+
 ## Named Graph Isolation
 
 Each workspace maps 1-1 to an RDF named graph. This enables querying a single workspace in isolation or spanning multiple configured workspaces without data coalescing into a single undifferentiated graph. See [Decision 28][decision-28] for the rationale.
 
 ### Workspace Identity
 
-Every workspace has a stable identity stored in `.clearhead/config.json` alongside other workspace-level config:
+A workspace's identity is its `workspace_id`, stored in its own `.clearhead/workspace.json` **manifest** — deliberately separate from `config.json`:
 
 ```json
 {
@@ -173,15 +199,17 @@ Every workspace has a stable identity stored in `.clearhead/config.json` alongsi
 }
 ```
 
-`workspace_id` is generated once by `clearhead init` and must never be regenerated — it is the durable identity of the workspace's named graph. Regenerating it would silently break named graph identity for any archived or shared data derived from that workspace.
+The manifest and `config.json` are split because they are different in kind. `config.json` holds *behavior* — human-authored preferences that **layer** through the precedence chain (global → project → project.local → env → args). Identity is a tool-managed *fact* about one workspace that must **not** layer: a `workspace_id` in a global config, or a `CLEARHEAD_WORKSPACE_ID` env override, is meaningless. Keeping identity in a non-layered manifest keeps the config precedence rules honest. The manifest is near-static — it changes on `init` and rename, essentially never otherwise — and carries workspace-level facts only; per-charter, per-action, and per-plan metadata live in their co-located [sidecars](#sidecar-for-data), never here. See the [manifest schema][workspace-manifest-schema].
+
+The named graph URI is derived from it as `urn:clearhead:workspace:<workspace_id>`.
+
+`workspace_id` is assigned once by `clearhead init` and remains stable for the life of the workspace — it is the durable handle for the workspace's named graph, so any consumer that names the graph URI resolves it to the same workspace across sessions. It is never regenerated in normal operation.
+
+That stability is a convenience, not a correctness requirement. A workspace without a `workspace_id` is fully queryable: the read side mints an **ephemeral** graph identity per load — distinct per workspace, never persisted, and never derived from the root path. Such a workspace answers queries correctly; its graph URI simply is not stable across sessions. `init` is how a workspace earns a durable URI — offered, never forced.
 
 `workspace_name` is the display name used in multi-workspace output and cross-workspace reference syntax (`name:charter/action`). Inferred from the project directory name by `init`; can be overridden manually.
 
 `created_at` records when the workspace was initialized. Informational only.
-
-The named graph URI is derived as: `urn:clearhead:workspace:<workspace_id>`
-
-For workspaces without a `config.json` or `workspace_id`, implementations should fall back to a deterministic UUIDv5 derived from the root path rather than failing. This ensures uninitialized workspaces remain functional while making explicit initialization the recommended path.
 
 ### Query Scope
 
@@ -196,10 +224,10 @@ The scope is declared in config, not per-command. A user who configures addition
 
 `clearhead init` bootstraps a workspace:
 
-1. Generates a UUIDv7 and writes `workspace_id`, `workspace_name`, `created_at` to `.clearhead/config.json` (skipped if `workspace_id` already present)
+1. Generates a UUIDv7 and writes `workspace_id`, `workspace_name`, `created_at` to `.clearhead/workspace.json` (skipped if `workspace_id` already present). If an older workspace still carries these fields in `.clearhead/config.json`, `init` and `doctor` migrate them into the manifest and drop them from `config.json`.
 2. Creates the `charters/` directory structure (skipped if already present)
 
-`init` is idempotent — rerunning it on an already-initialized workspace is safe and makes no changes. Pass `--force` to regenerate identity fields (destructive — breaks named graph continuity).
+`init` is idempotent — rerunning it on an already-initialized workspace is safe and makes no changes. Pass `--force` to regenerate identity fields. This assigns a new graph URI, so any consumer that referenced the old one no longer resolves to this workspace; the workspace's plaintext data is untouched.
 
 ## Workflows
 
@@ -254,3 +282,4 @@ this is how we maintain a format that is able to evolve gracefully
 [process]: ./process.md
 [reference-syntax]: ./reference_syntax.md
 [sync]: ./sync.md
+[workspace-manifest-schema]: ./schemas/workspace.schema.json

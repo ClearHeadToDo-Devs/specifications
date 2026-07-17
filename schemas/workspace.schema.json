@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/ClearHeadToDo-Devs/specifications/master/schemas/workspace.schema.json",
+  "title": "ClearHead Workspace Manifest",
+  "description": "Per-workspace identity manifest, stored at .clearhead/workspace.json. Holds the durable facts that identify a workspace concept, kept deliberately separate from config.json: identity is a tool-managed fact about one workspace, not a human-authored setting, and it does NOT participate in the config precedence chain (global -> project -> local -> env -> args). The manifest is near-static: it changes on init and rename, essentially never otherwise. It carries workspace-level facts only; per-charter, per-action, and per-plan metadata live in their co-located sidecars (see charter_metadata.schema.json), never here.",
+  "type": "object",
+  "properties": {
+    "workspace_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "The workspace's durable identity, assigned once by `clearhead init` (UUIDv7). The named graph URI is derived from it as urn:clearhead:workspace:<workspace_id>. Never regenerated in normal operation. May be absent: a workspace without it is still fully queryable, with the read side minting an ephemeral per-load graph identity. `init` is how a workspace earns a durable URI — offered, never forced."
+    },
+    "workspace_name": {
+      "type": "string",
+      "description": "Display name used in multi-workspace output and cross-workspace reference syntax (name:charter/action). Inferred from the project directory name by `init`; can be overridden manually."
+    },
+    "created_at": {
+      "type": "string",
+      "description": "ISO 8601 date recording when the workspace was initialized. Informational only."
+    }
+  },
+  "additionalProperties": true,
+  "examples": [
+    {
+      "workspace_id": "019e43e4-0000-7000-8000-000000000000",
+      "workspace_name": "platform",
+      "created_at": "2026-05-31"
+    }
+  ]
+}

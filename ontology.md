@@ -76,7 +76,7 @@ ever written to `DefaultGraph`.  The named graph URI for a workspace is:
 urn:clearhead:workspace:<uuid>
 ```
 
-where `<uuid>` is the stable `workspace_id` from `.clearhead/config.json`,
+where `<uuid>` is the stable `workspace_id` from `.clearhead/workspace.json`,
 generated once by `clearhead init`.  See [Workspace — Named Graph
 Isolation][workspace-graphs] for how that UUID is created and why it must
 never be regenerated.
