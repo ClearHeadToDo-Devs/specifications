@@ -43,6 +43,19 @@ This scoping makes discovery trivial: implementors scan `charters/` for charter 
 
 By default, everyone should have a `charters/inbox.actions` file within that workspace. This file serves as the default location for uncategorized acts.
 
+### Mutation durability and locking
+
+Every ClearHead operation that writes more than one workspace file follows one concurrency policy:
+
+1. acquire the workspace's exclusive OS lock at `<data_root>/.clearhead.lock`; fail on contention rather than continuing unlocked
+2. while holding the lock, recover any journaled `.pending` batch before reading mutation inputs
+3. stage every resulting file and commit the batch through the durability journal
+4. release the lock only after commit completes
+
+The lock file is persistent and contains the current owner's PID for diagnostics, but ownership is an OS file lock rather than the file's existence. The kernel releases ownership when a process exits or is killed, so stale PID text never blocks a later writer. Implementations must not delete the lock file on release because unlinking can allow two processes to lock different inodes for the same workspace.
+
+Single-file writes use atomic temp-file replacement and do not require the multi-file journal. Readers that expose raw diagnostic state may report a pending journal without replaying it; mutation entry points must always recover it before planning from workspace state.
+
 ### Example
 So if we go over the structure of the work we can see this as an example with a global and project workspace at the [examples directory][examples].
 
@@ -153,7 +166,7 @@ All paths are relative to `charters/`:
 - `charters/<charter>.completed.actions` — completed and cancelled acts for that charter
 - `charters/<charter>/next.actions` — root acts for a folder-form charter
 
-When a charter is archived, its files (`charters/<charter>.actions`, `.completed.actions`, `.upcoming.actions`, the charter `.md`, and its `.json` sidecar) are moved verbatim into the `archive/` region, at the path they held under `charters/`. Nothing is serialized: the archived form is the same plaintext, just relocated out of the default read set.
+When a charter is archived, its known files (`charters/<charter>.actions`, `.completed.actions`, `.upcoming.actions`, the charter `.md`, and its `.json` sidecar) and every other charter-local supporting file in a directory-form charter (notes, inventories, and future formats) are moved verbatim into the `archive/` region, at the path they held under `charters/`. Nothing is serialized: the archived form is the same plaintext, just relocated out of the default read set.
 
 Charter stem derivation follows the same rules as plan name inference: `next.actions` uses the parent directory name; all other `.actions` files use the file stem. Unlike plan name inference, `inbox` is NOT skipped — `charters/inbox.actions` is valid.
 
@@ -249,7 +262,7 @@ One concept that is very important to the workspace format is the process of "ar
 2. If we move a level up, we have the plans in `plans/<charter-name>/`, again, all plans start open but schedules simply "are no longer scheduled" they have no state explicitly however they are still logged as an example of a schedule
 3. Finally, like plans, the charters themselves at `charters/<charter>.md` can be archived after they are closed. Archival is a **move, not a translation**: the archived form is data, not a projection, so no Turtle or JSON-LD is written. Any RDF view of archived data is regenerated on read by the graph binary, exactly like live data.
   1. archiving a parent charter archives its whole subtree as one unit; the open-actions precondition is recursive too — it refuses if *any* descendant still holds open actions
-  2. the subtree's files (`.actions`, `.completed.actions`, `.upcoming.actions`, the charter `.md`, and its `.json` sidecar) are moved **all-or-none** into the `archive/` region, preserving their path under `charters/` so the subtree's internal structure survives. The sidecar moves *with* the files rather than folding its `created_at` / `external_schedule_id` into the lines; atomicity (via the batch transaction, journalled in `charters/`) is what makes that safe — there is no half-archived state that orphans metadata
+  2. the subtree's known files (`.actions`, `.completed.actions`, `.upcoming.actions`, the charter `.md`, and its `.json` sidecar) plus all supporting files owned by directory-form charters are moved **all-or-none** into the `archive/` region, preserving their path under `charters/` so the subtree's internal structure survives. The sidecar moves *with* the files rather than folding its `created_at` / `external_schedule_id` into the lines; atomicity (via the batch transaction, journalled in `charters/`) is what makes that safe — there is no half-archived state that orphans metadata
   3. any charter subdirectory left empty by the move is collapsed
 
 Because `archive/` is a sibling of `charters/`, the moved files leave the default read set automatically, but reference resolution can still look into them: an archived `<` target resolves to one of three states — **satisfied** (target Completed), **abandoned** (target Cancelled), or **dangling** (resolves nowhere). Keeping archives as readable plaintext is the whole reason that three-way signal is possible.
