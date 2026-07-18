@@ -32,14 +32,14 @@ In general the data should reside in `XDG_DATA_HOME/clearhead/`. The workspace r
 
 ```
 <workspace>/
-├── archive.ttl        ← the only TTL file; holds all closed history
+├── archive/           ← closed history, as plaintext; mirrors charters/ layout
 ├── charters/          ← acts (.actions), markdown (.md), json sidecars
 ├── plans/             ← vdir calendars; one subdirectory per charter
 ├── objectives/        ← objectives live here
 └── templates/         ← act templates live here
 ```
 
-This scoping makes discovery trivial: implementors scan `charters/` for charter content and `plans/` for schedule data, without needing exclusion lists.
+This scoping makes discovery trivial: implementors scan `charters/` for charter content and `plans/` for schedule data, without needing exclusion lists. The `archive/` region is a sibling of `charters/`, so it falls outside the default read for free, while staying plaintext and parseable when something needs to look into it.
 
 By default, everyone should have a `charters/inbox.actions` file within that workspace. This file serves as the default location for uncategorized acts.
 
@@ -75,7 +75,7 @@ To this end, we support the following conventions, with the assumption implement
   - This allows for sub-projects through the combination of directories and files.
 - `$workspace/charters/<charter-name>/README.md` - A file containing a description of the charter, its purpose, and any other relevant information as per [the charter spec][charters]
 
-all closed charters are stored in the `archive.ttl` file along with their children to keep a complete record
+all closed charters are moved into the `archive/` region along with their children to keep a complete record — as their original plaintext files, not a serialized form
 
 All charters and subcharters live within the `charters/` directory. Users are free to symlink README files from the project root into `.clearhead/charters/` if desired, but the canonical location is always within `charters/`.
 
@@ -153,7 +153,7 @@ All paths are relative to `charters/`:
 - `charters/<charter>.completed.actions` — completed and cancelled acts for that charter
 - `charters/<charter>/next.actions` — root acts for a folder-form charter
 
-When a charter is closed, all closed actions within `charters/<charter>.completed.actions` are swept into `archive.ttl` at the workspace root (`.clearhead/archive.ttl`). Any remaining open or cancelled actions in `charters/<charter>.upcoming.actions` are also cancelled and swept into `archive.ttl` at this time. This is the only TTL file in the workspace — everything else is either in `charters/`, `objectives/`, or `templates/`.
+When a charter is archived, its files (`charters/<charter>.actions`, `.completed.actions`, `.upcoming.actions`, the charter `.md`, and its `.json` sidecar) are moved verbatim into the `archive/` region, at the path they held under `charters/`. Nothing is serialized: the archived form is the same plaintext, just relocated out of the default read set.
 
 Charter stem derivation follows the same rules as plan name inference: `next.actions` uses the parent directory name; all other `.actions` files use the file stem. Unlike plan name inference, `inbox` is NOT skipped — `charters/inbox.actions` is valid.
 
@@ -247,14 +247,16 @@ One concept that is very important to the workspace format is the process of "ar
 1. At the lowest level, we have the actions that are implementations of their optional parent plans.
   1. at first, these are all open, then as the user is closing the actions, they move from `<charter>.actions` to `<charter>.completed.actions` in order to remove clutter and make the process of tracking closed actions easier for both humans and databases to comprehend, this way open act queries can be fast, but full history searches are still possible
 2. If we move a level up, we have the plans in `plans/<charter-name>/`, again, all plans start open but schedules simply "are no longer scheduled" they have no state explicitly however they are still logged as an example of a schedule
-3. Finally, like plans, the charters themselves at `charters/<charter>.md` can be archived after they are closed. at this point the most complex process happens.
-  1. the contents of `charters/<charter>.completed.actions` are moved to `archive.ttl` at the workspace root
-  2. the charter contents itself are converted to turtle and moved to `archive.ttl` for later review
-  3. the (now empty) `charters/<charter>.actions`, `charters/<charter>.completed.actions`, and the charter `.md` are removed from the workspace
+3. Finally, like plans, the charters themselves at `charters/<charter>.md` can be archived after they are closed. Archival is a **move, not a translation**: the archived form is data, not a projection, so no Turtle or JSON-LD is written. Any RDF view of archived data is regenerated on read by the graph binary, exactly like live data.
+  1. archiving a parent charter archives its whole subtree as one unit; the open-actions precondition is recursive too — it refuses if *any* descendant still holds open actions
+  2. the subtree's files (`.actions`, `.completed.actions`, `.upcoming.actions`, the charter `.md`, and its `.json` sidecar) are moved **all-or-none** into the `archive/` region, preserving their path under `charters/` so the subtree's internal structure survives. The sidecar moves *with* the files rather than folding its `created_at` / `external_schedule_id` into the lines; atomicity (via the batch transaction, journalled in `charters/`) is what makes that safe — there is no half-archived state that orphans metadata
+  3. any charter subdirectory left empty by the move is collapsed
 
-The `.ics` files in `plans/<charter-name>/` are **not** touched by archival. Per [decision 31][decisions] the `plans/` directory is a shared vdir that a CalDAV server may own; once a plan's `.ics` exists, deleting it would destroy data the other application owns. The action records already in `archive.ttl` carry the scheduling source of truth (`scheduled_at` / `due_at`), so the `.ics` is a redundant calendar projection, not history we need to preserve. Archival therefore leaves the calendar files in place; the user clears them through the calendar application. Any `.ics` that outlives its charter resurfaces on the next load as an implicit charter — an honest reflection that the calendar still holds those events until the user removes them.
+Because `archive/` is a sibling of `charters/`, the moved files leave the default read set automatically, but reference resolution can still look into them: an archived `<` target resolves to one of three states — **satisfied** (target Completed), **abandoned** (target Cancelled), or **dangling** (resolves nowhere). Keeping archives as readable plaintext is the whole reason that three-way signal is possible.
 
-REMEMBER, per the [process spec][process] it is assumed that all child plans are completed/cancelled which is why the open files above are expected to be empty or atleast emptyable before being moved to the central `archive.ttl`
+The `.ics` files in `plans/<charter-name>/` are **not** touched by archival. Per [decision 31][decisions] the `plans/` directory is a shared vdir that a CalDAV server may own; once a plan's `.ics` exists, deleting it would destroy data the other application owns. The archived action records carry the scheduling source of truth (`scheduled_at` / `due_at`), so the `.ics` is a redundant calendar projection, not history we need to preserve. Archival therefore leaves the calendar files in place; the user clears them through the calendar application. Any `.ics` that outlives its charter resurfaces on the next load as an implicit charter — an honest reflection that the calendar still holds those events until the user removes them.
+
+REMEMBER, per the [process spec][process] it is assumed that all child plans are completed/cancelled which is why the open files above are expected to be empty or atleast emptyable before being moved into `archive/`
 
 this is how we maintain a format that is able to evolve gracefully
 
