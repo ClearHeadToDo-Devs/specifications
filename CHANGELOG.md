@@ -1,5 +1,22 @@
 # Changelog - Actions Specifications
 
+## 2026-07-18
+
+### Removed
+
+**Query Output Specification** (`query_output.md`) — relocated out of the shared spec set.
+Query output has a single producer (`clearhead-graphd`), so its contract is that tool's
+public interface, not cross-implementation law that this repo exists to hold. The move:
+- Semantic principles (identity, query-form-follows-shape, ordering, the stateless-producer
+  seam, aggregates) → `clearhead-graphd/docs/query_contract.md`, alongside the existing
+  field-level export contract.
+- CLI presentation (shape×destination; `read`→native, `query`→structured) →
+  `clearhead-cli/docs/UI.md`.
+
+The core reframe carried across: "one payload, every consumer" became "one **semantic**
+payload" — graphd never forks its bytes; lighter presentations are downstream projections a
+client derives, not the engine serving different masters.
+
 ## 2026-07-05
 
 ### Added
