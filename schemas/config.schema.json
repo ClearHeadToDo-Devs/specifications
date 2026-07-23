@@ -26,7 +26,7 @@
     },
     "state_dir": {
       "type": "string",
-      "description": "Directory for machine-specific state (CRDT, event log). Keep local even if data_dir syncs via Dropbox etc.",
+      "description": "Directory for machine-specific runtime state and event logs. Keep local even if data_dir syncs via Dropbox etc.",
       "default": "$XDG_STATE_HOME/clearhead",
       "examples": [
         "~/.local/state/clearhead"

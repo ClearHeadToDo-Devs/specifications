@@ -141,7 +141,7 @@ All implementations MUST recognize these core settings:
 |---------|------|---------|-------------|
 | `data_dir` | string | `~/.local/share/clearhead` | Global directory for user data and action files |
 | `config_dir` | string | `~/.config/clearhead` | Global directory for configuration files |
-| `state_dir` | string | `~/.local/state/clearhead` | Directory for machine-specific state (CRDT, events.db) |
+| `state_dir` | string | `~/.local/state/clearhead` | Directory for machine-specific runtime state and event logs |
 | `default_file` | string | `inbox.actions` | Default action file name (relative to data_dir) |
 | `tag_hierarchies` | object | `{}` | Tag parent-child relationships for implicit inheritance |
 | `default_to_user_scope` | boolean | `false` | If true, only shows user-scoped actions (ignores project scope) |
@@ -470,7 +470,6 @@ An implementation is conformant with this specification if it:
 
 - [Action File Format](./action_specification.md) - Core file format
 - [Workspace](./workspace.md) - File and directory naming
-- [Sync Architecture](./sync_architecture.md) - CRDT sync and state management
 
 ## Changelog
 

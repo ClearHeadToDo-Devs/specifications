@@ -109,7 +109,7 @@ All events include:
 
 > Sync events are deferred to the future sync server implementation. Git is the current sync
 > mechanism; file-level history is available via `git log`. These event types are reserved for
-> when a sync server (CRDT-based or otherwise) is introduced.
+> when a distributed sync server is introduced.
 
 ### Semantic Patch / Projection Events
 

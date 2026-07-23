@@ -282,7 +282,6 @@ this is how we maintain a format that is able to evolve gracefully
 - [Ontology] — Domain model and RDF contract
 - [Process] — Workflow including recurring action behavior
 - [Reference Syntax] — Sub-charter and sub-plan references
-- [Sync] — CRDT sync and state management
 
 [action-file-format]: ./action_file_format.md
 [charter-sidecar-schema]: ./schemas/charter_metadata.schema.json
@@ -296,5 +295,4 @@ this is how we maintain a format that is able to evolve gracefully
 [ontology]: ./ontology.md
 [process]: ./process.md
 [reference-syntax]: ./reference_syntax.md
-[sync]: ./sync.md
 [workspace-manifest-schema]: ./schemas/workspace.schema.json
