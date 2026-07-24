@@ -146,7 +146,7 @@ All implementations MUST recognize these core settings:
 | `tag_hierarchies` | object | `{}` | Tag parent-child relationships for implicit inheritance |
 | `default_to_user_scope` | boolean | `false` | If true, only shows user-scoped actions (ignores project scope) |
 | `additional_workspaces` | array | `[]` | Additional workspaces to merge into the domain model. Entries may be relative paths, absolute paths (with `~` / env-var expansion), or URLs (planned). See [Additional workspaces](#additional-workspaces). |
-| `plan_path` | string | _(unset → `<data_root>/plans`)_ | Directory where plan `.ics` files are written, flat as `<plan_path>/<charter>/<uid>.ics`. A CalDAV server can point at the same directory to share plans. When unset, plans live under the workspace's own `plans/`. |
+| `plan_path` | string | _(unset → `<data_root>/plans`)_ | Configured iCalendar vdir at `<plan_path>/<charter>/<resource>.ics`. ClearHead assumes only the filesystem boundary; any CalDAV/file-sync transport is external. |
 | `expansion_total_instances` | integer | `2` | Total instances generated per schedule across both `<charter>.actions` and `<charter>.upcoming.actions`. Must be greater than `expansion_primary_instances`. |
 | `expansion_primary_instances` | integer | `1` | Instances placed in `<charter>.actions`; remainder go to `<charter>.upcoming.actions`. Must be less than `expansion_total_instances`. |
 

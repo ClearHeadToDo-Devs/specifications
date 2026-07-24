@@ -63,7 +63,7 @@ As we move through the inbox, we either complete actions, or move them to the ap
 
     And for any recurring actions, we should define them in `.ics` schedules so calendar timing stays canonical and expansion into `.actions` remains deterministic
 
-    I also think this is where we should start thinking about priorities which align to the eisenhower matrix of 1-4
+    This is also where priorities can be assigned on the RFC 5545-aligned 1-9 scale (1 highest, 9 lowest); urgency and importance remain separate planning judgments rather than encoded quadrants.
 ### On IDs
     By the time we move the actions out of the inbox, it is recommended that each action is given a unique UUID so that it can be tracked throughout the system.
 
@@ -153,7 +153,7 @@ As we move through the inbox, we either complete actions, or move them to the ap
 
 ### Recurring Actions
 
-    Recurring actions are schedules with recurrence in `VEVENT` (`RRULE`) that prescribe multiple actions over time.
+    Recurring actions are prescribed by Plan `VTODO` masters carrying `RRULE`.
 
     Template references may expand each occurrence into richer act structures.
 
@@ -176,7 +176,7 @@ As we move through the inbox, we either complete actions, or move them to the ap
     - `expansion_total_instances` (default: `2`) — total instances generated per schedule
     - `expansion_primary_instances` (default: `1`) — how many land in the primary `.actions` file; the rest go to `.upcoming.actions`
 
-    Both can be overridden per-schedule via the `upcoming:` directive in the VEVENT DESCRIPTION.
+    Both can be overridden per-schedule via the `upcoming:` directive in the Plan VTODO DESCRIPTION.
 
     See [ICS Schedule Spec](./ics_schedule_spec.md) for expansion details.
 
@@ -220,7 +220,7 @@ As we move through the inbox, we either complete actions, or move them to the ap
 
 ### Children of Recurring Actions
 
-    For complex recurring workflows, schedules can reference templates via the VEVENT DESCRIPTION field (first line: `template: <name>`).
+    For complex recurring workflows, schedules can reference templates via the Plan VTODO DESCRIPTION field (first line: `template: <name>`).
 
     Rather than generating one flat act, expansion can generate a structured act tree per occurrence.
 
@@ -268,15 +268,9 @@ As we move through the inbox, we either complete actions, or move them to the ap
     The reverse is also true, we want to avoid closed parent actions with open children actions as this creates confusion around what is actually done.
 
 ### Priority
-    Generally, we focus on a 1-4 scale aligned to the Eisenhower matrix:
-    1. Do: Urgent and Important
-    2. Schedule: Not Urgent but Important
-    3. Delegate: Urgent but Not Important
-    4. Delete: Not Urgent and Not Important
+    Priority uses the RFC 5545 range directly: 1 is highest and 9 is lowest. An omitted priority means undefined. This direct scale preserves VTODO interoperability without a lossy conversion table.
 
-    While your ability to delegate may vary on your circumstances, the core idea is that we will often want to AVOID doing things that are not important and not urgent as these are often distractions from the core work we want to be doing.
-
-    This is where that cancelled state can be useful as it gives us an easy way to cancel actions in a thoughtful way
+    Priority is ordering guidance, not an encoded Eisenhower quadrant. Urgency may be represented by dates and importance by the surrounding charter or objective. Work that no longer deserves attention should be explicitly cancelled rather than hidden behind a special priority value.
 
 # Engineering Process
 

@@ -75,18 +75,19 @@ cat calendar_export_example.actions | clearhead export > calendar.ics
 
 ### Supported Features
 
-The calendar export supports:
+The calendar export uses standalone VTODO components and supports:
 
-- **Event times** - `do_date_time` becomes DTSTART
-- **Duration** - `do_duration` sets event length (default 15 minutes)
-- **Descriptions** - Action descriptions become event descriptions
-- **Priority** - Mapped from ClearHead priority (1-4) to iCalendar (1-9)
-- **Categories** - Context tags become event categories
-- **Status** - Action state maps to event status:
-  - `[ ]` NotStarted → TENTATIVE
-  - `[-]` InProgress → CONFIRMED
-  - `[=]` Blocked/Awaiting → TENTATIVE
-  - `[x]` Completed → CONFIRMED
+- **Scheduled times** - `scheduled_at` becomes `DTSTART`
+- **Due times** - `due_date` becomes `DUE`
+- **Descriptions** - Action descriptions become VTODO descriptions
+- **Priority** - ClearHead priority maps directly to RFC 5545 `PRIORITY` (1-9)
+- **Categories** - Context tags become standard `CATEGORIES`
+- **Status** - Action state maps through VTODO `STATUS`:
+  - `[ ]` NotStarted → `NEEDS-ACTION`
+  - `[-]` InProgress → `IN-PROCESS`
+  - `[=]` Blocked/Awaiting → `NEEDS-ACTION` plus `X-CLEARHEAD-STATUS:blocked`
+  - `[x]` Completed → `COMPLETED`
+  - `[_]` Cancelled → `CANCELLED`
   - `[_]` Cancelled → CANCELLED
 
 ### Example File

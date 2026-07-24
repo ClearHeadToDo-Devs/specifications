@@ -368,7 +368,7 @@ These rules detect logical inconsistencies that block core functionality. These 
     **Severity:** Info
     **Fixable:** No
 
-    Priority must be 1-5 (1 = highest, 5 = lowest).
+    Priority must be 1-9 (1 = highest, 9 = lowest), aligned directly with RFC 5545 `PRIORITY`.
 
     ```actions
     [ ] Task !0

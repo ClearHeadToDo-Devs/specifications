@@ -203,7 +203,7 @@ These fields are optional and do not imply that every action has an external sch
 
 In the ICS integration profile, these map as follows:
 
-- `externalScheduleId <- VEVENT.UID`
+- `externalScheduleId <- recurring VTODO.UID`
 - `externalOccurrenceKey <- RECURRENCE-ID` (or canonicalized occurrence datetime when recurrence-id is absent)
 
 This mapping belongs to the integration contract, not the core ontology definition.

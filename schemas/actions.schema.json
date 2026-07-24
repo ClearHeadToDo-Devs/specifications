@@ -48,8 +48,9 @@
         },
         "priority": {
           "type": "integer",
-          "description": "Numeric priority level",
-          "minimum": 0
+          "description": "RFC 5545-aligned numeric priority (1 is highest, 9 is lowest)",
+          "minimum": 1,
+          "maximum": 9
         },
         "story": {
           "type": "string",

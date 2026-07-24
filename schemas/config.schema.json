@@ -83,7 +83,7 @@
     },
     "plan_path": {
       "type": "string",
-      "description": "Directory where plan .ics files are written, laid out flat as <plan_path>/<charter>/<uid>.ics. A CalDAV server (e.g. radicale) can point at this same directory to share plans through the files themselves. The server owns the calendar collection (its .Radicale.props); ClearHead only writes .ics into it. When unset, plans live under the workspace's own <data_root>/plans. Supports shell expansion.",
+      "description": "Configured iCalendar vdir, laid out as <plan_path>/<charter>/<resource>.ics, containing recurring Plan and standalone Action VTODOs. ClearHead integrates only with this filesystem boundary; vdirsyncer, CalDAV, file synchronization, or no transport may sit behind it. When unset, the vdir lives at <data_root>/plans. Supports shell expansion.",
       "examples": [
         "~/.local/share/clearhead/plans",
         "~/calendars/clearhead"

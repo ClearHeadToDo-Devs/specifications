@@ -36,7 +36,7 @@ These rules detect semantic correctness issues that likely indicate mistakes:
 |------|------|-------------|
 | E001 | Completed State Requires Completed Date | Actions with `[x]` must have `%` |
 | E002 | Completed Date Requires Completed State | Actions with `%` must have `[x]` |
-| E003 | Invalid Priority Level | Priority must be 1-5 |
+| E003 | Invalid Priority Level | Priority must be 1-9 |
 | E004 | Invalid UUID Format | UUIDs must follow standard format |
 | E005 | Duplicate ID | Action IDs must be unique |
 | E006 | Duration Without Do-Date | `D` requires `@` |
@@ -92,7 +92,7 @@ The `error.actions` files contain **valid** `.actions` syntax that will parse su
 
 For example:
 - `#123` is valid syntax (hex characters) but an invalid UUID format (E004)
-- `!6` is valid syntax (number) but an invalid priority level (E003)
+- `!10` is valid syntax (number) but an invalid priority level (E003)
 
 This is intentional - linting happens *after* parsing, so linting test cases must use parseable input.
 

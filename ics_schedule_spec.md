@@ -1,161 +1,209 @@
 ---
-title: ics schedule specification
-description: Plan/schedule semantics in .ics files for action generation
+title: iCalendar VTODO projection specification
+description: VTODO plan, Action, expansion, and vdir synchronization semantics
 author: primary_desktop
 categories: Reference
 created: 2026-04-20T00:00:00-0800
-updated: 2026-04-20T00:00:00-0800
-version: 1.0.0
+updated: 2026-07-23T00:00:00-0800
+version: 1.1.0
 ---
 
-This specification defines how `.ics` files represent schedules/plans and how they map into generated actions.
+This specification defines ClearHead's RFC 5545 projection in the configured
+plans vdir. The vdir is the complete integration boundary: CalDAV,
+vdirsyncer, Syncthing, Git, mounted storage, or no transport may sit behind it.
+ClearHead does not depend on server accounts, hrefs, ETags, or vendor metadata.
 
-The core principle is separation of concerns:
+The core separation is:
 
-- `.ics` owns schedule timing semantics.
-- `.actions` owns action execution records.
+- recurring VTODOs own Plan recurrence semantics;
+- standalone VTODOs project executable Actions;
+- `.actions` files remain the human-readable Action projection.
 
-See [action_file_format.md](./action_file_format.md) for action syntax.
+See [action_file_format.md](./action_file_format.md) for Action syntax.
 
-# Scope
+# File location and discovery
 
-This document covers:
+Each resource is one `.ics` file under a charter-scoped vdir directory:
 
-- `.ics` discovery and charter scope expectations
-- VEVENT field mapping into schedule records
-- Template linkage via DESCRIPTION convention
-- Instance-count generation bounds
-- Idempotent generation requirements
-- External linkage keys carried onto generated acts
+```text
+plans/<charter-scope>/<resource>.ics
+```
 
-This document does not redefine RFC 5545.
+ClearHead emits canonical files named `<uid>.ics`, but readers must identify a
+resource by its RFC 5545 `UID`, not by its filename. Transport tooling may
+choose a different filename. Duplicate standalone identities are an error;
+traversal order must never pick a winner.
 
-# File Location and Discovery
+# Component classification
 
-Plan/schedule files are `.ics` files discovered using naming conventions in [workspace.md](./workspace.md).
+Component kind and recurrence determine meaning:
 
-Plans are stored as individual `.ics` files (one VEVENT per file) within a `plans/` directory per charter:
+| Component | RRULE | ClearHead meaning |
+|---|---:|---|
+| `VTODO` | yes | recurring Plan master |
+| `VTODO` | no | standalone Action projection |
+| `VEVENT` | any | external calendar context; ClearHead does not author it |
 
-- `/plans/<charter-name>/<uid>.ics`
+Legacy recurring `VEVENT` Plan masters are converted once by the migration
+command. They are not a second permanent authoring format.
 
-Each file within a charter's `plans/` directory is scoped to that charter. See [workspace.md](./workspace.md) for full directory structure.
+# Recurring Plan VTODO
 
-# VEVENT Mapping
+A Plan master is a VTODO carrying `RRULE`.
 
-Each `VEVENT` represents one schedule definition.
+Expected fields:
 
-Required/expected fields:
+- `UID` (required): stable Plan identity
+- `SUMMARY` (required): Plan name
+- `DTSTART` (required for expansion): recurrence anchor
+- `RRULE` (required): recurrence semantics
+- `DESCRIPTION` (optional): directives followed by human-readable notes
+- `EXDATE`/`RDATE` (optional): RFC 5545 recurrence exceptions/additions
 
-- `UID` (required): stable schedule identity from calendar source
-- `SUMMARY` (recommended): human-readable schedule name
-- `DTSTART` (required for expansion): anchor datetime
-- `RRULE` (optional): recurrence semantics
-- `DURATION` (optional): schedule-level duration hint
-- `DESCRIPTION` (optional): if the first line starts with `template: <name>`, it binds a template for structural instantiation; remaining text is the plan description
+Recurrence remains exclusively Plan semantics. `.actions` files contain
+materialized instances, never recurrence definitions.
 
-If `RRULE` is absent, VEVENT is treated as a one-off schedule.
+## External identity bridge
 
-# External Identity Bridge
+Generated instances carry neutral linkage:
 
-To avoid making core ontology calendar-specific while preserving deterministic behavior, generated actions should carry neutral linkage fields:
+- `externalScheduleId <- VTODO.UID`
+- `externalOccurrenceKey <- RECURRENCE-ID`, otherwise the canonical RFC 3339
+  occurrence datetime
 
-- `externalScheduleId` (series-level identifier)
-- `externalOccurrenceKey` (instance-level identifier)
+The generated Action UUID is UUIDv5 over the Plan UID and occurrence key.
+This linkage expresses a real Plan-to-instance relationship; it is not needed
+for standalone Action mirrors.
 
-ICS mapping:
+## DESCRIPTION directives
 
-- `externalScheduleId <- VEVENT.UID`
-- `externalOccurrenceKey <- RECURRENCE-ID` when present, otherwise canonicalized occurrence datetime
-
-`externalOccurrenceKey` should be canonicalized as RFC3339.
-
-# Expansion Semantics
-
-`expand acts` (or equivalent workflow) should:
-
-1. Read schedule VEVENTs for charter scope.
-2. For each schedule, count open instances already present across both `<charter>.actions` and `<charter>.upcoming.actions` (open = `[ ]` not-started or `[-]` in-progress; cancelled `[_]` and completed `[x]` do not count).
-3. Resolve the per-schedule `upcoming:` directive from VEVENT DESCRIPTION if present (see [DESCRIPTION Directives](#description-directives)); otherwise use the workspace-level `expansion_total_instances` and `expansion_primary_instances` from configuration.
-4. Generate instances up to `total_instances` for this schedule (respecting the RRULE end date or count if present).
-5. Resolve template, if DESCRIPTION contains a `template: <name>` binding.
-6. Place the first `primary_instances` instances (by scheduled date ascending) into `<charter>.actions`; place remaining instances into `<charter>.upcoming.actions`.
-7. Upsert — do not duplicate instances that already exist (matched by deterministic UUID).
-
-This process must be idempotent: rerunning expansion for the same schedule must not create duplicates or change placement of already-existing instances.
-
-## Instance Bounds
-
-Generation is bounded by instance count, not by a date horizon. This makes expansion cadence-agnostic: a daily habit and a quarterly review both produce a predictable number of instances regardless of their recurrence frequency.
-
-The two relevant config values (see [Configuration](./configuration.md)):
-
-- `expansion_total_instances` (default: `2`) — total instances generated per schedule across both files. Must be > `expansion_primary_instances`.
-- `expansion_primary_instances` (default: `1`) — how many of those land in the primary `<charter>.actions` file.
-
-For a schedule where `total=2, primary=1`: the next upcoming occurrence lands in `<charter>.actions`; the one after lands in `<charter>.upcoming.actions`.
-
-## DESCRIPTION Directives
-
-The VEVENT DESCRIPTION field supports a block of `key: value` directives at the top before the human-readable description body. The parser reads leading lines that match `key: value` until it hits a blank line or a non-matching line.
-
-Supported directives:
+Leading `key: value` lines are directives until a blank or non-directive line.
+The remaining text is the Plan description.
 
 | Directive | Type | Description |
 |---|---|---|
-| `template` | string | Template name to expand per occurrence (e.g. `template: weekly-review`) |
-| `upcoming` | integer | Per-schedule override for `expansion_primary_instances` — how many instances of this schedule stay in the primary file |
+| `template` | string | Template expanded for each occurrence |
+| `upcoming` | integer | Per-Plan override for primary instance count |
 
-Example DESCRIPTION:
-```
+Example:
+
+```text
 template: weekly-review
 upcoming: 2
 
-Notes about this recurring review go here.
+Notes about this recurring review.
 ```
 
-If `upcoming:` is set on a schedule, it overrides the global `expansion_primary_instances` for that schedule only. `expansion_total_instances` continues to apply globally unless also overridden — a future directive key (`total:`) may be introduced for that purpose.
+Clients that do not understand these directives may display them as notes.
 
-Calendar applications that do not understand these directives will simply display them as part of the event notes, which is acceptable.
+# Expansion semantics
 
-Expansion must be idempotent.
+`expand actions` must:
 
-For generated acts:
+1. read recurring VTODO Plan masters in charter scope;
+2. count existing open instances across primary and upcoming Action files;
+3. resolve DESCRIPTION directives and workspace expansion bounds;
+4. generate occurrences in ascending order, respecting RRULE limits;
+5. instantiate the referenced template when present;
+6. place the first configured count in the primary file and the remainder in
+   the upcoming file;
+7. upsert by deterministic occurrence UUID.
 
-- Determine act identity from schedule identity + occurrence identity.
-- Recommended: UUIDv5 derived from (`externalScheduleId`, `externalOccurrenceKey`).
+Expansion is idempotent. Completed and cancelled instances vacate an open slot;
+not-started and in-progress instances occupy one.
 
-Running expansion multiple times for the same schedule window must not create duplicates.
+# Standalone Action VTODO
 
-Ad-hoc acts (not schedule-derived):
+A non-recurring VTODO projects one Action. ClearHead synchronizes these fields
+independently through three-way merge bases in the machine-local plans
+projection store:
 
-- do not require external linkage fields
-- typically use UUIDv7
+| Action | VTODO |
+|---|---|
+| identity | `UID` |
+| name | `SUMMARY` |
+| description | `DESCRIPTION` |
+| scheduled time | `DTSTART` |
+| due time | `DUE` |
+| state | `STATUS` |
+| completion time | `COMPLETED` |
+| priority | `PRIORITY` |
+| contexts | `CATEGORIES` |
 
-# Template Resolution
+Priority uses RFC 5545 values directly: `1` is highest and `9` is lowest;
+`0` means undefined and maps to no ClearHead priority. Context names map to
+standard CATEGORIES values. ClearHead context names use commas as separators,
+so a literal comma inside one category is not representable.
 
-When a `template: <name>` binding is present in the DESCRIPTION, resolve templates in this order:
+RFC 5545 has no blocked status. ClearHead emits:
 
-1. Charter-local `templates/`
-2. Workspace/platform-root `templates/`
+```text
+STATUS:NEEDS-ACTION
+X-CLEARHEAD-STATUS:blocked
+```
 
-If template resolution fails, implementations may:
+A later standard status edit wins over a stale blocked extension.
 
-- generate a single act from VEVENT summary/timing, and warn, or
-- skip generation and warn
+Predecessors, sequential behavior, parent-action hierarchy, and charter
+semantics are ClearHead-only because RFC 5545 has no equivalent contract.
 
-Behavior should be documented and consistent per implementation.
+## Identity adoption
 
-# Error Handling
+RFC 5545 UIDs are arbitrary globally unique text, not necessarily UUIDs.
 
-Invalid VEVENTs should be non-fatal at file level.
+- a UUID UID is used directly as the Action UUID;
+- any other UID deterministically derives an Action UUIDv5;
+- the original UID is never rewritten merely to fit the Action model;
+- no charter sidecar identity map is used.
 
-Implementations should:
+ClearHead-authored standalone resources use the Action UUID as UID and as the
+canonical filename. For an adopted arbitrary UID, the plans projection store
+remembers the UID so a missing resource can be recreated without changing its
+interoperable identity.
 
-- continue processing other VEVENTs
-- emit actionable diagnostics (file + event context + reason)
+## Calendar-created Actions
 
-# Contract Boundaries
+A standalone VTODO whose derived identity does not match an existing Action is
+imported as a new root Action. Its containing vdir directory selects the
+charter. If that scope is not yet represented by an Action file, ClearHead
+creates the corresponding implicit charter projection.
 
-- Core ontology/domain stays source-agnostic.
-- ICS semantics are integration-profile concerns.
-- The bridge is external identity, not calendar class adoption.
+## Missing resources
+
+Resource absence has no lifecycle meaning. If an Action previously projected
+to the vdir has no current VTODO, ClearHead recreates the VTODO from the Action.
+Only `STATUS:CANCELLED` cancels an Action; deleting a file does not.
+
+# Merge and write behavior
+
+Each synchronized field has an independent merge base. A conflict in one field
+must not block safe changes in another. First sync converges agreeing values and
+surfaces differing values as conflicts rather than guessing by timestamps.
+
+When updating an existing VTODO, ClearHead changes only fields it owns. It must
+preserve alarms, unrecognized properties, vendor extensions, calendar-level
+metadata, the original UID, and the transport-selected resource path.
+
+Date handling accepts UTC, floating local time, all-day DATE values, and IANA
+TZID values. Unknown/custom time zones must not be silently interpreted as the
+machine's local zone.
+
+# Migration
+
+`clearhead migrate plans-vtodo` converts files consisting entirely of recurring
+VEVENT Plan masters into VTODO+RRULE in place. It is idempotent and leaves
+non-recurring external VEVENT resources untouched. Mixed resources are refused
+rather than rewritten ambiguously.
+
+# Error handling
+
+Invalid resources are non-fatal to unrelated files. Implementations should
+continue processing other resources and emit actionable diagnostics including
+file and component context. Missing UID/SUMMARY components cannot be adopted as
+Actions. Duplicate derived Action identities are errors.
+
+# Contract boundaries
+
+- Domain meaning remains source-agnostic.
+- RFC 5545 and vdir behavior belong to the projection layer.
+- Transport and server implementation details remain outside ClearHead.

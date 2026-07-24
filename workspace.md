@@ -123,11 +123,11 @@ Note: we use the hidden file convention here to indicate that this is a sidecar 
 
 #### Plans
 
-Plans are stored as individual `.ics` files within the `plans/` directory with a directory per charter.
+The configured `plans/` path is a charter-scoped iCalendar vdir containing recurring Plan masters and standalone Action projections.
 
-Each `.ics` file contains a single `VCALENDAR` with a single `VEVENT`, and is named by its VEVENT `UID` (e.g., `a1b2c3d4.ics`).
+Each `.ics` file contains a single `VCALENDAR` with one primary RFC 5545 component. ClearHead authors VTODO: RRULE-bearing VTODOs are Plans and non-recurring VTODOs are Actions. VEVENT is read-only external calendar context. ClearHead-created files use the component UID as filename, while readers identify resources by UID because transport tooling may choose another filename.
 
-This one-event-per-file layout (commonly known as "vdir" format) is directly compatible with calendar tools like khal and CalDAV sync tools like vdirsyncer, enabling calendar applications to read and write plans in-place without format conversion.
+This one-component-per-file vdir layout is directly compatible with tools such as vdirsyncer and does not assume a particular CalDAV server or any transport at all.
 
 Any charter with plans requires directory form. The `plans/` directory itself signals that a workspace has schedule data.
 
@@ -144,11 +144,11 @@ All paths are relative to `<data_root>/plans/`. An example:
   - `work/feature` sub-charter (hierarchy encoded with `-`)
   - `subproject` charter
 
-Multi-event `.ics` files (e.g., bulk exports from Google Calendar) are an import format, not a storage format. Implementations should provide an import path that splits multi-event files into individual files within the target charter's `plans/` directory.
+Multi-component `.ics` files are an import format, not a storage format. Implementations should provide an import path that splits them into individual resources within the target charter's `plans/` directory.
 
 Be sure to review [the reference syntax][reference-syntax] for guidance on working with sub charters and sub plans.
 
-For schedule semantics and VEVENT mapping, see the [ICS Schedule Spec][ics-schedule-spec].
+For recurring Plan, standalone Action, identity, and synchronization semantics, see the [ICS Schedule Spec][ics-schedule-spec].
 
 #### Actions
 Per the [Ontology][ontology] specification, actions are the actual executable work items in the system, whether they are generated from plans or created directly.
@@ -184,8 +184,8 @@ They differ only in *where* the identity is persisted:
 |-----------|----------------------------------------------------|--------------|
 | Workspace | `workspace_id` in `.clearhead/workspace.json`      | [Workspace Identity](#workspace-identity) |
 | Charter   | frontmatter `id`, mirrored in the sidecar          | [Charters] |
-| Plan      | the `VEVENT` `UID` (also the `.ics` filename)      | [ICS Schedule Spec] |
-| Action    | inline id on the line, plus an optional charter id | [Action File Format] |
+| Plan      | recurring VTODO `UID` (canonical `.ics` filename)  | [ICS Schedule Spec] |
+| Action    | inline id; standalone VTODO UID maps deterministically | [Action File Format], [ICS Schedule Spec] |
 
 Two rules keep this honest:
 
@@ -249,7 +249,7 @@ Now, its one thing to speak on the concrete file formats for each record type bu
 ### Templates
 Templates are a list of actions in the form of `<name>.actions` files that are stored in a `templates/` directory at the root of the workspace. these are meant to be used as templates for generating actions either through schedules or on demand.
 
-it is assumed that the filename will be the reference for the template, so if we have a `weekly-review.actions` file in the `templates/` directory, then the reference for that template will be `weekly-review` and this is what will be used in the VEVENT DESCRIPTION field as `template: weekly-review` (first line of the event notes in any standard calendar app)
+it is assumed that the filename will be the reference for the template, so if we have a `weekly-review.actions` file in the `templates/` directory, then the reference for that template will be `weekly-review` and this is what will be used in the recurring VTODO DESCRIPTION field as `template: weekly-review` (first line of the task notes in a compatible calendar app)
 
 this will also allow for on demand generation of actions either as a side-effect to charter creation or through a command like `apply template` which will allow users to generate actions from templates on demand without needing to wait for the schedule to trigger them
 
@@ -267,7 +267,7 @@ One concept that is very important to the workspace format is the process of "ar
 
 Because `archive/` is a sibling of `charters/`, the moved files leave the default read set automatically, but reference resolution can still look into them: an archived `<` target resolves to one of three states — **satisfied** (target Completed), **abandoned** (target Cancelled), or **dangling** (resolves nowhere). Keeping archives as readable plaintext is the whole reason that three-way signal is possible.
 
-The `.ics` files in `plans/<charter-name>/` are **not** touched by archival. Per [decision 31][decisions] the `plans/` directory is a shared vdir that a CalDAV server may own; once a plan's `.ics` exists, deleting it would destroy data the other application owns. The archived action records carry the scheduling source of truth (`scheduled_at` / `due_at`), so the `.ics` is a redundant calendar projection, not history we need to preserve. Archival therefore leaves the calendar files in place; the user clears them through the calendar application. Any `.ics` that outlives its charter resurfaces on the next load as an implicit charter — an honest reflection that the calendar still holds those events until the user removes them.
+The `.ics` files in `plans/<charter-name>/` are **not** touched by archival. Per [decision 31][decisions], the configured vdir is a shared projection boundary and archival must not infer that its resources should be deleted. Archived Action records retain history while the vdir remains independently manageable through calendar tooling. Any standalone VTODO that outlives its active charter may be imported again under an implicit charter—an honest reflection that the calendar still presents it as active data.
 
 REMEMBER, per the [process spec][process] it is assumed that all child plans are completed/cancelled which is why the open files above are expected to be empty or atleast emptyable before being moved into `archive/`
 
@@ -278,7 +278,7 @@ this is how we maintain a format that is able to evolve gracefully
 - [Action File Format] — DSL syntax
 - [Charters] — Charter structure and frontmatter
 - [Configuration] — XDG paths and config settings
-- [ICS Schedule Spec] — VEVENT mapping and schedule semantics
+- [ICS Schedule Spec] — VTODO projection, synchronization, and schedule semantics
 - [Ontology] — Domain model and RDF contract
 - [Process] — Workflow including recurring action behavior
 - [Reference Syntax] — Sub-charter and sub-plan references
