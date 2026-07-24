@@ -44,8 +44,11 @@ Component kind and recurrence determine meaning:
 | `VTODO` | no | standalone Action projection |
 | `VEVENT` | any | external calendar context; ClearHead does not author it |
 
-Legacy recurring `VEVENT` Plan masters are converted once by the migration
-command. They are not a second permanent authoring format.
+There is no legacy Plan compatibility or migration path. Existing pre-release
+fixtures and workspaces were updated directly to VTODO. An explicit
+`import plans` operation may consume external VEVENT schedules and writes them
+back as current-format VTODO resources; normal workspace loading never treats
+VEVENT as a ClearHead Plan.
 
 # Recurring Plan VTODO
 
@@ -187,13 +190,6 @@ metadata, the original UID, and the transport-selected resource path.
 Date handling accepts UTC, floating local time, all-day DATE values, and IANA
 TZID values. Unknown/custom time zones must not be silently interpreted as the
 machine's local zone.
-
-# Migration
-
-`clearhead migrate plans-vtodo` converts files consisting entirely of recurring
-VEVENT Plan masters into VTODO+RRULE in place. It is idempotent and leaves
-non-recurring external VEVENT resources untouched. Mixed resources are refused
-rather than rewritten ambiguously.
 
 # Error handling
 
