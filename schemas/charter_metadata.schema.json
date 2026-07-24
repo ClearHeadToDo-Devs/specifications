@@ -34,15 +34,7 @@
                                    },
                                    "source_vevent": {
                                           "type": "string",
-                                          "description": "UID of the VEVENT that generated this action"
-                                   },
-                                   "scheduled_at_sync": {
-                                          "type": "string",
-                                          "description": "The action's scheduled_at as of the last CalDAV reconcile — the 'B' merge base for the three-way sync (decision 31). Machine-owned: only the reconcile engine writes it. Absent means 'never synced'."
-                                   },
-                                   "due_date_sync": {
-                                          "type": "string",
-                                          "description": "The action's due_date as of the last CalDAV reconcile — the 'B' merge base for the deadline. Machine-owned; absent means 'never synced'."
+                                          "description": "UID of the recurring iCalendar plan that generated this action"
                                    }
                             },
                             "additionalProperties": true
