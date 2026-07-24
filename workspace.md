@@ -125,7 +125,7 @@ Note: we use the hidden file convention here to indicate that this is a sidecar 
 
 The configured `plans/` path is a charter-scoped iCalendar vdir containing recurring Plan masters and standalone Action projections.
 
-Each `.ics` file contains a single `VCALENDAR` with one primary RFC 5545 component. ClearHead authors VTODO: RRULE-bearing VTODOs are Plans and non-recurring VTODOs are Actions. VEVENT is read-only external calendar context. ClearHead-created files use the component UID as filename, while readers identify resources by UID because transport tooling may choose another filename.
+Each `.ics` file contains a single `VCALENDAR` with one primary VTODO component: RRULE-bearing VTODOs are Plans and non-recurring VTODOs are Actions. Other iCalendar component types are outside the ClearHead projection. ClearHead-created files use the component UID as filename, while readers identify resources by UID because transport tooling may choose another filename.
 
 This one-component-per-file vdir layout is directly compatible with tools such as vdirsyncer and does not assume a particular CalDAV server or any transport at all.
 

@@ -42,13 +42,10 @@ Component kind and recurrence determine meaning:
 |---|---:|---|
 | `VTODO` | yes | recurring Plan master |
 | `VTODO` | no | standalone Action projection |
-| `VEVENT` | any | external calendar context; ClearHead does not author it |
 
-There is no legacy Plan compatibility or migration path. Existing pre-release
-fixtures and workspaces were updated directly to VTODO. An explicit
-`import plans` operation may consume external VEVENT schedules and writes them
-back as current-format VTODO resources; normal workspace loading never treats
-VEVENT as a ClearHead Plan.
+ClearHead's calendar surface is VTODO-only. Other iCalendar component types are
+ignored. There is no legacy Plan compatibility, migration, or alternate import
+path; pre-release fixtures and workspaces were updated directly to VTODO.
 
 # Recurring Plan VTODO
 
