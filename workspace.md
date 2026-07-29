@@ -238,9 +238,9 @@ The scope is declared in config, not per-command. A user who configures addition
 `clearhead init` bootstraps a workspace:
 
 1. Generates a UUIDv7 and writes `workspace_id`, `workspace_name`, `created_at` to `.clearhead/workspace.json` (skipped if `workspace_id` already present). If an older workspace still carries these fields in `.clearhead/config.json`, `init` and `doctor` migrate them into the manifest and drop them from `config.json`.
-2. Creates the `charters/` directory structure (skipped if already present)
+2. Creates the `charters/` directory structure and, for a project workspace, bootstraps the root charter as `charters/next.actions` with its identity in `charters/.next.json` (each skipped if already present). The root file is structural: it is the signal that lets flat named charters resolve as children of the project charter and keeps their plan-vdir slugs routable.
 
-`init` is idempotent — rerunning it on an already-initialized workspace is safe and makes no changes. Pass `--force` to regenerate identity fields. This assigns a new graph URI, so any consumer that referenced the old one no longer resolves to this workspace; the workspace's plaintext data is untouched.
+`init` is idempotent — rerunning it on an already-initialized workspace is safe and never overwrites existing data or identity. It may restore a missing root-charter scaffold. Pass `--force` to regenerate identity fields. This assigns a new graph URI, so any consumer that referenced the old one no longer resolves to this workspace; the workspace's plaintext data is untouched.
 
 ## Workflows
 
