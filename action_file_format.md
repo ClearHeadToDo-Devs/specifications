@@ -128,6 +128,13 @@ Wiki-style links are supported in names and descriptions:
 
 Escape literal link tokens with `\[\[`, `\]\]`, and `\|`.
 
+Links may span syntactically insignificant whitespace, including newlines. An
+unescaped `[` inside link content is reserved as a structural synchronization
+point: when a closing `]]` is missing, it lets Tree-sitter insert a `MISSING`
+close before the next action's `[state]` marker rather than consuming that
+action. The recovered link remains available for diagnostics, but the document
+is not eligible for formatting or semantic mutation until fixed.
+
 ## Priority (optional)
 
 `!<number>` where lower numbers are higher urgency by convention.

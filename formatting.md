@@ -11,6 +11,21 @@ version: 3.1.0
 
 This document covers the formatting rules for `.actions` files in the ClearHead ecosystem. The goal of this specification is to ensure consistent and readable formatting across different tools and editors while respecting the syntactically insignificant nature of whitespace in the ClearHead file format.
 
+## Source integrity gate
+
+Formatting existing source requires a clean parser-integrity result. A tree
+containing Tree-sitter `ERROR`/`MISSING` nodes or an explicit named recovery node
+is useful for diagnostics, but it is not safe to reserialize: recovered fields,
+hierarchy, or UUIDs may be attached to the wrong action. The formatter must
+return no output/edit until those issues are fixed. This applies to stdout as
+well as in-place and LSP formatting because stdout may be redirected over the
+source file.
+
+This is not a dependency on semantic lint policy. Parser integrity is a shared
+fact: the linter renders it as an error and may offer a surgical code action;
+the formatter only enforces the clean-source capability. Warnings or semantic
+errors that do not threaten source fidelity do not block formatting.
+
 ## Rules
 
 ### New Actions on New Lines

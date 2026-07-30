@@ -56,6 +56,18 @@ The lock file is persistent and contains the current owner's PID for diagnostics
 
 Single-file writes use atomic temp-file replacement and do not require the multi-file journal. Readers that expose raw diagnostic state may report a pending journal without replaying it; mutation entry points must always recover it before planning from workspace state.
 
+### Recovered source is quarantined from semantics
+
+A relaxed parser may return a document containing recovery diagnostics so doctor,
+the linter, and editor tooling can explain malformed input. Such a document is
+not eligible for semantic workspace lowering: generic parser recovery can attach
+a later field or UUID to the wrong action. The affected action file is omitted
+from the domain model until it parses with clean integrity, while a structured
+finding remains visible. Formatting and mutation likewise require the clean
+source capability; they must never reserialize recovered actions. Sidecar
+orphan cleanup is also deferred while any action source is quarantined, because
+absence from the semantic model is not proof that its provenance is stale.
+
 ### Example
 So if we go over the structure of the work we can see this as an example with a global and project workspace at the [examples directory][examples].
 
