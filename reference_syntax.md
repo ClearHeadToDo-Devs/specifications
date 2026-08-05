@@ -16,15 +16,23 @@ For programmatic structures, it is generally recommended to use the full UUID fo
 ### short UUID
 However, for user-facing references, we support a short UUID format that is _at least_ the first 4 characters of the UUID, as this is generally enough to avoid collisions within a single workspace, and is easy to read for humans when necessary.
 
-in the cases where there are multiple uuids with the same 8 characters, the structure is such that we match to _as many characters as is needed to disambiguate_ meaning that clients MUST accept short uuids longer than 8 characters to ensure that the references do not actually collide when necessary
+When multiple UUIDs share a short prefix, the reference must include _as many characters as are needed to disambiguate_. Clients MUST accept prefixes longer than eight characters; an ambiguous prefix does not resolve by collection or file order.
 
 ## Alias
 The second (and preferred) form of reference is by alias.
 
 Aliases are short, human-readable identifiers. They are the primary way to
-reference charters and plans in day-to-day use.
+reference charters and actions in day-to-day use.
 
-in formats where the filesystem is used, this is often the name of the file or directory itself, again namespaced within the domain its kept within.
+In formats where the filesystem is used, a charter alias is often reflected in
+the file or directory name, again namespaced within the domain where it is kept.
+Action aliases are authored explicitly in the action DSL.
+
+Plans do not currently have aliases. RFC 5545 provides `UID` for stable identity
+and `SUMMARY` for a mutable display name, but no standard alias property. Plans
+therefore use their UUID for ClearHead references; `SUMMARY` is not a reference.
+A distinct Plan alias would require an explicit extension property and is not
+part of the current format.
 
 in this way, we can have clean aliases that are still easy to reference based on the work of the structures inside
 
@@ -56,7 +64,10 @@ In ambiguous cases or for tooling, you can prefix a reference to force the targe
 Prefixes are optional but recommended when a segment could resolve to multiple types.
 
 ## Matching Rules
-- References match **aliases** or **UUIDs** only (full UUID or short UUID prefix).
+- Charters and actions match **aliases** or **UUIDs** only (full UUID or short UUID prefix).
+- Plans match **UUIDs** only (full UUID or short UUID prefix).
+- Matching precedence is **full UUID**, then **short UUID**, then **alias**, across the complete candidate set.
+- Multiple matches at the strongest tier within a workspace are ambiguous and MUST NOT resolve by collection or file order.
 - References are **case-insensitive** for aliases.
-- **Titles are not used** for reference resolution.
-- Acts are referenced by UUID/short UUID only (since they are namespaced IDs).
+- **Titles, names, and Plan `SUMMARY` values are not used** for reference resolution.
+- Action aliases are scoped by their containing path; UUIDs remain the strongest unambiguous form.
