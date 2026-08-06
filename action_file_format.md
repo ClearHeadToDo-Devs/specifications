@@ -126,7 +126,10 @@ Wiki-style links are supported in names and descriptions:
 - `[[text|url]]`
 - `[[url]]`
 
-Escape literal link tokens with `\[\[`, `\]\]`, and `\|`.
+Escape literal link tokens with `\[\[`, `\]\]`, and `\|`. Because `[` may
+begin a link, a literal standalone opening bracket in a description must also
+be escaped as `\[`; an unescaped lone `[` is a parser-integrity error rather
+than prose that tools may reinterpret.
 
 Links may span syntactically insignificant whitespace, including newlines. An
 unescaped `[` inside link content is reserved as a structural synchronization
