@@ -8,12 +8,14 @@
 This specification defines observability conventions for ClearHead tooling. It covers semantic events, structured logging, and debugging telemetry.
 
 **Observability is for:**
+
 - Debugging system behavior ("why is this action in this state?")
 - Property change history ("when did priority change from 2 to 1?")
 - Operational analytics (completion velocity, patterns over time)
 - Distributed tracing (sync operations, cross-device coordination)
 
 **Observability is NOT for:**
+
 - Current state (that's the domain data)
 - Action instances (that's `.recurring.actions` files)
 - Sync coordination (that's git)
@@ -131,10 +133,10 @@ These events trace how a named semantic operation becomes a domain model change 
 | `file_parsed` | Actions file parsed | `file_path`, `action_count`, `parse_time_ms` |
 | `lsp_started` | LSP server started | `port` (if applicable) |
 
-
 ## Retention
 
 Default retention: 1 year. Older files can be:
+
 - Deleted automatically (if configured)
 - Archived to cold storage
 - Aggregated into summary statistics
