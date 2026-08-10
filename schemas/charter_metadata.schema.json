@@ -32,9 +32,42 @@
                                           "type": "string",
                                           "description": "ISO 8601 creation timestamp"
                                    },
-                                   "external_schedule_id": {
-                                          "type": "string",
-                                          "description": "UID of the recurring iCalendar plan that generated this action"
+                                   "occurrence": {
+                                          "type": "object",
+                                          "description": "Frozen lineage for an archived materialized recurring occurrence. Live occurrence lineage is hydrated from the plans sync store; completed archives snapshot the fact so future plan edits/deletion do not rewrite history.",
+                                          "properties": {
+                                                 "plan_id": {
+                                                        "type": "string",
+                                                        "format": "uuid",
+                                                        "description": "UUID of the recurring Plan this occurrence realized"
+                                                 },
+                                                 "plan_uid": {
+                                                        "type": "string",
+                                                        "description": "iCalendar UID of the recurring VTODO master at crystallization time"
+                                                 },
+                                                 "occurrence_key": {
+                                                        "type": "string",
+                                                        "description": "Canonical recurrence slot key (RECURRENCE-ID/EXDATE key) realized by this occurrence"
+                                                 },
+                                                 "plan_title": {
+                                                        "type": "string",
+                                                        "description": "Human title of the recurring Plan at crystallization time"
+                                                 },
+                                                 "scheduled_at": {
+                                                        "type": "string",
+                                                        "description": "Scheduled timestamp on the archived occurrence root"
+                                                 },
+                                                 "rrule": {
+                                                        "type": "string",
+                                                        "description": "RRULE text from the recurring VTODO master at crystallization time"
+                                                 },
+                                                 "template": {
+                                                        "type": "string",
+                                                        "description": "Template name attached to the recurring Plan at crystallization time"
+                                                 }
+                                          },
+                                          "required": ["plan_id", "occurrence_key", "plan_title"],
+                                          "additionalProperties": true
                                    }
                             },
                             "additionalProperties": true
