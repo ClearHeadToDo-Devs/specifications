@@ -11,6 +11,7 @@ They are separate, because different implementors may choose to work with the fo
 ## Scoping
 
 For our work we generally have 3 scopes to consider:
+
 - Machine-Wide Scope: Config
 - User Scope: Data + Config
 - Project Scope: Data + Config
@@ -20,6 +21,7 @@ As is standard, each level is less prioritized than the next, so project scope o
 The user-scope data is for data that belongs to the user of that actual machine but is not generally attached to a given project and its location is configured via the `XDG_DATA_HOME` environment variable, with a default of `~/.local/share/` for unix systems and `%APPDATA%` for windows systems.
 
 This defined by the presence of a `.clearhead` directory. This may be empty as to only express a desire for this to be designated a project-local scope
+
 - while the default will be that this is in the root of the git directory, the algorithm itself will simply look for the nearest `.clearhead` directory and designate that as the project root, this way we can have multiple projects within a single git repository if desired, or even have a project that is not attached to a git repository at all
 
 ## Workspace Structure
@@ -69,20 +71,24 @@ orphan cleanup is also deferred while any action source is quarantined, because
 absence from the semantic model is not proof that its provenance is stale.
 
 ### Example
+
 So if we go over the structure of the work we can see this as an example with a global and project workspace at the [examples directory][examples].
 
 this shows both the project and user scope for examples of mixed layouts that would be representative of real world usage
 
 ### Objectives
+
 Objectives are all located in an `objectives` directory within the workspace where all objectives of the file format:
 `<objective-alias>.md` - a markdown file containing the description of the objective, its purpose, and any other relevant information as per [the objective spec][objectives]
 
 in a project-local scope, this should reside within `<project-root>/.clearhead/objectives/` while in a user-wide scope, this should reside within `objectives/` folder within the user workspace
 
 #### Sub Objectives
+
 objective files within the `objectives` directory are assumed to be a group of objectives,
 
 with:
+
 - `<objective-alias>/README.md` - a markdown file containing the description of the objective group, its purpose, and any other relevant information as per [the objective spec][objectives]
 - `<objective-alias>/<subobjective-alias>.md` - a markdown file containing the description of the subobjective, its purpose, and any other relevant information as per [the objective spec][objectives]
 
@@ -95,6 +101,7 @@ charters belong in the dedicated `charters` directory within the workspace, wher
 While the action specification allows for charters to be defined within the files themselves, it can often feel natural to break these files into separate files/folders for organization.
 
 To this end, we support the following conventions, with the assumption implementors will leverage these structures to provide better user experiences.
+
 - we can also designate `<charter>.md` files for charters that are primarily prose and not action-focused, but still want to be linked to actions within the platform
   - please see [the charter spec][charters] for more details on how to structure these files
   - This allows for sub-projects through the combination of directories and files.
@@ -107,6 +114,7 @@ All charters and subcharters live within the `charters/` directory. Users are fr
 Unless a specific `README.md` is present, the alias of the root charter is inferred from the project directory name. Users can override this by creating a `charters/README.md` with an explicit alias in the frontmatter.
 
 #### Hierarchy
+
 While actions express hierarchy through the file format, charters express hierarchy through placement.
 
 Specifically, while we do support parent as front matter, the primary way that lineage is created is by placing subcharters and their plans in the directory of its parent.
@@ -116,6 +124,7 @@ In this way, we can structure charters and subcharters
 #### On Scoping
 
 For project-scoped structures, the root charter is the project directory itself. Its files live at:
+
 - `<project>/.clearhead/charters/next.actions` — root charter acts
 - `<project>/.clearhead/plans/next/` — root plans (vdir directory)
 - `<project>/.clearhead/charters/README.md` — root charter description (optional)
@@ -132,10 +141,11 @@ please review the [charter sidecar schema][charter-sidecar-schema] for more deta
 
 Note: we use the hidden file convention here to indicate that this is a sidecar file meant to be read and written by tools as a companion to the charter, but should not be directly interacted with by users.
 
-
 #### Plans
 
 The configured `plans/` path is a charter-scoped iCalendar vdir containing recurring Plan masters and standalone Action projections.
+
+Every constructed charter owns one calculated collection path even when its directory does not exist. This relative path is derived from the charter's canonical workspace anchor and is not written into charter Markdown or sidecars. A configured `plan_path` replaces only the physical vdir root. Calendar resources attach to charters by exact collection ownership, never by mutable alias or title matching.
 
 Each `.ics` file contains a single `VCALENDAR` with one primary VTODO component: RRULE-bearing VTODOs are Plans and non-recurring VTODOs are Actions. Other iCalendar component types are outside the ClearHead projection. ClearHead-created files use the component UID as filename, while readers identify resources by UID because transport tooling may choose another filename.
 
@@ -145,24 +155,28 @@ Any charter with plans requires directory form. The `plans/` directory itself si
 
 All paths are relative to `<data_root>/plans/`. An example:
 
-  - `inbox/<uid>.ics`
-  - `work/<uid>.ics`
-  - `work-feature/<uid>.ics`
-  - `subproject/<uid>.ics`
+- `inbox/<uid>.ics`
+- `work/<uid>.ics`
+- `work-feature/<uid>.ics`
+- `subproject/<uid>.ics`
 
   which maps to charters:
-  - `inbox` charter
-  - `work` charter
-  - `work/feature` sub-charter (hierarchy encoded with `-`)
-  - `subproject` charter
+
+- `inbox` charter
+- `work` charter
+- `work/feature` sub-charter (hierarchy encoded with `-`)
+- `subproject` charter
 
 Multi-component `.ics` files are an import format, not a storage format. Implementations should provide an import path that splits them into individual resources within the target charter's `plans/` directory.
+
+An immediate collection directory with no charter owner is invalid workspace state, not an alternate way to create a charter. Its resources are quarantined and mutations must not silently adopt them. Doctor should report the collection and may offer an explicit fix that removes it while warning that transport tools such as vdirsyncer can propagate the deletion.
 
 Be sure to review [the reference syntax][reference-syntax] for guidance on working with sub charters and sub plans.
 
 For recurring Plan, standalone Action, identity, and synchronization semantics, see the [ICS Schedule Spec][ics-schedule-spec].
 
 #### Actions
+
 Per the [Ontology][ontology] specification, actions are the actual executable work items in the system, whether they are generated from plans or created directly.
 
 Actions are stored in the `.actions` files within the workspace and represent the lowest atomic unit of work within the system.
@@ -259,6 +273,7 @@ The scope is declared in config, not per-command. A user who configures addition
 Now, its one thing to speak on the concrete file formats for each record type but the other piece to cover is the workflow that actually handled these various structures and dictates what happens when and where. for this, we are going to go a little more over the workflows that allow this format to be updated automatically or manually based on what people prefer
 
 ### Templates
+
 Templates are a list of actions in the form of `<name>.actions` files that are stored in a `templates/` directory at the root of the workspace. these are meant to be used as templates for generating actions either through schedules or on demand.
 
 it is assumed that the filename will be the reference for the template, so if we have a `weekly-review.actions` file in the `templates/` directory, then the reference for that template will be `weekly-review` and this is what will be used in the recurring VTODO DESCRIPTION field as `template: weekly-review` (first line of the task notes in a compatible calendar app)
@@ -270,16 +285,16 @@ this will also allow for on demand generation of actions either as a side-effect
 One concept that is very important to the workspace format is the process of "archiving" things. weve covered the names above but its working from a reference point lets go from the beginning
 
 1. At the lowest level, we have the actions that are implementations of their optional parent plans.
-  1. at first, these are all open, then as the user is closing the actions, they move from `<charter>.actions` to `<charter>.completed.actions` in order to remove clutter and make the process of tracking closed actions easier for both humans and databases to comprehend, this way open act queries can be fast, but full history searches are still possible
-2. If we move a level up, we have the plans in `plans/<charter-name>/`, again, all plans start open but schedules simply "are no longer scheduled" they have no state explicitly however they are still logged as an example of a schedule
-3. Finally, like plans, the charters themselves at `charters/<charter>.md` can be archived after they are closed. Archival is a **move, not a translation**: the archived form is data, not a projection, so no Turtle or JSON-LD is written. Any RDF view of archived data is regenerated on read by the graph binary, exactly like live data.
-  1. archiving a parent charter archives its whole subtree as one unit; the open-actions precondition is recursive too — it refuses if *any* descendant still holds open actions
-  2. the subtree's known files (`.actions`, `.completed.actions`, `.upcoming.actions`, the charter `.md`, and its `.json` sidecar) plus all supporting files owned by directory-form charters are moved **all-or-none** into the `archive/` region, preserving their path under `charters/` so the subtree's internal structure survives. The sidecar moves *with* the files rather than folding its `created_at` / `external_schedule_id` into the lines; atomicity (via the batch transaction, journalled in `charters/`) is what makes that safe — there is no half-archived state that orphans metadata
-  3. any charter subdirectory left empty by the move is collapsed
+1. at first, these are all open, then as the user is closing the actions, they move from `<charter>.actions` to `<charter>.completed.actions` in order to remove clutter and make the process of tracking closed actions easier for both humans and databases to comprehend, this way open act queries can be fast, but full history searches are still possible
+1. If we move a level up, we have the plans in `plans/<charter-name>/`, again, all plans start open but schedules simply "are no longer scheduled" they have no state explicitly however they are still logged as an example of a schedule
+1. Finally, like plans, the charters themselves at `charters/<charter>.md` can be archived after they are closed. Archival is a **move, not a translation**: the archived form is data, not a projection, so no Turtle or JSON-LD is written. Any RDF view of archived data is regenerated on read by the graph binary, exactly like live data.
+1. archiving a parent charter archives its whole subtree as one unit; the open-actions precondition is recursive too — it refuses if *any* descendant still holds open actions
+1. the subtree's known files (`.actions`, `.completed.actions`, `.upcoming.actions`, the charter `.md`, and its `.json` sidecar) plus all supporting files owned by directory-form charters are moved **all-or-none** into the `archive/` region, preserving their path under `charters/` so the subtree's internal structure survives. The sidecar moves *with* the files rather than folding its `created_at` / `external_schedule_id` into the lines; atomicity (via the batch transaction, journalled in `charters/`) is what makes that safe — there is no half-archived state that orphans metadata
+1. any charter subdirectory left empty by the move is collapsed
 
 Because `archive/` is a sibling of `charters/`, the moved files leave the default read set automatically, but reference resolution can still look into them: an archived `<` target resolves to one of three states — **satisfied** (target Completed), **abandoned** (target Cancelled), or **dangling** (resolves nowhere). Keeping archives as readable plaintext is the whole reason that three-way signal is possible.
 
-The `.ics` files in `plans/<charter-name>/` are **not** touched by archival. Per [decision 31][decisions], the configured vdir is a shared projection boundary and archival must not infer that its resources should be deleted. Archived Action records retain history while the vdir remains independently manageable through calendar tooling. Any standalone VTODO that outlives its active charter may be imported again under an implicit charter—an honest reflection that the calendar still presents it as active data.
+The `.ics` files in `plans/<charter-name>/` are **not** touched by archival. Per [decision 31][decisions], the configured vdir is a shared projection boundary and archival must not infer that its resources should be deleted. Archived Action records retain history while the vdir remains independently manageable through calendar tooling. A collection left without a live charter owner is quarantined and reported by doctor; it is never silently adopted as an implicit charter.
 
 REMEMBER, per the [process spec][process] it is assumed that all child plans are completed/cancelled which is why the open files above are expected to be empty or atleast emptyable before being moved into `archive/`
 

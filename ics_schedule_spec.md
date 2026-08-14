@@ -34,6 +34,12 @@ resource by its RFC 5545 `UID`, not by its filename. Transport tooling may
 choose a different filename. Duplicate standalone identities are an error;
 traversal order must never pick a winner.
 
+Collection ownership is constructed from each charter's canonical workspace
+anchor whether or not the directory or any resource exists. The configured
+`plan_path` changes the physical vdir root, not those relative ownership keys.
+Calendar loading attaches resources by exact collection path; aliases, titles,
+and arbitrary `next.actions` basenames are not collection identity.
+
 # Component classification
 
 Component kind and recurrence determine meaning:
@@ -164,9 +170,11 @@ interoperable identity.
 ## Calendar-created Actions
 
 A standalone VTODO whose derived identity does not match an existing Action is
-imported as a new root Action. Its containing vdir directory selects the
-charter. If that scope is not yet represented by an Action file, ClearHead
-creates the corresponding implicit charter projection.
+imported as a new root Action into the charter that owns its containing vdir
+directory. A directory with no constructed charter owner is quarantined as an
+`unowned-plans-collection` violation; it never creates an implicit charter.
+`clearhead doctor --fix` may explicitly remove that local collection after
+warning that vdirsyncer can propagate the deletion.
 
 ## Missing resources
 
