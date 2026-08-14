@@ -24,8 +24,7 @@ This directory contains example `.actions` files demonstrating various features 
 
 ## Scheduling Note
 
-Recurring schedules are defined in `.ics` files. `.actions` examples in this directory
-represent actions (including generated occurrences), not schedule definitions.
+Recurring schedules are defined in `.ics` files. `.actions` examples in this directory represent actions (including generated occurrences), not schedule definitions.
 
 ## Calendar Export
 

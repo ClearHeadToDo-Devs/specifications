@@ -10,8 +10,7 @@ version: 2.0.0
 
 This specification defines the `*.actions` format.
 
-Under Decision 21, `.actions` files represent **actions** only (the executable units of work).
-Recurring schedules and other plan timing logic are represented in `.ics` files. See [ICS Schedule Specification](./ics_schedule_spec.md).
+Under Decision 21, `.actions` files represent **actions** only (the executable units of work). Recurring schedules and other plan timing logic are represented in `.ics` files. See [ICS Schedule Specification](./ics_schedule_spec.md).
 
 # Scope and Principles
 
@@ -93,8 +92,7 @@ Durations should use ISO 8601 duration format, for example `PT30M`.
 
 ## Depth (required for children)
 
-Children start with one or more `>` markers.
-Whitespace indentation is presentation only and should not affect parsing.
+Children start with one or more `>` markers. Whitespace indentation is presentation only and should not affect parsing.
 
 ## State (required)
 
@@ -126,17 +124,9 @@ Wiki-style links are supported in names and descriptions:
 - `[[text|url]]`
 - `[[url]]`
 
-Escape literal link tokens with `\[\[`, `\]\]`, and `\|`. Because `[` may
-begin a link, a literal standalone opening bracket in a description must also
-be escaped as `\[`; an unescaped lone `[` is a parser-integrity error rather
-than prose that tools may reinterpret.
+Escape literal link tokens with `\[\[`, `\]\]`, and `\|`. Because `[` may begin a link, a literal standalone opening bracket in a description must also be escaped as `\[`; an unescaped lone `[` is a parser-integrity error rather than prose that tools may reinterpret.
 
-Links may span syntactically insignificant whitespace, including newlines. An
-unescaped `[` inside link content is reserved as a structural synchronization
-point: when a closing `]]` is missing, it lets Tree-sitter insert a `MISSING`
-close before the next action's `[state]` marker rather than consuming that
-action. The recovered link remains available for diagnostics, but the document
-is not eligible for formatting or semantic mutation until fixed.
+Links may span syntactically insignificant whitespace, including newlines. An unescaped `[` inside link content is reserved as a structural synchronization point: when a closing `]]` is missing, it lets Tree-sitter insert a `MISSING` close before the next action's `[state]` marker rather than consuming that action. The recovered link remains available for diagnostics, but the document is not eligible for formatting or semantic mutation until fixed.
 
 ## Priority (optional)
 
@@ -144,28 +134,23 @@ is not eligible for formatting or semantic mutation until fixed.
 
 ## Parent / Objective reference (optional)
 
-`*<reference>` links a root act to an objective or higher-level grouping.
-Objective path notation is allowed, for example: `*work/clearhead/docs`.
+`*<reference>` links a root act to an objective or higher-level grouping. Objective path notation is allowed, for example: `*work/clearhead/docs`.
 
 ## Context tags (optional)
 
-Contexts are designated by `+` tags. The **canonical** form is a single `+`
-group with comma-separated tags, which is what formatters emit:
+Contexts are designated by `+` tags. The **canonical** form is a single `+` group with comma-separated tags, which is what formatters emit:
 
 ```actions
 [ ] Prepare deck +work,meeting,client
 ```
 
-The space-separated form is also **accepted** and parsed losslessly — every
-`+` group is collected, not just the last:
+The space-separated form is also **accepted** and parsed losslessly — every `+` group is collected, not just the last:
 
 ```actions
 [ ] Prepare deck +work +meeting +client
 ```
 
-Parsers must collect tags from all context nodes; keeping only the final group
-is silent data loss (see DECISIONS.md Decision 33). Tag hierarchies are
-configured in [configuration.md](./configuration.md).
+Parsers must collect tags from all context nodes; keeping only the final group is silent data loss (see DECISIONS.md Decision 33). Tag hierarchies are configured in [configuration.md](./configuration.md).
 
 ## Alias (optional)
 

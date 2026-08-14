@@ -82,9 +82,7 @@ These rules enforce style conventions and best practices:
 
 ### Retired Rule Fixture
 
-`legacy_E002_recurrence_without_do_date/` is retained as a legacy fixture only.
-Decision 21 removed recurrence syntax (`R:`) from `.actions`, so this fixture
-documents a retired lint rule and should not be used for active conformance.
+`legacy_E002_recurrence_without_do_date/` is retained as a legacy fixture only. Decision 21 removed recurrence syntax (`R:`) from `.actions`, so this fixture documents a retired lint rule and should not be used for active conformance.
 
 ### All Examples Use Valid Syntax
 

@@ -20,13 +20,7 @@ This specification defines a **relaxed parser, strict linter** approach:
 
 This approach aligns with modern tooling like TypeScript, where the parser is permissive and the typechecker/linter provides strict validation.
 
-Parser recovery is diagnostic input, not semantic authorization. Tree-sitter
-`ERROR`/`MISSING` nodes and explicit named recovery nodes are emitted as
-error-level diagnostics and prevent source formatting or semantic mutation.
-Tools may continue presenting the recoverable tree for editor feedback, but
-must not attach recovered fields or UUIDs to domain actions. Deterministic
-repairs should be offered as narrow source-edit code actions rather than a
-whole-document formatting pass.
+Parser recovery is diagnostic input, not semantic authorization. Tree-sitter `ERROR`/`MISSING` nodes and explicit named recovery nodes are emitted as error-level diagnostics and prevent source formatting or semantic mutation. Tools may continue presenting the recoverable tree for editor feedback, but must not attach recovered fields or UUIDs to domain actions. Deterministic repairs should be offered as narrow source-edit code actions rather than a whole-document formatting pass.
 
 ### Severity Levels
 

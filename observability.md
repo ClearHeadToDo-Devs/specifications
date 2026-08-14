@@ -1,7 +1,6 @@
 # Observability Specification
 
-**Version:** 1.0.0
-**Status:** Draft
+**Version:** 1.0.0 **Status:** Draft
 
 ## Purpose
 

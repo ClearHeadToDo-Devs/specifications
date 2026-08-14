@@ -63,23 +63,17 @@ This specification does not redefine those artifacts; it defines how downstream 
 
 ## RDF Graph Layer
 
-This section documents how the ontology manifests in the runtime Oxigraph store.
-It is the normative reference for anyone writing SPARQL queries, extending the
-graph module, or building a new client that needs to read clearhead graph data.
+This section documents how the ontology manifests in the runtime Oxigraph store. It is the normative reference for anyone writing SPARQL queries, extending the graph module, or building a new client that needs to read clearhead graph data.
 
 ### Named Graph Isolation
 
-Every workspace occupies exactly one RDF named graph.  No workspace data is
-ever written to `DefaultGraph`.  The named graph URI for a workspace is:
+Every workspace occupies exactly one RDF named graph.  No workspace data is ever written to `DefaultGraph`.  The named graph URI for a workspace is:
 
 ```
 urn:clearhead:workspace:<uuid>
 ```
 
-where `<uuid>` is the stable `workspace_id` from `.clearhead/workspace.json`,
-generated once by `clearhead init`.  See [Workspace — Named Graph
-Isolation][workspace-graphs] for how that UUID is created and why it must
-never be regenerated.
+where `<uuid>` is the stable `workspace_id` from `.clearhead/workspace.json`, generated once by `clearhead init`.  See [Workspace — Named Graph Isolation][workspace-graphs] for how that UUID is created and why it must never be regenerated.
 
 `DefaultGraph` is only correct in two specific contexts:
 
@@ -88,22 +82,13 @@ never be regenerated.
 | Archive serialization (`load_acts_into_store`, `serialize` module) | A single-use transient store written directly to Turtle; never queried via SPARQL. |
 | Test stores that explicitly cover the archive/serialization path | Same reason. |
 
-Everywhere else — CLI query paths, named query smoke tests, multi-workspace
-loading, new graph-layer code — use a named graph URI.  Any test that loads
-into `DefaultGraph` and then queries via SPARQL is testing a configuration
-that never occurs in production.
+Everywhere else — CLI query paths, named query smoke tests, multi-workspace loading, new graph-layer code — use a named graph URI.  Any test that loads into `DefaultGraph` and then queries via SPARQL is testing a configuration that never occurs in production.
 
 ### SPARQL Evaluator Behaviour
 
-The evaluator is configured with a **union default graph**: triple patterns
-without an explicit `GRAPH` clause match across all named graphs in the store.
-This is applied automatically for any query that does not declare its own
-`FROM` / `FROM NAMED` dataset.
+The evaluator is configured with a **union default graph**: triple patterns without an explicit `GRAPH` clause match across all named graphs in the store. This is applied automatically for any query that does not declare its own `FROM` / `FROM NAMED` dataset.
 
-This means the same `.sparql` file works correctly in single-workspace and
-multi-workspace contexts without modification: in a single-workspace store
-there is one named graph; in a multi-workspace store there are several, and the
-union includes all of them.
+This means the same `.sparql` file works correctly in single-workspace and multi-workspace contexts without modification: in a single-workspace store there is one named graph; in a multi-workspace store there are several, and the union includes all of them.
 
 ### SPARQL Query Conventions
 
@@ -127,8 +112,7 @@ All files in `clearhead-cli/src/queries/*.sparql` follow this convention.
 
 #### Use `GRAPH ?g` for workspace-aware queries
 
-Add a `GRAPH` clause when the query needs to expose or constrain the source
-workspace:
+Add a `GRAPH` clause when the query needs to expose or constrain the source workspace:
 
 ```sparql
 -- identify which workspace each action came from
@@ -148,9 +132,7 @@ SELECT ?name WHERE {
 
 ### Canonical Term Reference
 
-The following table is the authoritative cross-reference between domain
-entities and their RDF representation in `v4`.  All predicates use the prefix
-`actions: <https://clearhead.us/vocab/actions/v4#>` unless otherwise noted.
+The following table is the authoritative cross-reference between domain entities and their RDF representation in `v4`.  All predicates use the prefix `actions: <https://clearhead.us/vocab/actions/v4#>` unless otherwise noted.
 
 | Domain Entity | `rdf:type` | Key predicates |
 |---|---|---|
@@ -159,18 +141,9 @@ entities and their RDF representation in `v4`.  All predicates use the prefix
 | Action | `actions:Action` | `rdfs:label`, `actions:hasUUID`, `cco:ont00001868` (status), `cco:ont00001920` (prescribedBy → Plan), `bfo:BFO_0000050` (partOf → parent Action) |
 | Context (tag) | `actions:Context` | `actions:hasContextIdentifier`, `actions:contextBroader` (child→parent), `actions:contextNarrower` (parent→child) |
 
-**Status values** are IRIs: `actions:NotStarted`, `actions:InProgress`,
-`actions:Completed`, `actions:Blocked`, `actions:Cancelled`.
+**Status values** are IRIs: `actions:NotStarted`, `actions:InProgress`, `actions:Completed`, `actions:Blocked`, `actions:Cancelled`.
 
-The CCO property identifiers (`ont00000974`, `ont00001868`, etc.) are stable
-and normative — they come from the Common Core Ontologies and must not change
-without a coordinated update to the ontology repo, the constants in
-`clearhead-core/src/graph/mod.rs`, and every `.sparql` query file.  Any drift
-between those three locations produces **silent empty results** — the query
-executes successfully but matches no triples because the predicate IRI has
-changed.  This is why the named query smoke tests in
-`clearhead-core/tests/graph_queries.rs` exist: they catch this drift
-automatically.
+The CCO property identifiers (`ont00000974`, `ont00001868`, etc.) are stable and normative — they come from the Common Core Ontologies and must not change without a coordinated update to the ontology repo, the constants in `clearhead-core/src/graph/mod.rs`, and every `.sparql` query file.  Any drift between those three locations produces **silent empty results** — the query executes successfully but matches no triples because the predicate IRI has changed.  This is why the named query smoke tests in `clearhead-core/tests/graph_queries.rs` exist: they catch this drift automatically.
 
 ### Testing the Graph Layer
 

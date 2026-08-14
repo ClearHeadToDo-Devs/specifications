@@ -60,15 +60,7 @@ Single-file writes use atomic temp-file replacement and do not require the multi
 
 ### Recovered source is quarantined from semantics
 
-A relaxed parser may return a document containing recovery diagnostics so doctor,
-the linter, and editor tooling can explain malformed input. Such a document is
-not eligible for semantic workspace lowering: generic parser recovery can attach
-a later field or UUID to the wrong action. The affected action file is omitted
-from the domain model until it parses with clean integrity, while a structured
-finding remains visible. Formatting and mutation likewise require the clean
-source capability; they must never reserialize recovered actions. Sidecar
-orphan cleanup is also deferred while any action source is quarantined, because
-absence from the semantic model is not proof that its provenance is stale.
+A relaxed parser may return a document containing recovery diagnostics so doctor, the linter, and editor tooling can explain malformed input. Such a document is not eligible for semantic workspace lowering: generic parser recovery can attach a later field or UUID to the wrong action. The affected action file is omitted from the domain model until it parses with clean integrity, while a structured finding remains visible. Formatting and mutation likewise require the clean source capability; they must never reserialize recovered actions. Sidecar orphan cleanup is also deferred while any action source is quarantined, because absence from the semantic model is not proof that its provenance is stale.
 
 ### Example
 
@@ -78,8 +70,7 @@ this shows both the project and user scope for examples of mixed layouts that wo
 
 ### Objectives
 
-Objectives are all located in an `objectives` directory within the workspace where all objectives of the file format:
-`<objective-alias>.md` - a markdown file containing the description of the objective, its purpose, and any other relevant information as per [the objective spec][objectives]
+Objectives are all located in an `objectives` directory within the workspace where all objectives of the file format: `<objective-alias>.md` - a markdown file containing the description of the objective, its purpose, and any other relevant information as per [the objective spec][objectives]
 
 in a project-local scope, this should reside within `<project-root>/.clearhead/objectives/` while in a user-wide scope, this should reside within `objectives/` folder within the user workspace
 
@@ -310,16 +301,4 @@ this is how we maintain a format that is able to evolve gracefully
 - [Process] — Workflow including recurring action behavior
 - [Reference Syntax] — Sub-charter and sub-plan references
 
-[action-file-format]: ./action_file_format.md
-[charter-sidecar-schema]: ./schemas/charter_metadata.schema.json
-[charters]: ./charters.md
-[configuration]: ./configuration.md
-[decision-28]: ../DECISIONS.md
-[decisions]: ../DECISIONS.md
-[examples]: ./examples/workspaces/
-[ics-schedule-spec]: ./ics_schedule_spec.md
-[objectives]: ./objectives.md
-[ontology]: ./ontology.md
-[process]: ./process.md
-[reference-syntax]: ./reference_syntax.md
-[workspace-manifest-schema]: ./schemas/workspace.schema.json
+[action-file-format]: ./action_file_format.md [charter-sidecar-schema]: ./schemas/charter_metadata.schema.json [charters]: ./charters.md [configuration]: ./configuration.md [decision-28]: ../DECISIONS.md [decisions]: ../DECISIONS.md [examples]: ./examples/workspaces/ [ics-schedule-spec]: ./ics_schedule_spec.md [objectives]: ./objectives.md [ontology]: ./ontology.md [process]: ./process.md [reference-syntax]: ./reference_syntax.md [workspace-manifest-schema]: ./schemas/workspace.schema.json

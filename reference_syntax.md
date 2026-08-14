@@ -25,18 +25,11 @@ When multiple UUIDs share a short prefix, the reference must include _as many ch
 
 The second (and preferred) form of reference is by alias.
 
-Aliases are short, human-readable identifiers. They are the primary way to
-reference charters and actions in day-to-day use.
+Aliases are short, human-readable identifiers. They are the primary way to reference charters and actions in day-to-day use.
 
-In formats where the filesystem is used, a charter alias is often reflected in
-the file or directory name, again namespaced within the domain where it is kept.
-Action aliases are authored explicitly in the action DSL.
+In formats where the filesystem is used, a charter alias is often reflected in the file or directory name, again namespaced within the domain where it is kept. Action aliases are authored explicitly in the action DSL.
 
-Plans do not currently have aliases. RFC 5545 provides `UID` for stable identity
-and `SUMMARY` for a mutable display name, but no standard alias property. Plans
-therefore use their UUID for ClearHead references; `SUMMARY` is not a reference.
-A distinct Plan alias would require an explicit extension property and is not
-part of the current format.
+Plans do not currently have aliases. RFC 5545 provides `UID` for stable identity and `SUMMARY` for a mutable display name, but no standard alias property. Plans therefore use their UUID for ClearHead references; `SUMMARY` is not a reference. A distinct Plan alias would require an explicit extension property and is not part of the current format.
 
 in this way, we can have clean aliases that are still easy to reference based on the work of the structures inside
 
@@ -48,8 +41,7 @@ this way we can easily refer to subcharters, subplans, and even both in tandem i
 
 for example if we have the following plan:
 
-inbox.actions
-`[ ] something > [ ] sub`
+inbox.actions `[ ] something > [ ] sub`
 
 we can refer to sub as `something/sub` and if this were to be referenced with the charter we could write: `inbox/something/sub` to make reference of aliases easier
 
@@ -71,8 +63,7 @@ Prefixes are optional but recommended when a segment could resolve to multiple t
 
 ## Resolution Outcomes
 
-Resolution failures have stable semantic categories so callers do not need to
-classify human-readable diagnostics:
+Resolution failures have stable semantic categories so callers do not need to classify human-readable diagnostics:
 
 - **empty** — no reference text was supplied;
 - **invalid syntax** — a prefix has no value or the path has no segments;
@@ -80,8 +71,7 @@ classify human-readable diagnostics:
 - **ambiguous** — multiple entities match at the strongest available tier;
 - **type mismatch** — a typed path resolves, but to a different entity type.
 
-Diagnostics may add contextual names and remediation. Programmatic consumers
-should branch on the category rather than parsing that text.
+Diagnostics may add contextual names and remediation. Programmatic consumers should branch on the category rather than parsing that text.
 
 ## Matching Rules
 

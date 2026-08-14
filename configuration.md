@@ -73,23 +73,9 @@ Within the example of a specific project, these subdirectories all reside within
 
 ```
 
-`config.json` is committed so the whole team shares workspace *behavior*
-(`additional_workspaces`, `tag_hierarchies`, `plan_path`, …). `config.local.json`
-sits beside it as a git-ignored personal override: a single developer can set
-their own values (e.g. their own `plan_path`) without touching the shared file.
-The local file wins over the committed one. `clearhead init` writes a scoped
-`.clearhead/.gitignore` so the personal override stays out of version control.
+`config.json` is committed so the whole team shares workspace *behavior* (`additional_workspaces`, `tag_hierarchies`, `plan_path`, …). `config.local.json` sits beside it as a git-ignored personal override: a single developer can set their own values (e.g. their own `plan_path`) without touching the shared file. The local file wins over the committed one. `clearhead init` writes a scoped `.clearhead/.gitignore` so the personal override stays out of version control.
 
-Workspace *identity* — `workspace_id`, `workspace_name`, `created_at` — does **not**
-live in `config.json`. It lives in a separate `.clearhead/workspace.json` **manifest**.
-The two are split because they behave differently: `config.json` is human-authored
-behavior that layers through the precedence chain below, while the manifest is a
-tool-managed fact about one workspace that must not layer (a `workspace_id` in a
-*global* config, or a `CLEARHEAD_WORKSPACE_ID` env override, is meaningless). The
-manifest is committed and near-static — it changes on `init` and rename, essentially
-never otherwise — and holds workspace-level facts only; per-charter metadata stays in
-its co-located sidecar. See [Workspace Identity](./workspace.md#workspace-identity)
-and the [manifest schema](./schemas/workspace.schema.json).
+Workspace *identity* — `workspace_id`, `workspace_name`, `created_at` — does **not** live in `config.json`. It lives in a separate `.clearhead/workspace.json` **manifest**. The two are split because they behave differently: `config.json` is human-authored behavior that layers through the precedence chain below, while the manifest is a tool-managed fact about one workspace that must not layer (a `workspace_id` in a *global* config, or a `CLEARHEAD_WORKSPACE_ID` env override, is meaningless). The manifest is committed and near-static — it changes on `init` and rename, essentially never otherwise — and holds workspace-level facts only; per-charter metadata stays in its co-located sidecar. See [Workspace Identity](./workspace.md#workspace-identity) and the [manifest schema](./schemas/workspace.schema.json).
 ## Configuration File Format
 
 ### Format Choice
@@ -157,17 +143,13 @@ All implementations MUST recognize these core settings:
 
 ## Workspace Resolution
 
-Which workspace an invocation operates on is resolved by most-local context
-first, independent of configuration precedence below:
+Which workspace an invocation operates on is resolved by most-local context first, independent of configuration precedence below:
 
-1. **Project workspace** — walk up from the working directory to the first
-   ancestor containing a `.clearhead/` directory ([Workspace](./workspace.md)).
+1. **Project workspace** — walk up from the working directory to the first ancestor containing a `.clearhead/` directory ([Workspace](./workspace.md)).
 2. **Configured user workspace** — the `data_dir` setting, when set.
 3. **Default user workspace** — `$XDG_DATA_HOME/clearhead`.
 
-`data_dir` relocates the *fallback* user workspace only; it MUST NOT override
-a detected project workspace. Bypassing project detection is an explicit
-choice via `default_to_user_scope`, never a side effect of other settings.
+`data_dir` relocates the *fallback* user workspace only; it MUST NOT override a detected project workspace. Bypassing project detection is an explicit choice via `default_to_user_scope`, never a side effect of other settings.
 
 ## Configuration Precedence
 
@@ -181,10 +163,7 @@ Implementations MUST follow this precedence order (highest to lowest):
 1. **Built-in defaults** - Hardcoded in the application
 
 
-The two project layers let a committed `config.json` carry the shared workspace
-settings while each developer keeps personal overrides in a git-ignored
-`config.local.json` beside it — the local file wins. Both are optional and only
-apply when the invocation resolves to a project workspace.
+The two project layers let a committed `config.json` carry the shared workspace settings while each developer keeps personal overrides in a git-ignored `config.local.json` beside it — the local file wins. Both are optional and only apply when the invocation resolves to a project workspace.
 
 ### Layering Example
 
