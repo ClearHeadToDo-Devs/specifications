@@ -1,0 +1,7 @@
+{
+  "kind": "dry-run",
+  "operations": [
+    { "kind": "completed", "id": "urn:uuid:019fdffc-b18d-7d81-8dca-fb88f818a0cf", "children": 2 }
+  ],
+  "files": [ "/home/dab/Products/platform/.clearhead/charters/data-workflows.completed.actions" ]
+}

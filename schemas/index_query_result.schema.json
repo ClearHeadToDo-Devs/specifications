@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/ClearHeadToDo-Devs/specifications/master/schemas/index_query_result.schema.json",
+  "title": "ClearHead Index Query Result",
+  "description": "The JSON array graphd emits for the index query family (default, unscheduled, agenda, weekly, chain) under `--format json`. Every row is one actionable item carrying a canonical id, display fields, status, priority, and source-locator fields. This schema pins the exact wire bytes graphd already produces; it does not add an envelope or reshape the payload. Array order is the view's SPARQL ORDER BY and is significant. Row membership is owned by each view; this schema constrains row SHAPE, not which rows appear.",
+  "type": "array",
+  "items": { "$ref": "#/$defs/indexRow" },
+  "$defs": {
+    "canonicalId": {
+      "type": "string",
+      "description": "Canonical action identity as a urn:uuid IRI. This is the exact spelling the CLI resolver accepts, so a row id may drive show/update/complete/cancel without transformation.",
+      "pattern": "^urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "indexRow": {
+      "type": "object",
+      "description": "One actionable item in an index view.",
+      "required": [
+        "id",
+        "name",
+        "status",
+        "source_file",
+        "source_line",
+        "charter_root"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/canonicalId" },
+        "name": {
+          "type": "string",
+          "description": "Human-readable action title (rdfs:label)."
+        },
+        "status": {
+          "type": "string",
+          "description": "Action lifecycle state, rendered as the bare ontology state local-name. This is the full action-state domain; individual views filter which states appear (index views exclude Completed and Cancelled), but the column type is the whole domain, not a per-view subset.",
+          "enum": ["NotStarted", "InProgress", "Blocked", "Completed", "Cancelled"]
+        },
+        "source_file": {
+          "type": "string",
+          "description": "Path to the .actions file containing this action, relative to charter_root."
+        },
+        "source_line": {
+          "type": "integer",
+          "description": "1-based line number of the action within source_file.",
+          "minimum": 1
+        },
+        "charter_root": {
+          "type": "string",
+          "description": "Absolute path to the charter root directory of the owning workspace. Resolves source_file to an absolute path without external context."
+        },
+        "priority": {
+          "type": "integer",
+          "description": "RFC 5545 priority: 1 is highest, 9 is lowest. Omitted when the action has no priority. Not projected by the default view.",
+          "minimum": 1,
+          "maximum": 9
+        },
+        "parent": {
+          "$ref": "#/$defs/canonicalId",
+          "description": "Canonical id of the immediate parent action, denormalized onto the row. Absent for root actions and for views that do not project the parent edge."
+        },
+        "parent_name": {
+          "type": "string",
+          "description": "Display title of the parent action (rdfs:label). Present exactly when `parent` is present."
+        },
+        "scheduled_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Scheduled datetime as an xsd:dateTime lexical value (RFC 3339, e.g. 2026-07-01T09:00:00Z), projected by dated views (agenda, weekly). Omitted when unset."
+        },
+        "due_date": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Due datetime as an xsd:dateTime lexical value (RFC 3339, e.g. 2026-04-17T23:59:59Z), projected by dated views (agenda, weekly). Omitted when unset."
+        }
+      },
+      "dependentRequired": {
+        "parent": ["parent_name"],
+        "parent_name": ["parent"]
+      }
+    }
+  }
+}

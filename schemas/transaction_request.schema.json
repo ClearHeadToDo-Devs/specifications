@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/ClearHeadToDo-Devs/specifications/master/schemas/transaction_request.schema.json",
+  "title": "ClearHead Transaction Request",
+  "description": "A batch of semantic action operations that must validate together and commit together through one PendingBatch. Operations are applied in array order against trusted workspace state loaded under the workspace lock; any invalid operation rejects the whole batch before a write. This is NOT a JSON Patch or a desired-state document: each operation names an intent (update / complete / cancel) whose side effects (in-place field edits vs. cascade-close + date-stamp + file move) core owns. Single-item work should use the ordinary verbs; a transaction exists only for edits that must be atomic together. Dry-run is an invocation flag (`clearhead transact --dry-run`), not part of this document.",
+  "type": "object",
+  "required": ["operations"],
+  "additionalProperties": false,
+  "properties": {
+    "operations": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Ordered operations. Applied in sequence; the batch is all-or-nothing.",
+      "items": {
+        "oneOf": [
+          { "$ref": "#/$defs/updateAction" },
+          { "$ref": "#/$defs/completeAction" },
+          { "$ref": "#/$defs/cancelAction" }
+        ]
+      }
+    }
+  },
+  "$defs": {
+    "canonicalId": {
+      "type": "string",
+      "description": "Canonical action identity as a urn:uuid IRI, the exact spelling the query contract exports and the CLI resolver accepts.",
+      "pattern": "^urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "updateAction": {
+      "type": "object",
+      "description": "Edit an action's attributes in place (single file). No cascade, no move. State may be set to a NON-terminal value here; terminal transitions (completed / cancelled) are rejected by core in favor of the complete-action / cancel-action operations, which carry the cascade + date-stamp + file-move semantics a field write cannot.",
+      "required": ["op", "target", "set"],
+      "additionalProperties": false,
+      "properties": {
+        "op": { "const": "update-action" },
+        "target": { "$ref": "#/$defs/canonicalId" },
+        "set": {
+          "type": "object",
+          "description": "Fields to change; mirrors core's ActionUpdate applier surface. At least one field. Dependency-graph edits (predecessors, is_sequential) are intentionally out of the v1 operation set.",
+          "minProperties": 1,
+          "additionalProperties": false,
+          "properties": {
+            "name": { "type": "string", "minLength": 1 },
+            "description": { "type": "string" },
+            "priority": { "type": "integer", "minimum": 1, "maximum": 9 },
+            "context": {
+              "type": "array",
+              "description": "Context tags as bare names (no leading '+'). Replaces the existing set.",
+              "items": { "type": "string", "minLength": 1 }
+            },
+            "alias": { "type": "string", "minLength": 1 },
+            "state": {
+              "type": "string",
+              "description": "Action state, serialized as core ActionState does (snake_case; BlockedOrAwaiting => 'blocked'). Terminal values 'completed'/'cancelled' are accepted structurally but rejected by core's in-place terminal-state guard — use complete-action / cancel-action instead.",
+              "enum": ["not_started", "in_progress", "blocked", "completed", "cancelled"]
+            },
+            "scheduled_at": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Scheduled datetime, RFC 3339 (e.g. 2026-04-01T09:00:00+00:00)."
+            },
+            "duration": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Duration in minutes."
+            }
+          }
+        }
+      }
+    },
+    "completeAction": {
+      "type": "object",
+      "description": "Close an action and its full open subtree as Completed: stamp completed_at, detach the closed root from any external parent, and move the subtree from the active file to the .completed.actions file. Runs core's close_subtree; not expressible as an update.",
+      "required": ["op", "target"],
+      "additionalProperties": false,
+      "properties": {
+        "op": { "const": "complete-action" },
+        "target": { "$ref": "#/$defs/canonicalId" }
+      }
+    },
+    "cancelAction": {
+      "type": "object",
+      "description": "Close an action and its full open subtree as Cancelled, via the same close_subtree machinery as complete-action.",
+      "required": ["op", "target"],
+      "additionalProperties": false,
+      "properties": {
+        "op": { "const": "cancel-action" },
+        "target": { "$ref": "#/$defs/canonicalId" }
+      }
+    }
+  }
+}

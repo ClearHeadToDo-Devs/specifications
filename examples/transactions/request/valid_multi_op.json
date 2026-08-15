@@ -1,0 +1,8 @@
+{
+  "operations": [
+    { "op": "update-action", "target": "urn:uuid:019fdffc-b160-74f1-a8b3-a3a5694e794e",
+      "set": { "state": "in_progress", "priority": 2 } },
+    { "op": "complete-action", "target": "urn:uuid:019fdffc-b18d-7d81-8dca-fb88f818a0cf" },
+    { "op": "cancel-action", "target": "urn:uuid:019fdffc-b196-7e10-adb1-aed7338db159" }
+  ]
+}
