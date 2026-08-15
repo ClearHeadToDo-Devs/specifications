@@ -66,15 +66,25 @@
           },
           "minItems": 1
         },
-        "doDateTime": {
-          "type": "string",
-          "description": "ISO 8601 formatted scheduled date/time",
-          "pattern": "[^\\n!$*+%#>]+"
-        },
-        "doDuration": {
-          "type": "integer",
-          "description": "Duration in minutes",
-          "minimum": 1
+        "doDate": {
+          "type": "object",
+          "description": "Scheduled date/time for the action",
+          "required": [
+            "datetime"
+          ],
+          "properties": {
+            "datetime": {
+              "type": "string",
+              "description": "ISO 8601 formatted scheduled date or date/time",
+              "pattern": "[^\\n!$*+%#>]+"
+            },
+            "duration": {
+              "type": "integer",
+              "description": "Duration in minutes",
+              "minimum": 1
+            }
+          },
+          "additionalProperties": false
         },
         "recurrence": {
           "$ref": "#/definitions/recurrence"
@@ -83,14 +93,6 @@
           "type": "string",
           "description": "ISO 8601 formatted completion date/time",
           "pattern": "[^\\n!$*+@#>]+"
-        },
-        "predecessors": {
-          "type": "array",
-          "description": "Array of UUIDs of actions that must be completed before this action",
-          "items": {
-            "type": "string",
-            "pattern": "[0-9a-fA-F-]+"
-          }
         },
         "predecessors": {
           "type": "array",
