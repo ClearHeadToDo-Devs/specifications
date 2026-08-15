@@ -43,10 +43,10 @@ SELECT
     json_extract(value, '$.name'),
     json_extract(value, '$.description'),
     CAST(json_extract(value, '$.priority') AS INTEGER),
-    json_extract(value, '$.story'),
-    json_extract(value, '$.doDate.datetime'),
-    CAST(json_extract(value, '$.doDate.duration') AS INTEGER),
-    json_extract(value, '$.completedDate')
+    json_extract(value, '$.charter'),
+    json_extract(value, '$.scheduledDateTime'),
+    CAST(json_extract(value, '$.durationMinutes') AS INTEGER),
+    json_extract(value, '$.completedDateTime')
 FROM json_import,
      json_each(json_import.json_data, '$.actions');
 
@@ -96,9 +96,9 @@ SELECT
     json_extract(child.value, '$.name'),
     json_extract(child.value, '$.description'),
     CAST(json_extract(child.value, '$.priority') AS INTEGER),
-    json_extract(child.value, '$.doDate.datetime'),
-    CAST(json_extract(child.value, '$.doDate.duration') AS INTEGER),
-    json_extract(child.value, '$.completedDate')
+    json_extract(child.value, '$.scheduledDateTime'),
+    CAST(json_extract(child.value, '$.durationMinutes') AS INTEGER),
+    json_extract(child.value, '$.completedDateTime')
 FROM json_import,
      json_each(json_import.json_data, '$.actions') as parent,
      json_each(json_extract(parent.value, '$.children')) as child

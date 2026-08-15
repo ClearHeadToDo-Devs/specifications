@@ -3,5 +3,5 @@
 # Note: This example uses a hardcoded date - in practice you'd use: --arg today "$(date +%Y-%m-%d)"
 
 .actions[] | select(
-  .doDate.datetime? // "" | startswith("2025-01-16")
+  .scheduledDateTime? // "" | startswith("2025-01-16")
 )

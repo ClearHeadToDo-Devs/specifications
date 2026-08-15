@@ -2,9 +2,9 @@
 # Usage: jq -f examples/queries/jq/completion-stats.jq examples/sample.json
 
 .actions
-| group_by(.story // "No Project")
+| group_by(.charter // "No Project")
 | map({
-    story: .[0].story // "No Project",
+    charter: .[0].charter // "No Project",
     total: length,
     completed: map(select(.state == "completed")) | length,
     in_progress: map(select(.state == "in_progress")) | length,

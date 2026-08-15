@@ -54,7 +54,7 @@ jq -f examples/queries/jq/by-story.jq --arg story "Weekly Errands" examples/samp
 jq -f examples/queries/jq/due-today.jq --arg today "$(date +%Y-%m-%d)" examples/sample.json
 
 # Or modify the query inline for a specific date
-jq '.actions[] | select(.doDate.datetime? // "" | startswith("2025-01-16"))' examples/sample.json
+jq '.actions[] | select(.scheduledDateTime? // "" | startswith("2025-01-16"))' examples/sample.json
 ```
 
 ### Aggregate Queries
@@ -68,7 +68,7 @@ Output:
 ```json
 [
   {
-    "story": "Weekly Errands",
+    "charter": "Weekly Errands",
     "total": 1,
     "completed": 1,
     "in_progress": 0,
@@ -111,8 +111,8 @@ jq '.actions[] | select(.priority == 1 and (.contexts // [] | contains(["work"])
 jq --arg week_start "2025-01-13" --arg week_end "2025-01-20" '
   .actions[] | select(
     .state == "not_started" and
-    (.doDate.datetime? // "" >= $week_start) and
-    (.doDate.datetime? // "" < $week_end)
+    (.scheduledDateTime? // "" >= $week_start) and
+    (.scheduledDateTime? // "" < $week_end)
   )
 ' examples/sample.json
 ```
@@ -143,7 +143,7 @@ jq '.actions | map({name, priority})' examples/sample.json
 
 **Add a computed field:**
 ```bash
-jq '.actions | map(. + {has_deadline: (.doDate != null)})' examples/sample.json
+jq '.actions | map(. + {has_deadline: (.dueDateTime != null)})' examples/sample.json
 ```
 
 **Sort by priority then name:**

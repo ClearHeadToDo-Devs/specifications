@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://github.com/ClearHeadToDo-Devs/specifications/schemas/actions.schema.json",
   "title": "Actions File Serialization Format",
-  "description": "JSON Schema for the canonical serialization of .actions files",
+  "description": "JSON Schema for the canonical serialization of .actions files. Field names mirror the v4 actions ontology (https://clearhead.us/vocab/actions/v4) minus the 'has' prefix, so a single grep connects a serialized field to its ontology property and its .actions DSL token.",
   "type": "object",
   "required": [
     "actions"
@@ -24,9 +24,14 @@
         "name"
       ],
       "properties": {
+        "id": {
+          "type": "string",
+          "description": "hasUUID — '#' in the DSL. UUIDv7 preferred.",
+          "pattern": "[0-9a-fA-F-]+"
+        },
         "state": {
           "type": "string",
-          "description": "Current state of the action",
+          "description": "Current lifecycle state.",
           "enum": [
             "not_started",
             "completed",
@@ -37,177 +42,90 @@
         },
         "name": {
           "type": "string",
-          "description": "Name/title of the action",
+          "description": "rdfs:label — the action title.",
           "minLength": 1,
           "pattern": "[^\\n$!*+@%#>]+"
         },
         "description": {
           "type": "string",
-          "description": "Long-form description of the action",
+          "description": "Long-form description — '$ ... $' in the DSL.",
           "pattern": "[^\\n!*+@%#>]+"
         },
         "priority": {
           "type": "integer",
-          "description": "RFC 5545-aligned numeric priority (1 is highest, 9 is lowest)",
+          "description": "hasPriority — '!' in the DSL. RFC 5545-aligned, 1 (highest) to 9 (lowest).",
           "minimum": 1,
           "maximum": 9
         },
-        "story": {
-          "type": "string",
-          "description": "Parent project/story name (root actions only)",
-          "pattern": "[^\\n!$+@%#>]+"
-        },
         "contexts": {
           "type": "array",
-          "description": "Array of context tags",
+          "description": "hasContextIdentifier — '+' in the DSL.",
           "items": {
             "type": "string",
             "pattern": "[^,\\n!$*@%#>]+"
           },
           "minItems": 1
         },
-        "doDate": {
-          "type": "object",
-          "description": "Scheduled date/time for the action",
-          "required": [
-            "datetime"
-          ],
-          "properties": {
-            "datetime": {
-              "type": "string",
-              "description": "ISO 8601 formatted scheduled date or date/time",
-              "pattern": "[^\\n!$*+%#>]+"
-            },
-            "duration": {
-              "type": "integer",
-              "description": "Duration in minutes",
-              "minimum": 1
-            }
-          },
-          "additionalProperties": false
-        },
-        "recurrence": {
-          "$ref": "#/definitions/recurrence"
-        },
-        "completedDate": {
+        "scheduledDateTime": {
           "type": "string",
-          "description": "ISO 8601 formatted completion date/time",
-          "pattern": "[^\\n!$*+@#>]+"
+          "description": "hasScheduledDateTime — '@' in the DSL. ISO 8601 date or date-time the agent intends to act."
+        },
+        "durationMinutes": {
+          "type": "integer",
+          "description": "hasDurationMinutes — 'D' in the DSL.",
+          "minimum": 1
+        },
+        "dueDateTime": {
+          "type": "string",
+          "description": "hasDueDateTime — ':' in the DSL. ISO 8601 deadline."
+        },
+        "completedDateTime": {
+          "type": "string",
+          "description": "hasCompletedDateTime — '%' in the DSL. ISO 8601 completion time."
+        },
+        "createdDateTime": {
+          "type": "string",
+          "description": "hasCreatedDateTime — '^' in the DSL. ISO 8601 creation time."
+        },
+        "charter": {
+          "type": "string",
+          "description": "Charter membership hint — '*' in the DSL.",
+          "pattern": "[^\\n!$+@%#>]+"
+        },
+        "alias": {
+          "type": "string",
+          "description": "hasAlias — a short human handle."
+        },
+        "sequentialChildren": {
+          "type": "boolean",
+          "description": "hasSequentialChildren — '~' in the DSL. When true, each child implicitly depends on the previous sibling completing."
         },
         "predecessors": {
           "type": "array",
-          "description": "Array of UUIDs of actions that must be completed before this action",
+          "description": "Dependency references — '<' in the DSL. UUIDs that must complete first.",
           "items": {
             "type": "string",
             "pattern": "[0-9a-fA-F-]+"
           }
         },
-        "id": {
+        "externalScheduleId": {
           "type": "string",
-          "description": "UUIDv7 identifier",
-          "pattern": "[0-9a-fA-F-]+"
+          "description": "hasExternalScheduleId — external schedule-series identifier (e.g. an ICS UID)."
         },
-        "parent_id": {
+        "externalOccurrenceKey": {
           "type": "string",
-          "description": "UUIDv7 identifier of the parent action",
+          "description": "hasExternalOccurrenceKey — external occurrence-level identifier within a series."
+        },
+        "parentId": {
+          "type": "string",
+          "description": "UUID of the parent action ('>' nesting in the DSL).",
           "pattern": "[0-9a-fA-F-]+"
         },
         "children": {
           "type": "array",
-          "description": "Nested child actions",
+          "description": "Nested child actions ('>' depth in the DSL).",
           "items": {
             "$ref": "#/definitions/action"
-          }
-        }
-      },
-      "additionalProperties": false
-    },
-    "recurrence": {
-      "type": "object",
-      "required": [
-        "frequency"
-      ],
-      "properties": {
-        "frequency": {
-          "type": "string",
-          "description": "Recurrence frequency",
-          "enum": [
-            "minutely",
-            "hourly",
-            "daily",
-            "weekly",
-            "monthly",
-            "yearly"
-          ]
-        },
-        "interval": {
-          "type": "integer",
-          "description": "Interval between recurrences",
-          "minimum": 1,
-          "default": 1
-        },
-        "count": {
-          "type": "integer",
-          "description": "Maximum number of occurrences",
-          "minimum": 1
-        },
-        "until": {
-          "type": "string",
-          "description": "End date in ISO 8601 format"
-        },
-        "byMinute": {
-          "type": "array",
-          "description": "Minutes within the hour",
-          "items": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 60
-          }
-        },
-        "byHour": {
-          "type": "array",
-          "description": "Hours within the day",
-          "items": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 23
-          }
-        },
-        "byDay": {
-          "type": "array",
-          "description": "Days of the week",
-          "items": {
-            "type": "string",
-            "enum": [
-              "Mon",
-              "Tue",
-              "Wed",
-              "Thu",
-              "Fri",
-              "Sat",
-              "Sun"
-            ]
-          }
-        },
-        "byMonthDay": {
-          "type": "array",
-          "description": "Days of the month",
-          "items": {
-            "type": "integer",
-            "minimum": -31,
-            "maximum": 31,
-            "not": {
-              "const": 0
-            }
-          }
-        },
-        "byMonth": {
-          "type": "array",
-          "description": "Months of the year",
-          "items": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 12
           }
         }
       },
