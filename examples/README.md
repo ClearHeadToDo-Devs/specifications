@@ -9,7 +9,7 @@ This directory contains example `.actions` files demonstrating various features 
 - **with_description.actions** - Actions with descriptions
 - **with_priority.actions** - Priority levels
 - **with_context.actions** - Context tags
-- **with_do_date.actions** - Due dates and times
+- **with_do_date.actions** - Scheduled (do) dates and times
 - **with_completed_date.actions** - Completed actions
 - **with_story.actions** - Actions belonging to projects/stories
 - **with_everything.actions** - All optional fields demonstrated
@@ -57,17 +57,20 @@ cat calendar_export_example.actions | clearhead export > calendar.ics
 ### Importing to Calendar Apps
 
 **Google Calendar:**
+
 1. Export: `clearhead export inbox.actions -o calendar.ics`
 2. Go to Google Calendar → Settings → Import & Export
 3. Click "Select file from your computer" and choose `calendar.ics`
 4. Recurring events will automatically expand in your calendar
 
 **Apple Calendar:**
+
 1. Export: `clearhead export inbox.actions -o calendar.ics`
 2. Double-click the `.ics` file
 3. Choose which calendar to import into
 
 **Outlook:**
+
 1. Export: `clearhead export inbox.actions -o calendar.ics`
 2. File → Open & Export → Import/Export
 3. Choose "Import an iCalendar (.ics) or vCalendar file"
@@ -87,7 +90,6 @@ The calendar export uses standalone VTODO components and supports:
   - `[=]` Blocked/Awaiting → `NEEDS-ACTION` plus `X-CLEARHEAD-STATUS:blocked`
   - `[x]` Completed → `COMPLETED`
   - `[_]` Cancelled → `CANCELLED`
-  - `[_]` Cancelled → CANCELLED
 
 ### Example File
 
@@ -95,7 +97,7 @@ See **calendar_export_example.actions** for a comprehensive demonstration of cal
 
 ## Test Files
 
-- **conformance/** - Semantic conformance corpus, one scenario per fixture (parse / diagnostics / archive); see [conformance/README.md](conformance/README.md)
+- **conformance/** - Semantic and byte-level conformance corpus, one scenario per fixture (`parse`, `diagnostics`, `archive`, `syntax`); see [conformance/README.md](conformance/README.md)
 - **formatting/** - Directory with formatting test cases
 - **linting/** - Directory with lint rule examples
 

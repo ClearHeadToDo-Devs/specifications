@@ -27,7 +27,7 @@
         "id": {
           "type": "string",
           "description": "hasUUID — '#' in the DSL. UUIDv7 preferred.",
-          "pattern": "[0-9a-fA-F-]+"
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
         },
         "state": {
           "type": "string",
@@ -42,14 +42,12 @@
         },
         "name": {
           "type": "string",
-          "description": "rdfs:label — the action title.",
-          "minLength": 1,
-          "pattern": "[^\\n$!*+@%#>]+"
+          "description": "rdfs:label — the decoded semantic title, after DSL escapes are removed.",
+          "minLength": 1
         },
         "description": {
           "type": "string",
-          "description": "Long-form description — '$ ... $' in the DSL.",
-          "pattern": "[^\\n!*+@%#>]+"
+          "description": "Decoded long-form description — '$ ... $' in the DSL."
         },
         "priority": {
           "type": "integer",
@@ -62,7 +60,7 @@
           "description": "hasContextIdentifier — '+' in the DSL.",
           "items": {
             "type": "string",
-            "pattern": "[^,\\n!$*@%#>]+"
+            "minLength": 1
           },
           "minItems": 1
         },
@@ -89,12 +87,13 @@
         },
         "charter": {
           "type": "string",
-          "description": "Charter membership hint — '*' in the DSL.",
-          "pattern": "[^\\n!$+@%#>]+"
+          "description": "Decoded charter membership hint — '*' in the DSL.",
+          "minLength": 1
         },
         "alias": {
           "type": "string",
-          "description": "hasAlias — a short human handle."
+          "description": "hasAlias — a short human handle.",
+          "minLength": 1
         },
         "sequentialChildren": {
           "type": "boolean",
@@ -102,10 +101,10 @@
         },
         "predecessors": {
           "type": "array",
-          "description": "Dependency references — '<' in the DSL. UUIDs that must complete first.",
+          "description": "Dependency references — '<' in the DSL. A canonical UUID or unresolved alias is preserved as semantic reference text.",
           "items": {
             "type": "string",
-            "pattern": "[0-9a-fA-F-]+"
+            "minLength": 1
           }
         },
         "externalScheduleId": {
@@ -119,7 +118,7 @@
         "parentId": {
           "type": "string",
           "description": "UUID of the parent action ('>' nesting in the DSL).",
-          "pattern": "[0-9a-fA-F-]+"
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
         },
         "children": {
           "type": "array",

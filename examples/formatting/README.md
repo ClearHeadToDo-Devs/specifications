@@ -1,85 +1,39 @@
-# Formatting Test Examples
+# Formatting Examples
 
-This directory contains canonical formatting test cases for `.actions` files. These examples demonstrate the transformations that conformant formatters should produce.
+Canonical input/expected byte pairs for the rules in
+[`formatting.md`](../../formatting.md). The specification owns these inert
+artifacts; formatter implementations discover and execute them in their own
+repositories.
 
-## Purpose
+## Covered rules
 
-These test cases serve as:
-1. **Specification artifacts** - Executable demonstrations of formatting rules defined in [formatting.md](../../formatting.md)
-2. **Implementation tests** - Used by formatter implementations (Topiary query in tree-sitter-actions) to verify correctness
-3. **Documentation** - Show developers what "before" and "after" formatting looks like
+- `newlines/` — every action begins on its own line;
+- `indentation/` — child depth is represented by two-space indentation while
+  explicit `>` depth markers remain present;
+- `spacing/` — exactly one space separates state, name, and metadata fields;
+  spaces inside prose and around links normalize without separating a field
+  sigil from its value.
 
-## Formatter Scope
+Each leaf directory contains `input.actions` and `expected.actions`. Cases are
+small and orthogonal so a byte mismatch names one formatting contract.
 
-The formatter enforces **vertical spacing only**:
-- Each action must be on its own line
-
-The formatter does **not** enforce:
-- Horizontal spacing (whitespace-insensitive by design)
-- Indentation (depth markers define hierarchy, not whitespace)
-
-## Structure
-
-Each test case is a directory containing two files:
-- `input.actions` - Input file (may have multiple actions on one line)
-- `expected.actions` - The correctly formatted output
-
-```
+```text
 formatting/
-  newlines/                    # Vertical spacing tests
-    01_multiple_on_one_line/
-      input.actions            # [ ] Task 1[ ] Task 2
-      expected.actions         # Each on separate line
-    02_preserve_spacing/
-      input.actions            # [x]Task$Desc!1 (no spaces)
-      expected.actions         # Same (spacing preserved)
-    ...
+├── indentation/01_nested_actions/
+├── newlines/01_multiple_on_one_line/
+├── spacing/01_field_boundaries/
+└── spacing/02_description_links/
 ```
 
-## Test Cases
+The grammar's Topiary test reads every category through `CLEARHEAD_SPEC_DIR`;
+there is no symlink or copied formatter corpus in the implementation repository.
+Core separately proves semantic round-trip and idempotence over the semantic
+conformance fixtures.
 
-### Newlines
-Tests the only formatting rule: each action on its own line.
+## Adding a case
 
-- **01_multiple_on_one_line** - Multiple root actions on one line get split
-- **02_preserve_spacing** - Horizontal spacing is preserved unchanged
-- **03_children_on_one_line** - Parent and children on one line get split
-- **04_already_formatted** - Already-formatted files are unchanged (idempotence)
-
-## Usage
-
-### For Formatter Implementors
-
-Use these test cases to verify your formatter implementation:
-
-```bash
-# Example: Testing with Topiary
-for test in newlines/*/; do
-  topiary format "$test/input.actions" | diff "$test/expected.actions" -
-done
-```
-
-### For tree-sitter-actions
-
-The tree-sitter-actions repository references these via symlink or copies them:
-
-```bash
-cd tree-sitter-actions
-npm run test:formatting
-```
-
-## Adding New Test Cases
-
-When adding formatting test cases:
-
-1. **Create a descriptive directory name** (e.g., `05_nested_children`)
-2. **Add both files**:
-   - `input.actions` - Input that demonstrates the case
-   - `expected.actions` - The correctly formatted output
-3. **Test one thing** - Each case should test a specific aspect
-4. **Remember the scope** - Formatter only adds newlines, doesn't change spacing
-
-## Version History
-
-- **2026-01-18** - Simplified to newlines-only tests (v2.1.0 spec)
-- **2026-01-03** - Initial test suite with compact, list, and edge case tests
+1. Choose the rule category and a descriptive numbered directory.
+2. Add both exact source files, including their final newline.
+3. Isolate one discriminating transformation.
+4. Run the consuming formatter and review the expected bytes; do not generate an
+   expectation and accept it without comparison to `formatting.md`.

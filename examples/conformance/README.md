@@ -1,47 +1,54 @@
 # Conformance Corpus
 
-Hand-authored fixtures that pin the semantics of the `.actions` DSL. This is
-**oracle data, not a test runner** — the `specifications` repo executes nothing.
-Implementations (Core, and any other parser/tooling) consume these fixtures and
-prove *themselves* against the spec; conformance is a property of the
-implementation, never a test the spec runs against it.
+Hand-authored fixtures that pin the semantics and byte-level integrity boundaries
+of the `.actions` DSL. This is **oracle data, not a test runner**: the
+`specifications` repository executes nothing. Peer implementations pull these
+sources into their own tests and prove conformance at the boundary they own.
 
 ## Taxonomy
 
-The directory **is** the assertion — a consumer branches on it, one scenario per
-fixture:
+| Directory | Assertion | Owning consumer |
+| --- | --- | --- |
+| `parse/` | valid input has the declared domain meaning | Core or another semantic implementation |
+| `diagnostics/` | lint emits the declared code at the declared source node | Core or another linter |
+| `archive/` | terminal structure is internally consistent and archive-ready | Core |
+| `syntax/` | exact recovery/escaping bytes produce the reviewed CST | grammar |
 
-| Directory | Assertion |
-| --- | --- |
-| `parse/` | the input parses into the expected domain structure |
-| `diagnostics/` | linting the input emits the expected diagnostic (code + location) |
-| `archive/` | archive-readiness is detected correctly |
-
-The old monolithic `examples/actions/conformance_test.actions` mixed valid parses
-with error cases in one file, so no single expected-output was expressible over
-it. It has been split here, one scenario per file.
+The grammar retains expected S-expressions because concrete node shape is its
+implementation detail. It reads the `.actions` sources here through
+`CLEARHEAD_SPEC_DIR`; it does not copy or publish a second corpus. Core similarly
+consumes the semantic families behind its opt-in `spec-conformance` feature.
 
 ## Expected results
 
-Verified against `clearhead lint file` (the reference implementation) on
-2026-08-14:
-
 | Fixture | Expectation |
 | --- | --- |
-| `parse/every_field.actions` | parses; every metadata field populated; no diagnostics |
-| `parse/uuid_v7_derivation.actions` | no `^` field → created date derived from the v7 UUID timestamp; **no** `W004` (missing creation date) |
-| `archive/completed_tree.actions` | completed parent with completed child; consistent; no diagnostics |
-| `diagnostics/inconsistent_tree.actions` | closed parent with an open child → **`W002`** |
-| `diagnostics/completed_subtasks.actions` | open parent with all children closed → **`W003`** |
+| `parse/every_field.actions` | one action; every represented metadata field has the value written in the source; no diagnostics |
+| `parse/uuid_v7_derivation.actions` | the UUIDv7 identity is preserved; no retired `W004` diagnostic is emitted; workspace provenance may derive a creation instant when hydrating persisted metadata |
+| `archive/completed_tree.actions` | completed parent and child; no tree-consistency diagnostic; ready for archive |
+| `diagnostics/inconsistent_tree.actions` | closed parent with an open child → exactly one **`W002`** at the parent node |
+| `diagnostics/completed_subtasks.actions` | open parent with all children closed → exactly one **`W003`** at the parent node |
+| `syntax/description_brackets.actions` | escaped prose brackets remain prose while a complete link remains a link |
+| `syntax/description_unescaped_bracket.actions` | an unescaped opening bracket is a parser-integrity error; the following action remains separate |
+| `syntax/incomplete_description_link.actions` | an incomplete link is recoverable without consuming the following action |
+| `syntax/description_terminal_backslash.actions` | an escaped terminal backslash preserves the description delimiter |
+| `syntax/terminal_bare_backslash.actions` | a terminal bare backslash remains lenient name prose |
 
-Diagnostic expectations pin the **code and node location**, not the human-readable
-message text (which is presentation and will churn).
+Diagnostic expectations pin **code and complete node span**, not presentation
+message text. This bounded corpus covers the `W002`/`W003` label drift that
+motivated the gate; `examples/linting/` documents the wider optional rule set
+without claiming every implementation supports every rule. Structural tests
+assert typed domain values rather than a second serialized model. Formatting
+conformance has two complementary oracles:
 
-## Machine oracles
+- exact input/expected bytes under `../formatting/`, consumed by the grammar's
+  Topiary test;
+- semantic round-trip and idempotence over this corpus, consumed by Core.
 
-The expected-output *files* (e.g. `*.expected.json` for structural comparison,
-`*.expected.errors` for diagnostics) are intentionally **not** authored yet: their
-format should be driven by the Core conformance harness that consumes them, so it
-is co-designed with its first real reader rather than guessed here. Until then,
-this README's tables are the human-readable oracle. Tracked by the platform
-`spec-conformance-gate` charter.
+## Adding a fixture
+
+Keep one scenario per source. Put byte/recovery cases in `syntax/`, semantic
+mapping cases in `parse/`, and named lint behavior in `diagnostics/`. Add only the
+smallest source needed to distinguish the contract; broad positive-space
+coverage belongs in implementation-owned generators rather than a duplicated
+fixture framework.

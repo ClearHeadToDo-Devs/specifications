@@ -1,182 +1,55 @@
-# Linting Test Examples
+# Linting Examples
 
-This directory contains canonical linting test cases for `.actions` files. These examples demonstrate the linting errors and their correct fixes as defined in the linting specification.
+Canonical `.actions` fixtures for the rules defined in
+[`linting.md`](../../linting.md). The specification repository owns these source
+examples but executes no linter. Implementations consume the fixtures and assert
+behavior at their own test boundary.
 
-## Purpose
+Each active rule directory contains:
 
-These test cases serve as:
-1. **Specification artifacts** - Executable demonstrations of linting rules defined in [linting.md](../../linting.md)
-2. **Implementation tests** - Used by linter implementations (CLI, LSP server) to verify correctness via snapshot testing
-3. **Documentation** - Show developers what each linting rule detects and how to fix violations
+- `error.actions` — parseable source that plants the named condition;
+- `fixed.actions` — the smallest corrected form.
 
-## Structure
+The directory code and name must agree with the canonical rule heading in
+`linting.md`. Current fixture coverage is:
 
-Each test case is a directory containing two files:
-- `error.actions` - Valid syntax but contains linting violations
-- `fixed.actions` - The same actions corrected to pass the linting rule
+| Severity | Active fixture codes |
+| --- | --- |
+| Error | `E001`, `E003`, `E004`, `E005`, `E006` |
+| Warning | `W001`, `W002`, `W003`, `W005`, `W006`, `W010`, `W011`, `W012` |
+| Information | `I001`, `I002`, `I003`, `I004`, `I006`, `I007`, `I008`, `I009`, `I010`, `I011`, `I012`, `I013`, `I014`, `I015` |
 
-```
-linting/
-  E001_completed_without_date/
-    error.actions           # [x] actions without %
-    fixed.actions           # [x] actions with valid %
-  E002_date_without_completed/
-    error.actions           # [ ] actions with %
-    fixed.actions           # [x] actions with %
-  ...
-```
+Not every specified rule needs a hand-authored pair. Implementations should use
+the cheapest discriminating oracle: exact fixtures for named byte/location
+contracts and generated planted conditions for combinatorial semantics.
 
-## Rule Categories
+## Tree-consistency codes
 
-### Error-Level Rules (E001-E016)
+The canonical meanings are:
 
-These rules detect semantic correctness issues that likely indicate mistakes:
+- **`W002`** — a closed parent has an open child;
+- **`W003`** — an open parent has only closed children.
 
-| Rule | Name | Description |
-|------|------|-------------|
-| E001 | Completed State Requires Completed Date | Actions with `[x]` must have `%` |
-| E002 | Completed Date Requires Completed State | Actions with `%` must have `[x]` |
-| E003 | Invalid Priority Level | Priority must be 1-9 |
-| E004 | Invalid UUID Format | UUIDs must follow standard format |
-| E005 | Duplicate ID | Action IDs must be unique |
-| E006 | Duration Without Do-Date | `D` requires `@` |
-| E008 | Empty Context Tag | Context tags cannot be empty |
-| E009 | Hierarchy Depth Exceeded | Maximum depth is 5 levels |
-| E010 | Orphaned Child Marker | Children must have proper parents |
-| E011 | Skipped Hierarchy Level | Cannot skip depth levels |
-| E012 | Completed Parent with Uncompleted Children | `[x]` parent cannot have `[ ]` children |
-| E013 | Uncompleted Parent with All Children Completed | Parent should be `[x]` if all children are |
-| E014 | Missing Creation Date | Actions should have `^` or UUID v7 |
-| E015 | Creation Date in Future | `^` cannot be in the future |
-| E016 | Completion Before Creation | `%` cannot be before `^` |
+The retired `E012`/`E013` labels from the old monolithic conformance example are
+not valid codes. Diagnostic conformance pins code and source-node span, not the
+human-readable message.
 
-### Warning-Level Rules (W001-W004)
+## Retired fixtures
 
-These rules detect suspicious patterns that may need review:
+- `legacy_E002_recurrence_without_do_date/` documents the removed `R:` syntax;
+  recurrence now lives in iCalendar Plans.
+- `legacy_W004_missing_creation_date/` documents the former requirement to
+  repeat creation provenance in plaintext; sidecar/UUIDv7 provenance makes a
+  missing `^` field non-diagnostic.
 
-| Rule | Name | Description |
-|------|------|-------------|
-| W001 | Past Do-Date on Not-Started Action | `[ ]` actions with very old `@` dates |
-| W002 | Completed Before Scheduled | `%` significantly before `@` |
-| W003 | Excessive Duration | Very long `D` values may be errors |
-| W004 | Very Old Action | Not-started actions with ancient `@` dates |
+Retired fixtures are historical context and must not be included in active
+conformance sweeps.
 
-### Info-Level Rules (I001-I010)
+## Adding a fixture
 
-These rules enforce style conventions and best practices:
-
-| Rule | Name | Description |
-|------|------|-------------|
-| I001 | Metadata Order | Metadata should follow canonical order |
-| I002 | High Priority Without Do-Date | Priority 1-2 actions may need `@` |
-| I003 | Blocked Without Description | `[=]` actions should explain why |
-| I004 | Action Name Too Long | Long names should use `$` instead |
-| I005 | Missing Context | Actions may benefit from `+` tags |
-| I006 | Missing Story Assignment | Root actions may benefit from `*` |
-| I007 | Child Higher Priority Than Parent | May indicate organizational issues |
-| I008 | TODO/FIXME Markers | May indicate incomplete planning |
-| I009 | Question Marks in Name | May indicate uncertainty |
-| I010 | All Caps Name | Use priority instead of shouting |
-
-## Important Notes
-
-### Retired Rule Fixture
-
-`legacy_E002_recurrence_without_do_date/` is retained as a legacy fixture only. Decision 21 removed recurrence syntax (`R:`) from `.actions`, so this fixture documents a retired lint rule and should not be used for active conformance.
-
-### All Examples Use Valid Syntax
-
-The `error.actions` files contain **valid** `.actions` syntax that will parse successfully. They demonstrate **semantic** or **stylistic** issues, not syntax errors.
-
-For example:
-- `#123` is valid syntax (hex characters) but an invalid UUID format (E004)
-- `!10` is valid syntax (number) but an invalid priority level (E003)
-
-This is intentional - linting happens *after* parsing, so linting test cases must use parseable input.
-
-### Multiple Violations Per File
-
-Each `error.actions` file contains 2-4 instances of the same violation to provide more comprehensive test coverage. All violations in a file are related to the same rule - we don't mix different rule violations.
-
-### Configuration-Dependent Rules
-
-Some rules have configurable thresholds (noted in comments):
-- W001: `past_do_date_threshold_days` (default: 7)
-- W002: `early_completion_threshold_minutes` (default: 60)
-- W003: `max_duration_minutes` (default: 480)
-- W004: `old_action_threshold_days` (default: 365)
-- I004: `max_name_length` (default: 50)
-
-The examples use default thresholds unless otherwise noted.
-
-## Usage
-
-### For Linter Implementors
-
-Use these test cases to verify your linter implementation:
-
-```bash
-# Example: Testing a linter
-for test in E*/; do
-  linter check "$test/error.actions" > output.txt
-  # Verify expected diagnostics are present
-  # Verify no diagnostics for fixed.actions
-  linter check "$test/fixed.actions" || echo "Fixed file should not have errors"
-done
-```
-
-### For Snapshot Testing
-
-These examples are ideal for snapshot testing:
-
-```javascript
-// Example: Jest snapshot test
-describe('Linter', () => {
-  const testDirs = fs.readdirSync('specifications/examples/linting');
-
-  testDirs.forEach(dir => {
-    test(`${dir} detects errors`, () => {
-      const result = linter.check(`${dir}/error.actions`);
-      expect(result.diagnostics).toMatchSnapshot();
-    });
-
-    test(`${dir} fixed version passes`, () => {
-      const result = linter.check(`${dir}/fixed.actions`);
-      expect(result.diagnostics).toHaveLength(0);
-    });
-  });
-});
-```
-
-### For the CLI
-
-The actions-cli can use these for testing and documentation:
-
-```bash
-cd actions-cli
-npm run test:linting
-```
-
-## Adding New Test Cases
-
-When adding linting test cases:
-
-1. **Create a descriptive directory name** using the rule code and name (e.g., `E017_new_rule`)
-2. **Add both files**:
-   - `error.actions` - Valid syntax with 2-4 violations of the rule
-   - `fixed.actions` - Same actions corrected
-3. **Test one rule** - Each directory tests a single linting rule
-4. **Use realistic examples** - Prefer real-world scenarios over contrived cases
-5. **Add comments** - Include rule description at top of each file
-6. **Verify parsing** - Ensure `error.actions` parses successfully
-
-## Linting Rules Reference
-
-For the complete linting specification, see:
-- [linting.md](../../linting.md) - Canonical linting rules
-- [action_specification.md](../../action_specification.md) - File format syntax
-- [formatting.md](../../formatting.md) - Formatting rules
-
-## Version History
-
-- **2026-01-04** - Initial test suite with E, W, and I level rules (29 rules total)
+1. Confirm the rule and code in `linting.md`.
+2. Add one directory named `<code>_<short_name>`.
+3. Keep both files valid syntax and isolate one rule.
+4. Prefer realistic, minimal source and avoid embedding implementation messages.
+5. Have the consuming implementation assert the expected code and relevant node
+   location; the specification itself remains inert.

@@ -24,11 +24,13 @@ This is not a dependency on semantic lint policy. Parser integrity is a shared f
 While actions themselves may also contain newlines, it is recommended that each action be placed on its own line to enhance readability.
 
 Input:
+
 ```actions
 [ ] Task 1[ ] Task 2[ ] Task 3
 ```
 
 Output:
+
 ```actions
 [ ] Task 1
 [ ] Task 2
@@ -37,7 +39,7 @@ Output:
 
 This makes each action clearly distinguishable and easier to read.
 
-### Identation for child actions
+### Indentation for child actions
 
 Child actions should be indented to reflect their hierarchy within the action list. Each level of depth should be represented by either 2 spaces or a tab character, depending on the user's preference.
 
@@ -47,7 +49,6 @@ Child actions should be indented to reflect their hierarchy within the action li
         [ ] Sub-child Task
     [ ] Child Task 2
 ```
-
 
 ### Metadata Spacing
 
@@ -68,9 +69,11 @@ Because no token can absorb the boundary space itself, the two never compete, an
 ## Version History
 
 ### 3.1.1 (2026-07-05)
+
 - `description_text` is now trimmed like the other freeform tokens. Previously it swallowed the spaces around links inside a `$...$` block, so topiary's reconstructed spacing stacked on top and produced a non-idempotent double space (`text  [[link]]  text`) that failed topiary's idempotence check. Descriptions now hug their `$` markers (`$text$`, icon->value compact) and links inside get a single owned space on each side.
 
 ### 3.1.0 (2026-07-03)
+
 - **Breaking:** Formatter now enforces horizontal spacing at field boundaries (reverses the 2.1.0 decision to leave this to lint-only)
 - Root cause of the earlier inconsistent double-spacing: `notChars()`-based grammar tokens (name, story, tags, predecessor names) greedily absorbed boundary whitespace into their own byte range, so a topiary `@prepend_space` directive could double up with whitespace already baked into the preceding token
 - Fixed at the grammar level with `notCharsTrimmed()`, which never lets a token start or end on whitespace while still allowing interior spaces
@@ -78,6 +81,7 @@ Because no token can absorb the boundary space itself, the two never compete, an
 - Icon->value spacing within a single field (`!1`, `#id`) remains unenforced/compact -- unchanged from prior versions
 
 ### 3.0.0 (2026-01-31)
+
 - **Breaking:** Formatter now enforces indentation based on action depth
 - Depth markers themselves are indented (not just action content)
 - Indentation respects user preferences (spaces vs tabs, width)
@@ -87,8 +91,11 @@ Because no token can absorb the boundary space itself, the two never compete, an
 **Migration:** Run `clearhead format --in-place` on existing files to update formatting
 
 ### 2.3.0 (2026-01-30)
+
 - expanded to include guidance on the various formats
+
 ### 2.1.0 (2026-01-18)
+
 - **Breaking:** Reduced scope to vertical spacing only
 - Removed horizontal spacing enforcement (whitespace-insensitive by design)
 - Removed indentation enforcement (depth markers define hierarchy)
@@ -96,11 +103,14 @@ Because no token can absorb the boundary space itself, the two never compete, an
 - Dramatically simplified specification
 
 ### 2.0.0 (2026-01-18)
+
 - Removed list style
 - Removed metadata ordering from formatter scope
 
 ### 1.1.0 (2026-01-03)
+
 - Expanded scope to all spacing
 
 ### 1.0.0 (2026-01-01)
+
 - Initial specification

@@ -56,6 +56,7 @@ A linter is *optional* and *configurable* - teams choose which rules to enforce 
 These rules detect logical inconsistencies that block core functionality. These are NOT parse errors - the parser accepts this input, but the linter identifies semantic problems.
 
 #### E001: Duration Without Do-Date
+
     **Fixable:** No
 
     Duration (`D`) requires a do-date (`@`) to be meaningful.
@@ -68,6 +69,7 @@ These rules detect logical inconsistencies that block core functionality. These 
     **Rationale:** A duration without a start time is nonsensical.
 
 #### E002: Recurrence Without Do-Date (Retired)
+
     **Fixable:** No
 
     This rule is retired as of Decision 21.
@@ -77,6 +79,7 @@ These rules detect logical inconsistencies that block core functionality. These 
     live in `.ics` schedule files.
 
 #### E003: Empty Context Tag
+
     **Fixable:** No
 
     Context tags cannot be empty, including whitespace-only tags or trailing commas.
@@ -88,8 +91,8 @@ These rules detect logical inconsistencies that block core functionality. These 
     [ ] Task +work,
     ```
 
-
 #### E004: Orphaned Child Marker
+
     **Fixable:** No
 
     Child actions (`>`) must follow a parent action at the appropriate depth.
@@ -101,6 +104,7 @@ These rules detect logical inconsistencies that block core functionality. These 
     ```
 
 #### E005: Skipped Hierarchy Level
+
     **Fixable:** No
 
     Cannot skip depth levels (e.g., depth 0 → depth 2).
@@ -114,6 +118,7 @@ These rules detect logical inconsistencies that block core functionality. These 
     ```
 
 #### E006: Invalid UUID Format
+
     **Fixable:** No
 
     UUIDs must follow standard format: `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx` (UUIDv7 recommended).
@@ -134,6 +139,7 @@ These rules detect logical inconsistencies that block core functionality. These 
     position.
 
 #### E007: No State Brackets
+
     **Fixable:** Yes
 
     ```actions
@@ -143,12 +149,12 @@ These rules detect logical inconsistencies that block core functionality. These 
 
     State is a fundamental part of the syntax and actions without state are considered invalid
 
-### 2. Warnings 
+### 2. Warnings
 
     These rules check for suspicious date/time relationships.
 
-
 #### W001: Hierarchy Depth Exceeded
+
     **Fixable:** No
 
     Maximum nesting depth is 5 levels (depth 0-5).
@@ -161,6 +167,7 @@ These rules detect logical inconsistencies that block core functionality. These 
     This may or may not be a breaking issue depending on parser implementation. but either way, the process also discourages deep nesting for clarity.
 
 #### W002: Closed Parent with Open Children
+
     **Fixable:** No
 
     A parent action cannot be marked as closed if it has children that are still active.
@@ -178,6 +185,7 @@ These rules detect logical inconsistencies that block core functionality. These 
     **Rationale:** Archiving and completion logic typically operates on trees. A closed parent with active child work is semantically inconsistent.
 
 #### W003: Open Parent with All Children Closed
+
     **Fixable:** No
 
     A parent action that remains open while all of its children are closed should likely be closed as well.
@@ -194,20 +202,17 @@ These rules detect logical inconsistencies that block core functionality. These 
 
     **Rationale:** Serves as a nudge to the user to wrap up the parent action once all its sub-tasks are finished.
 
-#### W004: Missing Creation Date
-    **Fixable:** Yes (derive from UUID v7 or add current date)
+#### W004: Missing Creation Date (Retired)
 
-    Actions should ideally have a creation date, either explicitly via the `^` marker or implicitly via a UUID v7 in the `#` field.
-
-    ```actions
-    [ ] New task
-    [ ] New task ^2026-01-03
-    [ ] New task #01942db4-0000-7000-8000-000000000001
-    ```
-
-    **Rationale:** Creation timestamps help with aging analysis and history tracking, but are not required for correctness. This is a best practice for teams wanting detailed action tracking, but can be disabled for casual use.
+This rule is retired. Creation provenance is persisted in the action sidecar and
+may be bootstrapped from a UUIDv7 timestamp; it is not required to appear as a
+`^` field in every `.actions` line. An implementation must not warn merely
+because the plaintext field is absent. The historical fixture remains under
+`examples/linting/legacy_W004_missing_creation_date/` for compatibility context,
+not active conformance.
 
 #### W005: Creation Date in Future
+
     **Fixable:** No
 
     The creation date (`^`) cannot be in the future relative to the current system time.
@@ -217,6 +222,7 @@ These rules detect logical inconsistencies that block core functionality. These 
     ```
 
 #### W006: Completion Before Creation
+
     **Fixable:** No
 
     The completion date (`%`) cannot be before the creation date (`^`).
@@ -226,6 +232,7 @@ These rules detect logical inconsistencies that block core functionality. These 
     ```
 
 #### W007: Circular Dependency
+
     **Fixable:** No
 
     Actions cannot have circular dependencies (directly or transitively).
@@ -240,6 +247,7 @@ These rules detect logical inconsistencies that block core functionality. These 
     **Fix suggestion:** Review the dependency structure and break the cycle by removing or reworking one of the dependencies.
 
 #### W008: Invalid Predecessor Reference
+
     **Fixable:** No
 
     A predecessor references an action that doesn't exist in the workspace.
@@ -253,6 +261,7 @@ These rules detect logical inconsistencies that block core functionality. These 
     **Fix suggestion:** Check the name/UUID spelling, or create the missing predecessor action.
 
 #### W009: Ambiguous Predecessor Reference
+
     **Fixable:** No
 
     Multiple actions in the workspace match the predecessor name. Use UUID or alias to disambiguate.
@@ -268,6 +277,7 @@ These rules detect logical inconsistencies that block core functionality. These 
     **Configuration:** `require_uuid_for_ambiguous_predecessors` (default: false) — if true, escalates to error severity.
 
 #### W010: Duplicate Alias
+
     **Fixable:** No
 
     Multiple actions in the workspace define the same alias.
@@ -282,6 +292,7 @@ These rules detect logical inconsistencies that block core functionality. These 
     **Fix suggestion:** Rename one of the aliases to be unique.
 
 #### W011: Ambiguous Short UUID
+
     **Fixable:** No
 
     Multiple UUIDs in the workspace share the same 8-character prefix.
@@ -297,6 +308,7 @@ These rules detect logical inconsistencies that block core functionality. These 
     **Fix suggestion:** Use the full UUID or an alias for the reference.
 
 #### W012: Sequential Marker on Childless Action
+
     **Fixable:** No
 
     The `~` marker is used on an action with no children.
@@ -308,6 +320,7 @@ These rules detect logical inconsistencies that block core functionality. These 
     **Rationale:** The sequential marker only affects child actions. Using it on a leaf action has no effect and may indicate a mistake.
 
 #### W013: Incomplete UUID
+
     **Fixable:** No (requires user input)
 
     A `#id` that is a well-formed *prefix* of a full UUID but stops short — the
@@ -330,10 +343,10 @@ These rules detect logical inconsistencies that block core functionality. These 
     genuinely invalid id (`#123`, `#abc-def`, `#not-a-uuid`) that no amount of
     further typing turns into the uuid at that position.
 
-
 ### 3. Style and Conventions (Info)
 
 #### I001: Closed State Requires Completed Date
+
     **Severity:** Info
     **Fixable:** No (requires user input)
 
@@ -351,6 +364,7 @@ These rules detect logical inconsistencies that block core functionality. These 
     **Fix suggestion:** Add `%YYYY-MM-DDTHH:MM` or change state to an open state such as `[ ]`.
 
 #### I002: Completed Date Requires Closed State
+
     **Severity:** Info
     **Fixable:** No
 
@@ -367,6 +381,7 @@ These rules detect logical inconsistencies that block core functionality. These 
     We may consider a distinct reopen date if requested, but for now `%` means the action was closed at that timestamp.
 
 #### I003: Invalid Priority Level
+
     **Severity:** Info
     **Fixable:** No
 
@@ -383,8 +398,8 @@ These rules detect logical inconsistencies that block core functionality. These 
 
     While we dont necessarily stop you from putting higher values, for the sake of the process, we conform to the eisenhower matrix
 
-
 #### I004: Duplicate ID
+
     **Severity:** Info
     **Fixable:** No
 
@@ -401,6 +416,7 @@ These rules detect logical inconsistencies that block core functionality. These 
     These rules enforce team conventions and best practices. All are configurable.
 
 #### I006: Metadata Order
+
     **Severity:** Info
     **Fixable:** Yes (if auto-reordering is enabled)
 
@@ -416,6 +432,7 @@ These rules detect logical inconsistencies that block core functionality. These 
     **Rationale:** Consistent ordering improves scanability across files.
 
 #### I007: High Priority Without Do-Date
+
     **Severity:** Info
     **Fixable:** No
 
@@ -429,6 +446,7 @@ These rules detect logical inconsistencies that block core functionality. These 
     **Configuration:** `high_priority_threshold` (default: 2)
 
 #### I008: Blocked Without Description
+
     **Severity:** Info
     **Fixable:** No
 
@@ -439,8 +457,8 @@ These rules detect logical inconsistencies that block core functionality. These 
     [=] Task $ Waiting for API access !1
     ```
 
-
 #### I009: Child Higher Priority Than Parent
+
     **Severity:** Info
     **Fixable:** No
 
@@ -459,6 +477,7 @@ These rules detect logical inconsistencies that block core functionality. These 
     We keep the hierarchy limited for process requirements but many 
 
 #### I010: Excessive Duration
+
     **Severity:** Info
     **Fixable:** No
 
@@ -472,6 +491,7 @@ These rules detect logical inconsistencies that block core functionality. These 
     **Configuration:** `max_duration_minutes` (default: 480 = 8 hours)
 
 #### I011: Past Do-Date on Not-Started Action
+
     **Severity:** Warning
     **Fixable:** No
 
@@ -488,6 +508,7 @@ These rules detect logical inconsistencies that block core functionality. These 
     **Configuration:** `past_do_date_threshold_days` (default: 7) - how many days past before warning.
 
 #### I012: Invalid Alias Format
+
     **Severity:** Info
     **Fixable:** No
 
@@ -503,6 +524,7 @@ These rules detect logical inconsistencies that block core functionality. These 
     **Rationale:** Aliases are used as identifiers and should be simple, machine-friendly strings.
 
 #### I013: Redundant Tag (Covered by Hierarchy)
+
     **Severity:** Info
     **Fixable:** Yes
 
@@ -519,6 +541,7 @@ These rules detect logical inconsistencies that block core functionality. These 
     **Configuration:** Requires `tag_hierarchies` to be configured.
 
 #### I014: Story Path Depth Excessive
+
     **Severity:** Info
     **Fixable:** No
 
@@ -534,6 +557,7 @@ These rules detect logical inconsistencies that block core functionality. These 
     **Rationale:** Deep hierarchies become hard to navigate and may indicate scope creep.
 
 #### I015: Empty Alias
+
     **Severity:** Info
     **Fixable:** No
 
@@ -545,4 +569,3 @@ These rules detect logical inconsistencies that block core functionality. These 
     ```
 
     **Rationale:** An alias marker without a name serves no purpose.
-

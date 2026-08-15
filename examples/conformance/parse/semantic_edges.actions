@@ -1,0 +1,9 @@
+[ ] Escaped \$ \! \* \+ \@ \% \# \> title =root-edge ~
+$Description with \! \* \+ \@ \% \# \> and [[docs|https://example.com]]$
+!9
+*Charter\!
++ctx,second
+@2026-01-02T09:00
+:2026-01-03T17:00
+#01942db4-0000-7000-8000-000000000009
+>[ ] Child =child-edge <root-edge #01942db4-0000-7000-8000-00000000000a
