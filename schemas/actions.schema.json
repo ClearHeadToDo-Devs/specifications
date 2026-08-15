@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://github.com/clearheadtodo-devs/tree-sitter-actions/schema/actions.schema.json",
+  "$id": "https://github.com/ClearHeadToDo-Devs/specifications/schemas/actions.schema.json",
   "title": "Actions File Serialization Format",
   "description": "JSON Schema for the canonical serialization of .actions files",
   "type": "object",

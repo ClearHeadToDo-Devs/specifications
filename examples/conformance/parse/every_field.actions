@@ -1,0 +1,8 @@
+[ ] Root action with every field
+    $ This action is used to verify that all metadata is correctly parsed and displayed. $
+    !1
+    *Conformance-Project
+    +testing,metadata
+    @2026-01-01T09:00 D60
+    ^2026-01-03T12:00
+    #01942db4-0000-7000-8000-000000000001

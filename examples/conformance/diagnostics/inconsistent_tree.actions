@@ -1,0 +1,6 @@
+[x] Inconsistent tree
+    $ This parent is completed but has active work below. $
+    ^2026-01-03T09:00
+    %2026-01-03T10:00
+    #01942db4-0000-7000-8000-000000000004
+    >[ ] Still active ^2026-01-03T09:05 #01942db4-0000-7000-8000-000000000005

@@ -95,7 +95,7 @@ See **calendar_export_example.actions** for a comprehensive demonstration of cal
 
 ## Test Files
 
-- **conformance_test.actions** - Comprehensive test covering all features
+- **conformance/** - Semantic conformance corpus, one scenario per fixture (parse / diagnostics / archive); see [conformance/README.md](conformance/README.md)
 - **formatting/** - Directory with formatting test cases
 - **linting/** - Directory with lint rule examples
 

@@ -1,0 +1,3 @@
+[ ] Action with derivation test
+    $ This action has no ^ field, so the created date should be derived from the v7 UUID timestamp. $
+    #01942db4-ec68-7000-8000-000000000008
