@@ -61,40 +61,169 @@ The ontology repository remains the canonical location for term and schema artif
 
 This specification does not redefine those artifacts; it defines how downstream tools should apply them consistently.
 
-## RDF Graph Layer
+## Canonical RDF Dataset
 
-This section documents how the ontology manifests in the runtime Oxigraph store. It is the normative reference for anyone writing SPARQL queries, extending the graph module, or building a new client that needs to read clearhead graph data.
+This is the normative, **engine-neutral** contract for the RDF that ClearHead
+publishes. A conforming implementation produces this dataset from a validated
+`DomainModel` whether or not any SPARQL engine is present. The optional local
+evaluator described further down is *one consumer* of this dataset, not its
+definition, and nothing here depends on a database being installed.
 
-### Named Graph Isolation
+The single projection is authoritative for every ClearHead RDF statement.
+JSON-LD is a serialization of this same dataset — compact framing may reorder or
+rename terms per format, but it MUST preserve the same facts and the same graph
+identity. There is no second, hand-built export path.
 
-Every workspace occupies exactly one RDF named graph.  No workspace data is ever written to `DefaultGraph`.  The named graph URI for a workspace is:
+### Publication Boundary
 
-```
+- The plaintext workspace is the only canonical write model. RDF is a
+  deterministic, replaceable **snapshot** of the validated domain model.
+- The read path is one-way:
+  `plaintext workspace -> validated DomainModel -> RDF dataset`.
+- Missing triples are **not** workspace deletions; external graph mutations do
+  **not** sync back into plaintext.
+- There is no generic RDF import, no arbitrary-Turtle loading surface, no remote
+  endpoint proxy, and no round-trip that recovers workspace *source* (files,
+  line layout, formatting) from RDF.
+- Query results address ordinary mutation verbs through the same canonical
+  `urn:uuid:...` identities the CLI already accepts.
+
+### Named Graph Identity
+
+Every workspace occupies exactly one RDF named graph. The named graph IRI for a
+workspace is:
+
+```text
 urn:clearhead:workspace:<uuid>
 ```
 
-where `<uuid>` is the stable `workspace_id` from `.clearhead/workspace.json`, generated once by `clearhead init`.  See [Workspace — Named Graph Isolation][workspace-graphs] for how that UUID is created and why it must never be regenerated.
+where `<uuid>` is the stable `workspace_id` from `.clearhead/workspace.json`,
+generated once by `clearhead init` and never regenerated. See
+[Workspace — Named Graph Isolation][workspace-graphs] for how that UUID is
+created and why it must remain stable.
 
-`DefaultGraph` is only correct in two specific contexts:
+Dataset-capable syntaxes (**TriG**, **N-Quads**) preserve this named graph, so a
+multi-workspace export keeps each workspace addressable and separable. Graph-only
+syntaxes (Turtle, and compact JSON-LD) serialize a single graph's statements and
+therefore do **not** carry the named-graph identity; they are offered only where
+that loss is acceptable and their contract is well-defined.
 
-| Context | Why `DefaultGraph` is acceptable |
+### Entity Scope and Identity
+
+The canonical dataset projects five entities:
+
+| Entity | IRI shape |
 |---|---|
-| Archive serialization (`load_acts_into_store`, `serialize` module) | A single-use transient store written directly to Turtle; never queried via SPARQL. |
-| Test stores that explicitly cover the archive/serialization path | Same reason. |
+| Charter | `urn:uuid:<uuid>` |
+| Plan | `urn:uuid:<uuid>` |
+| Action | `urn:uuid:<uuid>` |
+| Context (tag) | `urn:context:<slug>` |
+| Workspace | `urn:clearhead:workspace:<uuid>` |
 
-Everywhere else — CLI query paths, named query smoke tests, multi-workspace loading, new graph-layer code — use a named graph URI.  Any test that loads into `DefaultGraph` and then queries via SPARQL is testing a configuration that never occurs in production.
+Context `<slug>` normalization: leading `+` stripped, trimmed, lowercased,
+internal spaces replaced with `-`.
 
-### SPARQL Evaluator Behaviour
+**Objective is reserved but not yet projected.** The ontology-out contract
+(`ontology/v4/ONTOLOGY_OUT_CONTRACT.md`) declares `Objective` (and
+`ContextType`) in the canonical seam, but the current projection emits no
+Objective statements. This is a known, tracked gap, not a silent omission: the
+platform projection scope is the five entities above until Objective projection
+is deliberately added. The ontology repository remains the authority for the
+*term* vocabulary regardless of what the platform currently emits.
 
-The evaluator is configured with a **union default graph**: triple patterns without an explicit `GRAPH` clause match across all named graphs in the store. This is applied automatically for any query that does not declare its own `FROM` / `FROM NAMED` dataset.
+### Canonical Term Reference
 
-This means the same `.sparql` file works correctly in single-workspace and multi-workspace contexts without modification: in a single-workspace store there is one named graph; in a multi-workspace store there are several, and the union includes all of them.
+The following table is the authoritative cross-reference between domain entities
+and their RDF representation in `v4`. All predicates use the prefix
+`actions: <https://clearhead.us/vocab/actions/v4#>` unless otherwise noted.
 
-### SPARQL Query Conventions
+| Domain Entity | `rdf:type` | Key predicates |
+|---|---|---|
+| Charter | `actions:Charter` | `rdfs:label`, `actions:hasUUID`, `actions:hasAlias`, `actions:hasCharterState`, `actions:hasSubCharter` (parent → child), `bfo:BFO_0000051` (hasPart → Plans / Actions) |
+| Plan | `cco:ont00000974` | `rdfs:label`, `actions:hasUUID`, `actions:hasRecurrenceRule`, `actions:hasExternalScheduleId`, `cco:ont00001942` (prescribes → Actions) |
+| Action | `actions:Action` | `rdfs:label`, `actions:hasUUID`, `cco:ont00001868` (status), `cco:ont00001920` (prescribedBy → Plan), `cco:ont00001916` (isSuccessorOf → predecessor Action), `bfo:BFO_0000050` (partOf → parent Action), `actions:requiresContext` (→ Context) |
+| Context (tag) | `actions:Context` | `actions:hasContextIdentifier`, `actions:contextBroader` (child→parent), `actions:contextNarrower` (parent→child) |
+| Workspace | `ws:Workspace` | `rdfs:label`, `actions:hasAlias`, `ws:root`, `ws:charterRoot` |
 
-#### Omit `GRAPH ?g` for standard queries
+**Status values** are IRIs: `actions:NotStarted`, `actions:InProgress`,
+`actions:Completed`, `actions:Blocked`, `actions:Cancelled`.
 
-The recommended style for built-in named queries is no explicit `GRAPH` clause:
+The CCO property identifiers (`ont00000974`, `ont00001868`, etc.) are stable and
+normative — they come from the Common Core Ontologies and must not change
+without a coordinated update to the ontology repo, the constants in the Core RDF
+module, and every `.sparql` query file. Any drift between those locations
+produces **silent empty results**: the query executes successfully but matches
+no triples because the predicate IRI changed. Named-query smoke tests exist to
+catch this drift automatically.
+
+### Datatypes
+
+- Date-times use `xsd:dateTime` with a single canonical RFC3339 representation
+  (`hasScheduledDateTime`, `hasDueDateTime`, `hasCompletedDateTime`,
+  `hasCreatedDateTime`).
+- Counts use `xsd:integer` (`hasPriority`, `hasDurationMinutes`, source line).
+- Sequential flag uses `xsd:boolean` (`hasSequentialChildren`).
+- Identifiers and provenance strings use `xsd:string`; `rdfs:label` /
+  `rdfs:comment` are plain literals.
+
+### Determinism
+
+- Node ordering is stable and documented: by type rank, then lexical identifier.
+- A single canonical RFC3339 representation is used for every datetime literal.
+- For a given `DomainModel`, a given serialization is byte-deterministic, so
+  exports are diffable and testable.
+
+### Provenance and Reconstruction
+
+- `ws:hasSourceFile` / `ws:hasSourceLine` are **workspace-snapshot** properties,
+  valid for the current filesystem state and intended for editor integration
+  (quickfix, jump-to-source). They are not portable cross-machine identity and
+  are not required to reconstruct the domain model.
+- The projected entity scope reconstructs to *equivalent domain data* — the
+  semantic reconstruction scope is the five entities above, **not** the workspace
+  source layout. Recovering files or formatting from RDF is explicitly out of
+  scope (see Publication Boundary).
+
+### Authoritative Artifacts
+
+- `ontology/v4/*` is canonical: `actions.context.json`, `actions.schema.json`,
+  `actions-vocabulary.owl`, `actions-shapes-v4.ttl`, and
+  `ONTOLOGY_OUT_CONTRACT.md`.
+- Any `*.v4.*` files vendored inside an implementation (for example under a
+  graph module's `resources/`) are **copies for offline stability**, not a second
+  authority. They must be verified against `ontology/v4`, never forked from it.
+
+## Optional Local SPARQL Evaluation
+
+This section is **non-normative to the dataset**. It describes an *optional
+convenience*: running SPARQL locally over exactly the dataset defined above. The
+evaluator is not a ClearHead backend, not a persistence layer, and not required
+for RDF publication — a minimal build has no query engine at all. Its behavior
+below constrains how queries are written, not what the canonical dataset
+contains.
+
+The evaluator loads only ClearHead's generated dataset (and trusted bundled
+ontology/shape resources required by the contract) into an ephemeral in-memory
+store, runs one query, and exits. It does not persist state, load arbitrary
+foreign RDF, federate, or proxy remote endpoints. Complete saved queries are
+ordinary `.sparql` files that MUST also run unchanged in independent SPARQL
+tooling.
+
+### Union Default Graph
+
+The evaluator is configured with a **union default graph**: triple patterns
+without an explicit `GRAPH` clause match across all named graphs in the store.
+This is applied automatically for any query that does not declare its own
+`FROM` / `FROM NAMED` dataset.
+
+The same `.sparql` file therefore works in single- and multi-workspace contexts
+without modification: a single-workspace store has one named graph; a
+multi-workspace store has several, and the union includes all of them.
+
+### Query Conventions
+
+**Omit `GRAPH ?g` for standard queries.** The recommended style for built-in
+named queries is no explicit `GRAPH` clause:
 
 ```sparql
 PREFIX actions: <https://clearhead.us/vocab/actions/v4#>
@@ -108,11 +237,8 @@ SELECT ?name WHERE {
 }
 ```
 
-All files in `clearhead-cli/src/queries/*.sparql` follow this convention.
-
-#### Use `GRAPH ?g` for workspace-aware queries
-
-Add a `GRAPH` clause when the query needs to expose or constrain the source workspace:
+**Use `GRAPH ?g` for workspace-aware queries** — when the query needs to expose
+or constrain the source workspace:
 
 ```sparql
 -- identify which workspace each action came from
@@ -130,31 +256,11 @@ SELECT ?name WHERE {
 }
 ```
 
-### Canonical Term Reference
-
-The following table is the authoritative cross-reference between domain entities and their RDF representation in `v4`.  All predicates use the prefix `actions: <https://clearhead.us/vocab/actions/v4#>` unless otherwise noted.
-
-| Domain Entity | `rdf:type` | Key predicates |
-|---|---|---|
-| Charter | `actions:Charter` | `rdfs:label`, `actions:hasUUID`, `actions:hasAlias`, `actions:hasCharterState`, `bfo:BFO_0000051` (hasPart → Plans / Actions) |
-| Plan | `cco:ont00000974` | `rdfs:label`, `actions:hasUUID`, `actions:hasRecurrenceRule`, `actions:hasExternalScheduleId`, `cco:ont00001942` (prescribes → Actions) |
-| Action | `actions:Action` | `rdfs:label`, `actions:hasUUID`, `cco:ont00001868` (status), `cco:ont00001920` (prescribedBy → Plan), `bfo:BFO_0000050` (partOf → parent Action) |
-| Context (tag) | `actions:Context` | `actions:hasContextIdentifier`, `actions:contextBroader` (child→parent), `actions:contextNarrower` (parent→child) |
-
-**Status values** are IRIs: `actions:NotStarted`, `actions:InProgress`, `actions:Completed`, `actions:Blocked`, `actions:Cancelled`.
-
-The CCO property identifiers (`ont00000974`, `ont00001868`, etc.) are stable and normative — they come from the Common Core Ontologies and must not change without a coordinated update to the ontology repo, the constants in `clearhead-core/src/graph/mod.rs`, and every `.sparql` query file.  Any drift between those three locations produces **silent empty results** — the query executes successfully but matches no triples because the predicate IRI has changed.  This is why the named query smoke tests in `clearhead-core/tests/graph_queries.rs` exist: they catch this drift automatically.
-
-### Testing the Graph Layer
-
-New graph-layer code and new named queries each require a corresponding test:
-
-| What you added | What to add |
-|---|---|
-| A new `insert_*` function or new triple emitted from an existing one | A unit test in `graph/insert.rs` that loads into `TRANSIENT_GRAPH_URI` and asserts the triple is present via `quads_for_pattern(…, None)` (any graph). |
-| A new reconstruction path in `query.rs` | A roundtrip test in `graph/query.rs`: load a model → load into store with transient graph → `load_domain_model_from_store` → assert the field is preserved. |
-| A new `.sparql` named query file | A smoke test in `tests/graph_queries.rs` using `include_str!`.  Assert non-empty results against the fixture workspace.  If the query is legitimately empty for the fixture (e.g. it filters by a date in the future), document *why* rather than letting it silently pass. |
-| A new multi-workspace code path | A test in `clearhead-cli/src/lib.rs` similar to `multi_workspace_tests` that spins up two temp workspaces and asserts cross-workspace query results. |
+`DefaultGraph` is only appropriate for single-use transient stores written
+directly to Turtle and never queried via SPARQL (for example archive
+serialization). Any test that loads into `DefaultGraph` and then queries via
+SPARQL is testing a configuration that never occurs in production; use a named
+graph IRI everywhere else.
 
 ## Source Boundary: Core Ontology vs Integration Profiles
 
