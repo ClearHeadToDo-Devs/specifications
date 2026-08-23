@@ -141,7 +141,7 @@ and their RDF representation in `v4`. All predicates use the prefix
 |---|---|---|
 | Charter | `actions:Charter` | `rdfs:label`, `actions:hasUUID`, `actions:hasAlias`, `actions:hasCharterState`, `actions:hasSubCharter` (parent → child), `bfo:BFO_0000051` (hasPart → Plans / Actions) |
 | Plan | `cco:ont00000974` | `rdfs:label`, `actions:hasUUID`, `actions:hasRecurrenceRule`, `actions:hasExternalScheduleId`, `cco:ont00001942` (prescribes → Actions) |
-| Action | `actions:Action` | `rdfs:label`, `actions:hasUUID`, `cco:ont00001868` (status), `cco:ont00001920` (prescribedBy → Plan), `cco:ont00001916` (isSuccessorOf → predecessor Action), `bfo:BFO_0000050` (partOf → parent Action), `actions:requiresContext` (→ Context) |
+| Action | `actions:Action` | `rdfs:label`, `actions:hasUUID`, `cco:ont00001868` (status), `cco:ont00001775` (isSuccessorOf → predecessor Action), `bfo:BFO_0000050` (partOf → parent Action), `actions:requiresContext` (→ Context) |
 | Context (tag) | `actions:Context` | `actions:hasContextIdentifier`, `actions:contextBroader` (child→parent), `actions:contextNarrower` (parent→child) |
 | Workspace | `ws:Workspace` | `rdfs:label`, `actions:hasAlias`, `ws:root`, `ws:charterRoot` |
 
