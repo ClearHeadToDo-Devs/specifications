@@ -202,7 +202,7 @@ They differ only in *where* the identity is persisted:
 | Workspace | `workspace_id` in `.clearhead/workspace.json`      | [Workspace Identity](#workspace-identity) |
 | Charter   | frontmatter `id`, mirrored in the sidecar          | [Charters] |
 | Plan      | configured VEVENT/VTODO `UID` (canonical `.ics` filename) | [ICS Schedule Spec] |
-| Action    | inline id; a calendar-authored one-off Plan UID maps deterministically to its realized Action | [Action File Format], [ICS Schedule Spec] |
+| Action    | inline id; its sidecar records the UID of any realized Plan | [Action File Format], [ICS Schedule Spec] |
 
 Two rules keep this honest:
 

@@ -75,7 +75,7 @@ Clients that do not understand these directives may display them as notes.
 
 ### One-off Plans
 
-A scheduled, non-recurring Action realizes exactly one Plan. For ClearHead-authored resources the Action UUID is used as the component UID and canonical filename. For a calendar-authored arbitrary text UID, ClearHead retains the UID and deterministically derives the Action UUID; it never rewrites the external UID merely to fit the domain model.
+A scheduled, non-recurring Action realizes exactly one Plan. For ClearHead-authored resources the Action UUID is used as the component UID and canonical filename. For a calendar-authored resource, ClearHead retains the arbitrary external UID, mints an independent native Action UUID, and records the relationship in the Action sidecar; it never rewrites the external UID or derives durable Action identity from transport-owned identity.
 
 The lifecycle is bidirectional:
 
@@ -121,7 +121,7 @@ A calendar-created Plan uses its `SUMMARY` and optional description to seed the 
 
 Each synchronized schedule field has an independent three-way merge base in the machine-local plans projection store. A conflict in one field must not block safe changes in another. First sync converges agreeing values and surfaces differing values as conflicts rather than guessing by timestamps.
 
-The store also retains the interoperable UID and recurring occurrence linkage needed to reconnect a materialized Action to its Plan. It is projection bookkeeping, not Action state or canonical history.
+The Action sidecar stores the durable semantic Plan link: the interoperable Plan UID and, for a recurring instance, its canonical recurrence key. This committed relationship survives projection-store loss, Plan path changes, and arbitrary calendar-created UIDs. The machine-local projection store retains only merge bases and other reconstructible reconciliation state.
 
 When updating an existing component, ClearHead changes only fields it owns. It must preserve alarms, unrecognized properties, vendor extensions, calendar-level metadata, the original UID, and the transport-selected resource path.
 

@@ -32,6 +32,22 @@
                                           "type": "string",
                                           "description": "ISO 8601 creation timestamp"
                                    },
+                                   "plan": {
+                                          "type": "object",
+                                          "description": "Durable semantic link from this Action to the iCalendar Plan it realizes.",
+                                          "properties": {
+                                                 "uid": {
+                                                        "type": "string",
+                                                        "description": "Interoperable iCalendar UID of the Plan component. ClearHead-authored one-off Plans normally use the Action UUID; calendar-authored Plans may use arbitrary text."
+                                                 },
+                                                 "occurrence_key": {
+                                                        "type": "string",
+                                                        "description": "Canonical recurrence slot key when this Action realizes one occurrence of a recurring Plan; omitted for one-off Plans."
+                                                 }
+                                          },
+                                          "required": ["uid"],
+                                          "additionalProperties": false
+                                   },
                                    "occurrence": {
                                           "type": "object",
                                           "description": "Frozen lineage for an archived materialized recurring occurrence. Live occurrence lineage is hydrated from the plans sync store; completed archives snapshot the fact so future plan edits/deletion do not rewrite history.",
