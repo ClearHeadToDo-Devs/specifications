@@ -5,6 +5,7 @@
 This specification defines how ClearHead implementations handle configuration, including directory structure, file format, configuration layering, and extension mechanisms.
 
 **Key principles:**
+
 - XDG Base Directory compliance for portability
 - JSON format for universal compatibility
 - Layered configuration for flexibility
@@ -43,7 +44,6 @@ All implementations MUST follow the XDG Base Directory specification:
 | State | `$XDG_STATE_HOME/clearhead` | `~/.local/state/clearhead` |
 | Cache (optional) | `$XDG_CACHE_HOME/clearhead` | `~/.cache/clearhead` |
 
-
 ### Default File Structure
 
 ```
@@ -76,6 +76,7 @@ Within the example of a specific project, these subdirectories all reside within
 `config.json` is committed so the whole team shares workspace *behavior* (`additional_workspaces`, `tag_hierarchies`, `plan_path`, …). `config.local.json` sits beside it as a git-ignored personal override: a single developer can set their own values (e.g. their own `plan_path`) without touching the shared file. The local file wins over the committed one. `clearhead init` writes a scoped `.clearhead/.gitignore` so the personal override stays out of version control.
 
 Workspace *identity* — `workspace_id`, `workspace_name`, `created_at` — does **not** live in `config.json`. It lives in a separate `.clearhead/workspace.json` **manifest**. The two are split because they behave differently: `config.json` is human-authored behavior that layers through the precedence chain below, while the manifest is a tool-managed fact about one workspace that must not layer (a `workspace_id` in a *global* config, or a `CLEARHEAD_WORKSPACE_ID` env override, is meaningless). The manifest is committed and near-static — it changes on `init` and rename, essentially never otherwise — and holds workspace-level facts only; per-charter metadata stays in its co-located sidecar. See [Workspace Identity](./workspace.md#workspace-identity) and the [manifest schema](./schemas/workspace.schema.json).
+
 ## Configuration File Format
 
 ### Format Choice
@@ -83,6 +84,7 @@ Workspace *identity* — `workspace_id`, `workspace_name`, `created_at` — does
 Configuration MUST be stored in a Format that supports conversion to-and-from JSON format at `$XDG_CONFIG_HOME/clearhead/config.json`.
 
 **Rationale for JSON:**
+
 - Universal support across all languages and platforms
 - Native support in most editors
 - Simple, well-understood format
@@ -95,6 +97,7 @@ The configuration file uses a flat structure with implementation-specific namesp
 2. **Implementation settings** - Prefixed with implementation name (e.g., `cli_*`, `nvim_*`)
 
 **Core configuration example:**
+
 ```json
 {
   "data_dir": "~/.local/share/clearhead",
@@ -104,6 +107,7 @@ The configuration file uses a flat structure with implementation-specific namesp
 ```
 
 **With implementation-specific settings:**
+
 ```json
 {
   "data_dir": "~/.local/share/clearhead",
@@ -132,11 +136,12 @@ All implementations MUST recognize these core settings:
 | `tag_hierarchies` | object | `{}` | Tag parent-child relationships for implicit inheritance |
 | `default_to_user_scope` | boolean | `false` | If true, only shows user-scoped actions (ignores project scope) |
 | `additional_workspaces` | array | `[]` | Additional workspaces to merge into the domain model. Entries may be relative paths, absolute paths (with `~` / env-var expansion), or URLs (planned). See [Additional workspaces](#additional-workspaces). |
-| `plan_path` | string | _(unset → `<data_root>/plans`)_ | Configured iCalendar vdir at `<plan_path>/<charter>/<resource>.ics`. ClearHead assumes only the filesystem boundary; any CalDAV/file-sync transport is external. |
+| `plan_path` | string | *(unset → `<data_root>/plans`)* | Configured iCalendar vdir at `<plan_path>/<charter>/<resource>.ics`. ClearHead assumes only the filesystem boundary; any CalDAV/file-sync transport is external. |
 | `plan_component` | string | `vevent` | iCalendar component used to encode Plans: `vevent` for ordinary calendar scheduling or `vtodo` for task-oriented calendar clients. This changes the integration surface, not Plan or Action domain semantics. |
 | `expansion_total_instances` | integer | `2` | Bounded number of recurring Plan occurrences exposed by planning projections. Materialized current instances and read-only future projections may apply different view policies. |
 
 **Requirements:**
+
 - Core settings MUST support shell expansion (`~`, `$HOME`, environment variables)
 - Relative paths in `default_file` MUST be resolved from `data_dir`
 - Absolute paths MUST be used as-is
@@ -160,8 +165,7 @@ Implementations MUST follow this precedence order (highest to lowest):
 3. **Project-local configuration** - `<project-root>/.clearhead/config.local.json` (git-ignored, personal)
 4. **Project configuration** - `<project-root>/.clearhead/config.json` (committed, shared)
 5. **Global configuration** - `$XDG_CONFIG_HOME/clearhead/config.json`
-1. **Built-in defaults** - Hardcoded in the application
-
+6. **Built-in defaults** - Hardcoded in the application
 
 The two project layers let a committed `config.json` carry the shared workspace settings while each developer keeps personal overrides in a git-ignored `config.local.json` beside it — the local file wins. Both are optional and only apply when the invocation resolves to a project workspace.
 
@@ -183,6 +187,7 @@ Result: compact (CLI flag wins)
 Environment variables MUST use the `CLEARHEAD_` prefix followed by setting names in uppercase with underscores.
 
 **Core settings:**
+
 ```bash
 CLEARHEAD_DATA_DIR=/custom/path
 CLEARHEAD_CONFIG_DIR=/custom/config
@@ -190,6 +195,7 @@ CLEARHEAD_DEFAULT_FILE=work.actions
 ```
 
 **Implementation-specific settings** use the same prefix pattern with implementation namespace:
+
 ```bash
 # CLI settings (maps to cli_* in JSON)
 CLEARHEAD_CLI_FORMAT=json
@@ -219,6 +225,7 @@ Implementations MUST parse environment variable values as follows:
 Implementations MAY add their own settings to the configuration file using a namespaced prefix (typically the tool name in lowercase followed by an underscore).
 
 **Example for multiple implementations:**
+
 ```json
 {
   "data_dir": "~/.local/share/clearhead",
@@ -243,18 +250,19 @@ Implementations MAY add their own settings to the configuration file using a nam
 ```
 
 **Requirements:**
+
 - Implementations MUST prefix their settings with a unique namespace (e.g., `cli_`, `nvim_`, `sync_`, `web_`)
 - Implementations MUST ignore settings from other namespaces
 - Implementations SHOULD NOT depend on settings from other namespaces
 - Namespace prefixes MUST be unique identifiers (no conflicts)
 - Core settings (no prefix) MUST be respected by all implementations
 
-
 ### Tag Hierarchies (`tag_hierarchies`)
 
 Tag hierarchies define parent-child relationships between context tags. When an action is tagged with a child tag, it implicitly inherits all ancestor tags.
 
 **Structure:**
+
 ```json
 {
   "tag_hierarchies": {
@@ -267,6 +275,7 @@ Tag hierarchies define parent-child relationships between context tags. When an 
 Each key is a parent tag, and its value is an array of child tags that should inherit from it.
 
 **Example:**
+
 ```json
 {
   "tag_hierarchies": {
@@ -280,12 +289,14 @@ Each key is a parent tag, and its value is an array of child tags that should in
 ```
 
 **Semantics:**
+
 - **Transitive inheritance**: If `terminal` is a child of `computer`, and `neovim` is a child of `terminal`, then `+neovim` implicitly includes both `+terminal` and `+computer`.
 - **Query expansion**: Searching for `+computer` will match actions tagged with `+neovim`, `+terminal`, `+browser`, etc.
 - **Linting**: Actions tagged with both a child and its ancestor receive an info-level warning (I013) about redundancy.
 - **Case-insensitive**: Tag matching is case-insensitive.
 
 **Use cases:**
+
 - GTD contexts: `@errands` → `@grocery`, `@pharmacy`, `@bank`
 - Energy levels: `@low_energy` → `@email`, `@reading`
 - Tools: `@computer` → `@terminal` → `@neovim`
@@ -296,6 +307,7 @@ Each key is a parent tag, and its value is an array of child tags that should in
 Implementations SHOULD provide their own JSON schema that extends the core schema:
 
 **Core schema** (`config.schema.json` in this spec repository):
+
 ```json
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
@@ -310,6 +322,7 @@ Implementations SHOULD provide their own JSON schema that extends the core schem
 ```
 
 **CLI extension** (in clearhead-cli repository):
+
 ```json
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
@@ -325,6 +338,7 @@ Implementations SHOULD provide their own JSON schema that extends the core schem
 ```
 
 This allows:
+
 - Validation tools to check configuration correctness
 - Editors to provide autocomplete and documentation
 - Forward compatibility as new implementations are added
@@ -341,12 +355,14 @@ Implementations MUST handle paths as follows:
 4. **Platform normalization**: Handle path separators appropriately
 
 **Example:**
+
 ```json
 {
   "data_dir": "~/Documents/clearhead",
   "default_file": "inbox.actions"
 }
 ```
+
 Resolves to: `~/Documents/clearhead/inbox.actions`
 
 ### Error Handling
@@ -360,6 +376,7 @@ Implementations SHOULD:
 - **Invalid values**: Use defaults and warn
 
 **Example error message:**
+
 ```
 Warning: Invalid JSON in ~/.config/clearhead/config.json:12
   Unexpected token '}' at line 12, column 3
@@ -401,7 +418,6 @@ All other settings use defaults.
 
 ### Full Configuration
 
-
 ```json
 {
   "data_dir": "~/Dropbox/clearhead",
@@ -442,8 +458,7 @@ An implementation is conformant with this specification if it:
 6. Handles missing/invalid configuration gracefully with defaults
 7. Supports shell expansion in path values
 8. Uses namespaced prefixes for implementation-specific settings (e.g., `cli_`, `nvim_`, `sync_`)
-  1. care should be taken to avoid conflicts remember this is a global namespace 
-
+9. care should be taken to avoid conflicts remember this is a global namespace
 
 ## See Also
 
