@@ -134,11 +134,11 @@ Note: we use the hidden file convention here to indicate that this is a sidecar 
 
 #### Plans
 
-The configured `plans/` path is a charter-scoped iCalendar vdir containing recurring Plan masters and standalone Action projections.
+The configured `plans/` path is a charter-scoped iCalendar vdir containing Plan resources. A Plan is the scheduling relationship for an Action: one-off when no RRULE is present and recurring when RRULE is present. Unscheduled Actions have no Plan resource.
 
 Every constructed charter owns one calculated collection path even when its directory does not exist. This relative path is derived from the charter's canonical workspace anchor and is not written into charter Markdown or sidecars. A configured `plan_path` replaces only the physical vdir root. Calendar resources attach to charters by exact collection ownership, never by mutable alias or title matching.
 
-Each `.ics` file contains a single `VCALENDAR` with one primary VTODO component: RRULE-bearing VTODOs are Plans and non-recurring VTODOs are Actions. Other iCalendar component types are outside the ClearHead projection. ClearHead-created files use the component UID as filename, while readers identify resources by UID because transport tooling may choose another filename.
+Each `.ics` file contains a single `VCALENDAR` with one primary Plan component plus any same-UID recurrence overrides. The configured `plan_component` chooses VEVENT (the default calendar integration) or VTODO (the task-client integration). Both encode the same Plan semantics; RRULE distinguishes recurring from one-off Plans rather than distinguishing Plans from Actions. ClearHead-created files use the component UID as filename, while readers identify resources by UID because transport tooling may choose another filename.
 
 This one-component-per-file vdir layout is directly compatible with tools such as vdirsyncer and does not assume a particular CalDAV server or any transport at all.
 
@@ -201,8 +201,8 @@ They differ only in *where* the identity is persisted:
 |-----------|----------------------------------------------------|--------------|
 | Workspace | `workspace_id` in `.clearhead/workspace.json`      | [Workspace Identity](#workspace-identity) |
 | Charter   | frontmatter `id`, mirrored in the sidecar          | [Charters] |
-| Plan      | recurring VTODO `UID` (canonical `.ics` filename)  | [ICS Schedule Spec] |
-| Action    | inline id; standalone VTODO UID maps deterministically | [Action File Format], [ICS Schedule Spec] |
+| Plan      | configured VEVENT/VTODO `UID` (canonical `.ics` filename) | [ICS Schedule Spec] |
+| Action    | inline id; a calendar-authored one-off Plan UID maps deterministically to its realized Action | [Action File Format], [ICS Schedule Spec] |
 
 Two rules keep this honest:
 

@@ -83,11 +83,17 @@
     },
     "plan_path": {
       "type": "string",
-      "description": "Configured iCalendar vdir, laid out as <plan_path>/<charter>/<resource>.ics, containing recurring Plan and standalone Action VTODOs. ClearHead integrates only with this filesystem boundary; vdirsyncer, CalDAV, file synchronization, or no transport may sit behind it. When unset, the vdir lives at <data_root>/plans. Supports shell expansion.",
+      "description": "Configured iCalendar Plan vdir, laid out as <plan_path>/<charter>/<resource>.ics. ClearHead integrates only with this filesystem boundary; vdirsyncer, CalDAV, file synchronization, or no transport may sit behind it. When unset, the vdir lives at <data_root>/plans. Supports shell expansion.",
       "examples": [
         "~/.local/share/clearhead/plans",
         "~/calendars/clearhead"
       ]
+    },
+    "plan_component": {
+      "type": "string",
+      "enum": ["vevent", "vtodo"],
+      "default": "vevent",
+      "description": "iCalendar component used to encode Plans. VEVENT is the interoperable calendar default; VTODO is available for task-oriented calendar clients. Action state remains authoritative in .actions for either choice."
     }
   },
   "additionalProperties": true,

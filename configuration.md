@@ -133,8 +133,8 @@ All implementations MUST recognize these core settings:
 | `default_to_user_scope` | boolean | `false` | If true, only shows user-scoped actions (ignores project scope) |
 | `additional_workspaces` | array | `[]` | Additional workspaces to merge into the domain model. Entries may be relative paths, absolute paths (with `~` / env-var expansion), or URLs (planned). See [Additional workspaces](#additional-workspaces). |
 | `plan_path` | string | _(unset → `<data_root>/plans`)_ | Configured iCalendar vdir at `<plan_path>/<charter>/<resource>.ics`. ClearHead assumes only the filesystem boundary; any CalDAV/file-sync transport is external. |
-| `expansion_total_instances` | integer | `2` | Total instances generated per schedule across both `<charter>.actions` and `<charter>.upcoming.actions`. Must be greater than `expansion_primary_instances`. |
-| `expansion_primary_instances` | integer | `1` | Instances placed in `<charter>.actions`; remainder go to `<charter>.upcoming.actions`. Must be less than `expansion_total_instances`. |
+| `plan_component` | string | `vevent` | iCalendar component used to encode Plans: `vevent` for ordinary calendar scheduling or `vtodo` for task-oriented calendar clients. This changes the integration surface, not Plan or Action domain semantics. |
+| `expansion_total_instances` | integer | `2` | Bounded number of recurring Plan occurrences exposed by planning projections. Materialized current instances and read-only future projections may apply different view policies. |
 
 **Requirements:**
 - Core settings MUST support shell expansion (`~`, `$HOME`, environment variables)
