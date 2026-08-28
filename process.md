@@ -1,13 +1,14 @@
 # Process Overview
+
 Our fundamental unit of measurement is lists of actions.
 
 Therefore, the entire system can be thought of as no more or less than a set of interconnected lists of actions.
 
 This process covers the workflow to manage the state of said actions as they move through the system.
 
-All of this process is assumed to be built around the [Actions File Format](./action_file_format.md) which can be easily translated into either [json data](./json_schema.md), [relational databases](./sql_schema.md), or even more visual formats like markdown files for easier human consumption.
+This process is built around the human-editable [Actions File Format](./action_file_format.md). Implementations may project those facts into the canonical [Action JSON Schema](./schemas/actions.schema.json), RDF, tables, or other presentations without making those projections a second workspace authority.
 
-however much of this can be adapted to different implementation methods and backends
+The process can be adapted to different implementation methods and delivery backends.
 
 ## Capture
 
@@ -18,6 +19,7 @@ Normally, it is assumed that people will be writing to the "inbox.actions" file 
 Remember, we arent putting all the details in yet, just get it out of your head and into the inbox.
 
 ### 5 Minute Rule
+
 The 5 minute rule answers that annoying question "how do i know when something is too small for the inbox?". the answer is "when it takes you longer to write it down than to do it".
 
 For most people, this can be ~5 minutes or less. so, if you know an action will take less than 5 minutes, and you CAN do it right now, just do it.
@@ -53,6 +55,7 @@ Instead, actions should only be scheduled if they have a proper due date or dead
 Regular actions that dont need a due date should simply rely on the priority and context system to help them surface during times when we dont have our calendar time-blocked with a specific intention.
 
 Otherwise, we run the risk of over-scheduling ourselves and creating a system that is more rigid than it needs to be.
+
 ## Organize
 
 As we move through the inbox, we either complete actions, or move them to the appropriate [action list](./workspace.md)
@@ -64,7 +67,9 @@ As we move through the inbox, we either complete actions, or move them to the ap
     And for any recurring actions, we should define them in `.ics` schedules so calendar timing stays canonical and expansion into `.actions` remains deterministic
 
     This is also where priorities can be assigned on the RFC 5545-aligned 1-9 scale (1 highest, 9 lowest); urgency and importance remain separate planning judgments rather than encoded quadrants.
+
 ### On IDs
+
     By the time we move the actions out of the inbox, it is recommended that each action is given a unique UUID so that it can be tracked throughout the system.
 
     While optional, this is a key feature that enables powerful features from analytics, to logging, to cross-referencing actions between lists in a deterministic way. 
@@ -72,6 +77,7 @@ As we move through the inbox, we either complete actions, or move them to the ap
     It is assumed this will be done with tooling, either automatically or as a script, but it can also be done manually if needed.
 
 ## Reflect
+
     This one is either part 4 or 5 depending on your perspective. 
 
     But this is also where GTD aligns with Agile in their emphasis on _regular reflection and review_.
@@ -92,9 +98,11 @@ As we move through the inbox, we either complete actions, or move them to the ap
     While a good default is a weekly review, agile does this process bi-weekly on average which is normal for teams doing this process, while some individuals fine building a daily ritual to be core to how they keep aligned through the day.
 
 ### On Analytics
-    This is where a robust system of review is crucial for success. We want to be able to both look back at what we have done, while also planning for future intentions and as such this is often where we transition from working with the file format to things like [sql](./sql_schema.md) or [json](./json_schema.md) to get better insights into the state of our actions. and track these actions as they move through the system and to be able to find the relevant actions we need to focus on next.
+
+    This is where a robust system of review is crucial for success. We want to look back at what we have done while planning future intentions, so tooling may project the workspace into JSON, RDF, tables, or an external analytical store. These are read models over the authoritative workspace unless an explicit mutation contract says otherwise.
 
 #### Blocked and Dependent Actions
+
     One particular place where tooling makes this easier is the ability to identify when some actions may be blocked or depend upon one another which will help us identify bottlenecks in our workflow and ensure we are focusing on the right actions at the right time.
 
     This process is difficult to do by hand with a file of strings, but trivially easy with even a simple database.
@@ -104,11 +112,13 @@ As we move through the inbox, we either complete actions, or move them to the ap
     This is also the stage where active use of the calendar bcomes key to managing the list of actions as reviewing both our upcoming and past intentions can often bring up new actions or remind us of key other actions we are trying to do
 
 ## Engage
+
     Any other point in time that you are not doing one of the above phases, you are in the "Engage" phase where you are using your system as a declarative action system where you simply look at your list of actions and complete them as time permits
 
     Here we are embodying the core principles of deep work to keep us aligned on the next action we want to focus on, knowing that we have reviewed the relevant inboxes and have decided what can and should be done ahead of time.
 
 ### Agenda View
+
     Another core usecase for the system is being able to generate an "agenda view" of the actions that need to be done today or in the near future.
 
     This is not simply actions that are due/do today, but also represents actions that have no open dependencies, are within the proper context you are in, and are the top priority actions you want to focus on. All of this requires not just a data system, but a robust one that is able to leverage the relationships between actions as a graph and do the hard work of filtering down to the right actions for you to focus on.
@@ -119,11 +129,12 @@ As we move through the inbox, we either complete actions, or move them to the ap
 
     This list will include recurring and one-off actions, as well as actions that have no due date but are of high priority of which can be done within the current context/timeframe.
 
-## Arhiving 
+## Arhiving
 
     Archival is a sparate activity from closure, a record can be closed however long we want to before it is "archived" and for some formats, the distinction isnt needed as much if the state is maintained within a database. however, for file-based interfaces it is often easier to move the closed records into some sort of "archive" for external storage and querying such that the whole graph can be queried at a a later time such as is outlined in the [workspace spec](./workspace.md)
 
 # Workflow
+
     Now that we have covered the overarching stages, we want to get a bit more granular around the relationships between various properties around the actions and how they are meant to communicate our intent
 
 ## Charters
@@ -146,9 +157,8 @@ As we move through the inbox, we either complete actions, or move them to the ap
 
     tooling providers may choose to do a flag that will auto cancel/complete child actions if they wish, but the default should be that charters are not closed until all the child actions are dealt with
 
-
-
 ## Plans
+
     Plans are schedule definitions represented in `.ics` files. They define timing and recurrence, while `.actions` files hold the generated or manually-created actions.
 
 ### Recurring Actions
@@ -158,6 +168,7 @@ As we move through the inbox, we either complete actions, or move them to the ap
     Template references may expand each occurrence into richer act structures.
 
 ### Plans vs Actions
+
     Plans/schedules and actions are distinct concerns:
     - Plans/schedules live in `.ics`
     - Actions live in `.actions`
@@ -258,8 +269,8 @@ As we move through the inbox, we either complete actions, or move them to the ap
 
     All formats should support closure and when we have completed a plan the most upcoming action, which is the only one except for the case of a recurring action, is also completed, while all projected actions are removed as they were simply projections and we dont want to clutter the archive with them
 
-
 ### On Children Actions
+
     One important note is that unless otherwise specified, and where relevant, the state of parent actions are determined by their children actions.
 
     This means an action can be considered done if all the children are completed.
@@ -268,6 +279,7 @@ As we move through the inbox, we either complete actions, or move them to the ap
     The reverse is also true, we want to avoid closed parent actions with open children actions as this creates confusion around what is actually done.
 
 ### Priority
+
     Priority uses the RFC 5545 range directly: 1 is highest and 9 is lowest. An omitted priority means undefined. This direct scale preserves VTODO interoperability without a lossy conversion table.
 
     Priority is ordering guidance, not an encoded Eisenhower quadrant. Urgency may be represented by dates and importance by the surrounding charter or objective. Work that no longer deserves attention should be explicitly cancelled rather than hidden behind a special priority value.

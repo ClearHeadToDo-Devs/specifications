@@ -1,4 +1,5 @@
 # ClearHead Specifications
+
 This is intended to be a space where key specifications can live, separated by the implementation details of the underlying projects.
 
 This enables those who wish to build upon the specifications, but avoid the tooling to do such without needing to carve out the relevant pieces from the implementation products.
@@ -14,9 +15,11 @@ To avoid duplication and drift:
 - Implementation repositories (for example CLI or core libraries) are expected to document only implementation mechanics, and should reference these specifications for normative behavior.
 
 # ClearHead Platform Overview
+
 Many of these other specifications cover rather precise technical details, but i want to take a bit of time to cover the overarch process that is guiding much of these specifications as a way to bring meaning to the disperate parts.
 
 ## The Problem Being Solved
+
 At its core, ClearHead is an attempt to _express intention_ in a clean, straightforward manner.
 
 This starts as a simple text file on your machine, your replacement for `todo.txt`. However, as your needs grow, the tools will grow with you at the pace you need, rather than forcing you into a complex system from the start.
@@ -24,6 +27,7 @@ This starts as a simple text file on your machine, your replacement for `todo.tx
 When you do start integrating these into your systems, it is important that these intentions become just as much data as they are text, and we will have access to the tools that power users are used to, rather than reinventing the wheel again.
 
 We have demanding lives, and making these intentions useful takes more work than one might think when they start their todo.txt, and the goal is to allow people to use these intentions in whatever way makes sense within their system to:
+
 - Keep track of what they need to do
   - both at home and while travelling
   - with or without internet access
@@ -44,7 +48,9 @@ We have demanding lives, and making these intentions useful takes more work than
   - using the intentions themselves as a workflow engine for both humans and machines
 
 ## Values and Principles
+
 With this platform, my goal is to create a system with a few core values:
+
 - local-first: Users should be able to use the system fully offline, with optional cloud sync.
   - Adherence to Standards: In particular, i believe we achieve local-first software through the coordination of standards and data rather than bespoke implementations.
   - Interoperability: Different tools and implementations should be able to work together seamlessly.
@@ -60,10 +66,11 @@ With this platform, my goal is to create a system with a few core values:
 ### Philisophical Inspirations
 
 This has been a topic of research of mine for many years and it would be rude of me not to credit many of these authors for guiding and shaping my thinking on the topic:
+
 - [Getting Things Done](https://gettingthingsdone.com/) by David Allen - The foundational text on modern task management and productivity.
   - Ive been practicing GTD personally for over a decade now and it shapes much of my thinking on these topics. In terms of clear, pragmatic systems for intentions I believe David does the best at creating a system that is empathetic to how humans actually work.
 - [Deep Work](https://www.calnewport.com/books/deep-work/) by Cal Newport - A deep dive into the importance of focused work and how to achieve it in a distracted world.
-  - While GTD is a brillient set of systems, it has relatively little to say on WHAT actions you should take and WHEN and how to go about them. Deep work answers this question by arguing that we should be trying to do as much deep work as possible, minimizing and automating shallow work. 
+  - While GTD is a brillient set of systems, it has relatively little to say on WHAT actions you should take and WHEN and how to go about them. Deep work answers this question by arguing that we should be trying to do as much deep work as possible, minimizing and automating shallow work.
   - Cal has done a great job of outlining how professions like programming need to work and serves as a good guide to finding focus in a world of distractions.
 - [The Agile Manifesto](https://agilemanifesto.org/) by Kent Beck et al. - A set of principles for software development that emphasizes collaboration, flexibility, and customer satisfaction.
   - While mostly focused on software, i believe the core insight of agile is a sense of humility and pragmatism when it comes to delivering work. Whereas the first two are about optimizations, agile is this funny instance of a more humanistic perspective peaking out from a very corporate mindset.
@@ -76,18 +83,20 @@ This has been a topic of research of mine for many years and it would be rude of
 #### Technical Inspirations
 
 Over the years of research I have seen many implementations that have inspired this work:
+
 - [todoist](https://todoist.com/) - A powerful task management system with a strong focus on user experience and cross-platform support.
   - My current personal task system while this system is built and while it adheres to most of the web 2.0 principles, it does a good job of being a solid, reliable task manager that just works and any system that replaces it will need to meet this high bar for both usability and reliability.
 - [(Neo)vim](https://neovim.io/) - An extensible and highly customizable text editor that serves as the foundation for many ClearHead tools.
   - as my personal editor, neovim is a constant source of inspiration from both a technical perspective, as well as a user experience perspective. this tool will in many ways try to bring some of the same principles of extensibility and customizability to task management that neovim brings to text editing.
 - [todo.txt](https://todotxt.org/) - A simple, plaintext-based task management system that emphasizes simplicity and portability.
   - has always been the standard bearer of simplicity in task management and while it lacks many of the advanced features of modern systems, its simplicity and portability are unmatched. ClearHead aims to aknowledge this core insight that one should always be able to go back to editing a file to list out intentions even if we grow from there.
-- [taskwarrior](https://taskwarrior.org/) - A command-line task management tool that offers advanced features and flexibility for power users. 
+- [taskwarrior](https://taskwarrior.org/) - A command-line task management tool that offers advanced features and flexibility for power users.
   - taskwarrior shows in many ways the opposite virtue of todo.txt, in that it wants to leverage the power of data to do really cool things with relatively little effort. This is another very good virtue that clearhead will seek to embody.
 - [org-mode](https://orgmode.org/) - An Emacs-based system for organizing tasks, notes, and projects with a focus on plain text and extensibility.
-    - org-mode is another very powerful system that has a strong focus on plain text and shows that there is no reason a plain-text based system cant be as powerful as a database-backed system. While i personally dont use emacs, i do admire the power and flexibility of org-mode and its community.
+  - org-mode is another very powerful system that has a strong focus on plain text and shows that there is no reason a plain-text based system cant be as powerful as a database-backed system. While i personally dont use emacs, i do admire the power and flexibility of org-mode and its community.
 
 While all of these systems have their strengths and weaknesses, none of them fully embody the values and principles that ClearHead aims to achieve, and thus i felt there was a need for a new system that could bring these ideas together in a cohesive manner.
+
 ## Index
 
 Here is the index of specifications and their purpose within the whole:
@@ -96,13 +105,12 @@ Here is the index of specifications and their purpose within the whole:
     1. This document serves as the high-level guide for how different tools should approach the handling of action files and user intentions, ensuring a consistent experience across the ecosystem.
 1. [Action File Format](./action_file_format.md) - The format for `.actions` files that represent actions (execution records). If you read nothing else, start here to understand how actions are defined.
     1. For Example, while [tree-sitter-actions](https://github.com/ClearHeadToDo-Devs/tree-sitter-actions) implements this specification using tree-sitter, it could just as easily be implemented using PEGS or any other parsing technology.
-2. [iCalendar VTODO Projection Specification](./ics_schedule_spec.md) - Defines recurring Plan VTODOs, standalone Action VTODOs, expansion, identity, and bidirectional vdir synchronization.
-2. [Workspace](./workspace.md) - The structure, discovery, and identity conventions for workspaces within the ClearHead ecosystem. This allows different tools to interoperate without confusion as they can leverage shared configuration, naming semantics, and structure to build more interesting systems
+1. [iCalendar VTODO Projection Specification](./ics_schedule_spec.md) - Defines recurring Plan VTODOs, standalone Action VTODOs, expansion, identity, and bidirectional vdir synchronization.
+1. [Workspace](./workspace.md) - The structure, discovery, and identity conventions for workspaces within the ClearHead ecosystem. This allows different tools to interoperate without confusion as they can leverage shared configuration, naming semantics, and structure to build more interesting systems
     1. Both [clearhead-cli](https://github.com/ClearHeadToDo-Devs/clearhead-cli) and [clearhead.nvim](https://github.com/ClearHeadToDo-Devs/clearhead.nvim) implement these conventions to manage collections of actions, wether they be plaintext files, json data, or full databases.
-3. [Configuration](./configuration.md) - Defines how ClearHead implementations handle configuration, including XDG directory structure, JSON configuration format, layered configuration (defaults → file → env → args), and extension mechanisms for implementation-specific settings. This ensures all tools share a common configuration approach while allowing for tool-specific extensions.
+1. [Configuration](./configuration.md) - Defines how ClearHead implementations handle configuration, including XDG directory structure, JSON configuration format, layered configuration (defaults → file → env → args), and extension mechanisms for implementation-specific settings. This ensures all tools share a common configuration approach while allowing for tool-specific extensions.
     1. Implementations like [clearhead-cli](https://github.com/ClearHeadToDo-Devs/clearhead-cli) and [clearhead.nvim](https://github.com/ClearHeadToDo-Devs/clearhead.nvim) can share configuration via `~/.config/clearhead/config.json` while maintaining their own sections for tool-specific settings.
-4. [Json Schema](./json_schema.md) - The canonical JSON serialization format for action files. This allows different tools to exchange action data in a structured way, and also enables validation and storage in systems that require structured formats.
-    1. For Example, while [clearhead-cli](https://github.com/ClearHeadToDo-Devs/clearhead-cli) can inject action files, it can export json files that conform to this specification for use in other systems.
-        1. Great for those who want to build with data but dont want a full database. with knowledge they can be synced back to plaintext action files later.
-6. [Ontology & Linked Data](./ontology.md) - Defines the semantic meaning of the data using the Actions Vocabulary (OWL) and explains the Context Map strategy.
+1. [Action JSON Schema](./schemas/actions.schema.json) - The canonical JSON projection shape for action data. It supports interchange and validation without replacing the plaintext workspace as durable authority.
+    1. Implementations may export this projection for pipelines and external analysis; synchronization back into workspace source requires an explicit mutation contract rather than treating JSON as a second write model.
+1. [Ontology & Linked Data](./ontology.md) - Defines the semantic meaning of the data using the Actions Vocabulary (OWL) and explains the Context Map strategy.
     1. This specification ensures that while tools typically interact with simple JSON, the data remains semantically rigorous and interoperable with the broader Semantic Web (RDF/JSON-LD).

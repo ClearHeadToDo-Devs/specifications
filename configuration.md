@@ -462,7 +462,7 @@ An implementation is conformant with this specification if it:
 
 ## See Also
 
-- [Action File Format](./action_specification.md) - Core file format
+- [Action File Format](./action_file_format.md) - Core file format
 - [Workspace](./workspace.md) - File and directory naming
 
 ## Changelog

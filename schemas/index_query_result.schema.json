@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/ClearHeadToDo-Devs/specifications/master/schemas/index_query_result.schema.json",
   "title": "ClearHead Index Query Result",
-  "description": "The JSON array graphd emits for the index query family (default, unscheduled, agenda, weekly, chain) under `--format json`. Every row is one actionable item carrying a canonical id, display fields, status, priority, and source-locator fields. This schema pins the exact wire bytes graphd already produces; it does not add an envelope or reshape the payload. Array order is the view's SPARQL ORDER BY and is significant. Row membership is owned by each view; this schema constrains row SHAPE, not which rows appear.",
+  "description": "The JSON array emitted by the CLI's in-process index query family (default, unscheduled, agenda, weekly, chain) under `--format json`. Every row is one actionable item carrying a canonical id, display fields, status, priority, and source-locator fields. This schema pins the producer contract without adding an envelope or reshaping the payload. Array order is the view's SPARQL ORDER BY and is significant. Row membership is owned by each view; this schema constrains row SHAPE, not which rows appear.",
   "type": "array",
   "items": { "$ref": "#/$defs/indexRow" },
   "$defs": {

@@ -9,7 +9,7 @@ version: 1.1.0
 
 # Actions File Linting Specification
 
-This specification defines optional linting rules for `.actions` files. While the [action_specification.md](./action_specification.md) defines valid syntax and [formatting.md](./formatting.md) handles presentation (spacing, indentation), this document defines semantic quality checks that detect correctness issues, temporal problems, and style violations.
+This specification defines optional linting rules for `.actions` files. While the [Action File Format](./action_file_format.md) defines valid syntax and [Formatting](./formatting.md) handles presentation (spacing, indentation), this document defines semantic quality checks that detect correctness issues, temporal problems, and style violations.
 
 ## Philosophy
 
