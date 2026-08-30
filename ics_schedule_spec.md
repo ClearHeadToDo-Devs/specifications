@@ -38,7 +38,7 @@ Collection ownership is constructed from each charter's canonical workspace anch
 `plan_component` selects the component used to encode Plans:
 
 | Value | Component | Intended integration |
-|---|---|---|
+| --- | --- | --- |
 | `vevent` | `VEVENT` | ordinary calendar scheduling; **default** |
 | `vtodo` | `VTODO` | task-oriented calendar/mobile clients |
 
@@ -134,7 +134,7 @@ An `EXDATE` or explicitly cancelled occurrence skips the slot. Completing an Act
 The relationship deliberately has split authority:
 
 | Meaning | Authority | Calendar representation |
-|---|---|---|
+| --- | --- | --- |
 | scheduled start | Plan/calendar, bidirectionally reconciled | `DTSTART` |
 | end/duration or due schedule | Plan/calendar, bidirectionally reconciled | `DTEND`, `DUE`, or `DURATION` according to codec |
 | recurrence and exceptions | Plan/calendar | `RRULE`, `RDATE`, `EXDATE`, `RECURRENCE-ID` |
