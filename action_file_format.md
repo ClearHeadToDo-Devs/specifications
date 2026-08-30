@@ -170,11 +170,27 @@ Aliases provide stable references independent of name changes:
 
 ## Do date/time (optional)
 
-`@<datetime>` indicates when an act is intended to be worked.
+`@<datetime>` is the local lower bound of the Action's feasible execution
+range: the Action is not intended to be worked before this value.
 
 ## Due date/time (optional)
 
-`:<datetime>` indicates deadline semantics.
+`:<datetime>` is the local upper bound of the Action's feasible execution
+range: the Action is intended to be completed no later than this value.
+
+Either bound may be omitted. When both are present they form an inclusive local
+range, and the do date/time must not be later than the due date/time.
+
+Action hierarchy composes these constraints without changing the locally stored
+values. An Action's effective lower bound is the latest do date/time asserted by
+itself or any ancestor; its effective upper bound is the earliest due date/time
+asserted by itself or any ancestor. A missing local bound therefore inherits an
+ancestor's bound naturally, while a child may narrow the inherited range.
+
+A local bound outside an ancestor's range should produce a coherence warning. An
+empty effective range is a violation. Queries use the effective range, but tools
+must not write inherited bounds into source unless the user explicitly requests
+a materializing operation.
 
 Note: recurrence is not represented in `.actions`.
 

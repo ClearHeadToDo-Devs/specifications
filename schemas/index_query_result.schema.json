@@ -64,12 +64,12 @@
         "scheduled_at": {
           "type": "string",
           "format": "date-time",
-          "description": "Scheduled datetime as an xsd:dateTime lexical value (RFC 3339, e.g. 2026-07-01T09:00:00Z), projected by dated views (agenda, weekly). Omitted when unset."
+          "description": "Effective lower bound of the Action's feasible execution range as an xsd:dateTime lexical value (RFC 3339, e.g. 2026-07-01T09:00:00Z), projected by dated views (agenda, weekly). This may be locally asserted or inherited from an ancestor; omitted when no lower bound applies."
         },
         "due_date": {
           "type": "string",
           "format": "date-time",
-          "description": "Due datetime as an xsd:dateTime lexical value (RFC 3339, e.g. 2026-04-17T23:59:59Z), projected by dated views (agenda, weekly). Omitted when unset."
+          "description": "Effective upper bound of the Action's feasible execution range as an xsd:dateTime lexical value (RFC 3339, e.g. 2026-04-17T23:59:59Z), projected by dated views (agenda, weekly). This may be locally asserted or inherited from an ancestor; omitted when no upper bound applies."
         }
       },
       "dependentRequired": {

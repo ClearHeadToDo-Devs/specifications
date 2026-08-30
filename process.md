@@ -46,15 +46,24 @@ We should also figure out what actions are indepedent and dependent, making sure
 
 Another important consideration is the addition of tags as context for these actions so that we can filter down based on the context this action must be done within
 
-### Timeframes, and Dates
+### Timeframes and Dates
 
-While this system supports the use of explicit time-blocking techniques, i find myself aligning with David on this point that scheduling hard-chunks on the calendar is often overwhelming for most people and requires a deep knowledge of the future to do well.
+While this system supports explicit time-blocking, scheduling hard chunks on the
+calendar is often overwhelming and requires more knowledge of the future than is
+available. Undated Actions should therefore remain normal and rely on priority
+and context when no calendar commitment demands attention.
 
-Instead, actions should only be scheduled if they have a proper due date or deadline associated with them.
+When timing constraints are real, the Action's do date (`@`) is the lower bound
+of its feasible execution range and its due date (`:`) is the upper bound. An
+Action hierarchy composes these constraints by intersection: the effective lower
+bound is the latest lower bound on the Action or any ancestor, and the effective
+upper bound is the earliest corresponding upper bound. The complete field and
+coherence semantics are defined in
+[Actions File Format](./action_file_format.md#do-datetime-optional).
 
-Regular actions that dont need a due date should simply rely on the priority and context system to help them surface during times when we dont have our calendar time-blocked with a specific intention.
-
-Otherwise, we run the risk of over-scheduling ourselves and creating a system that is more rigid than it needs to be.
+These effective values are query-time derivations. They do not justify writing
+inherited dates into descendants or manufacturing calendar commitments merely
+to make the projection easier to compute.
 
 ## Organize
 

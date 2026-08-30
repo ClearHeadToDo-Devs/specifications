@@ -66,7 +66,7 @@
         },
         "scheduledDateTime": {
           "type": "string",
-          "description": "hasScheduledDateTime — '@' in the DSL. ISO 8601 date or date-time the agent intends to act."
+          "description": "hasScheduledDateTime — '@' in the DSL. ISO 8601 local lower bound of the Action's feasible execution range; the Action is not intended to be worked before this value. Effective bounds inherited from ancestors are derived and are not serialized here."
         },
         "durationMinutes": {
           "type": "integer",
@@ -75,7 +75,7 @@
         },
         "dueDateTime": {
           "type": "string",
-          "description": "hasDueDateTime — ':' in the DSL. ISO 8601 deadline."
+          "description": "hasDueDateTime — ':' in the DSL. ISO 8601 local upper bound of the Action's feasible execution range; the Action is intended to be completed no later than this value. Effective bounds inherited from ancestors are derived and are not serialized here."
         },
         "completedDateTime": {
           "type": "string",
