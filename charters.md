@@ -1,15 +1,19 @@
-# Charter Documentation 
+# Charter Documentation
+
 Charters are the primary way that we organize plans within the platform. they are prose markdown documents that leverage combination of frontmatter and content to give users a way to organize plans and actions around a particular domain of concern.
 
 ## Frontmatter
+
 for the purposes of organization and reading, frontmatter allows charters to contain some important metadata, while still remaining largely a prose document for human consumption
 
 in this structure, we are primarily concerned with what is needed to give this structure meaning within the platform and link it with other parsed works meaning we have:
+
 - id: a unique UUIDv7 for the charter that can be linked
 
 this is the only required field for now if a charter DOES exist within the platform that will be used
 
 ### Optional Frontmatter
+
 - title: a human readable title for the charter, this is optional because it can be derived
 - alias: an aptional-short name for the charter that can be used for reference
   - aliases are scoped within the namespace of their parent charter
@@ -18,19 +22,29 @@ this is the only required field for now if a charter DOES exist within the platf
     - however this model is SECONDARY to the model outlined in things like the naming conventions
   - **Note:** in a file-based workspace you almost never need this field — directory placement is the primary and preferred way to express charter hierarchy (see [workspace.md](./workspace.md)). This field exists for non-filesystem contexts or genuinely disconnected structures where placement cannot express the relationship.
 - objectives: a list of references to objectives within the platform that this works in servie of
-- state: the current state of the charter which includes the following options
-  - New
-  - Active
-  - Blocked
-  - Closed
-  - Cancelled
+- state: the Charter's locally asserted lifecycle state:
+  - `New` — defined but not admitted for engagement
+  - `Active` — locally eligible for engagement
+  - `Blocked` — unable to advance
+  - `Closed` — finished and terminal
+  - `Cancelled` — abandoned and terminal
 
-Other states are permissable but these are the minimium states that charter implementors must support
+When `state` is omitted, semantic projections must expose it as `New`; omission
+must not be interpreted as `Active`. Effective engagement also requires every
+ancestor Charter to be `Active`. This inherited eligibility is derived and never
+rewrites the local state.
 
-`Closed` and `Cancelled` are both terminal states: either makes a charter eligible for archival (see [Archive](./Archive)).
+Other states are permissible, but these are the minimum states Charter
+implementations must support. State transitions do not implicitly cascade to
+descendant Charters or Actions. The normative admission, readiness, transition,
+and contradiction rules are defined in [Process Overview](./process.md#charters).
+
+`Closed` and `Cancelled` are both terminal states: either makes a Charter
+eligible for archival (see [Archive](./Archive)).
 
 ## Content
-For the purpose of the content, charters only need a single header and content below it 
+
+For the purpose of the content, charters only need a single header and content below it
 
 ```md
 # Example Charter Title
@@ -40,6 +54,12 @@ with some description text
 in this way, the first header serves as the title and the content serves as the description
 
 even the description is optional, as the title is the only required content for a charter to be valid, but the description can be used to give more context about the charter and its purpose
+
+## charter logs
+
+charters may also have a log section beneath the core section and this will be assumed to be a log of various events and changes that happened within the charter.
+
+good for keeping a running log if semantic activity
 
 ### Extra Sections
 

@@ -143,19 +143,39 @@ As we move through the inbox, we either complete actions, or move them to the ap
 
 ### State
 
-    Charters have the following states:
-    - New
-    - Active
-    - Closed
-    - Blocked
+Charter state is a local fact governing whether its work stream is admitted for
+engagement:
 
-    While these states are relatively straightforward they enable a simple workflow that makes the process easier to see
+- `New` — defined but not yet admitted. This is the default when `state` is
+  omitted from source.
+- `Active` — eligible for engagement, provided every ancestor Charter is also
+  `Active`.
+- `Blocked` — cannot currently advance.
+- `Closed` — finished and terminal.
+- `Cancelled` — abandoned and terminal.
+
+States never cascade implicitly. Changing a Charter's state does not rewrite any
+descendant Charter or Action. Effective eligibility is nevertheless inherited:
+a Charter beneath a non-`Active` ancestor is not admitted even when its own local
+state is `Active`.
+
+Cross-level contradictions remain visible and are diagnosed rather than
+silently normalized:
+
+- an `Active` descendant Charter or `InProgress` Action beneath `New` or
+  `Blocked` ancestry is a warning;
+- an open descendant Charter or Action beneath `Closed` or `Cancelled` ancestry
+  is a violation.
+
+An `Active` Charter with no Actions is valid and does not require a warning.
 
 #### Closure
 
-    Generally, before a charter should be closed the underlying actions should be either closed or cancelled so that decisions are made around which actions will or wont go forward.
-
-    tooling providers may choose to do a flag that will auto cancel/complete child actions if they wish, but the default should be that charters are not closed until all the child actions are dealt with
+Before closing or cancelling a Charter, its open descendant work should normally
+be completed, cancelled, moved, or otherwise reconciled. Implementations must not
+automatically complete or cancel descendants as an implicit consequence of the
+Charter transition. A separate explicit batch operation may be offered when the
+user deliberately requests cascading mutations.
 
 ## Plans
 
@@ -191,7 +211,7 @@ As we move through the inbox, we either complete actions, or move them to the ap
 
     See [ICS Schedule Spec](./ics_schedule_spec.md) for expansion details.
 
-### Expand Acts Workflow
+### Expand Actions Workflow
 
     The schedule expansion lifecycle is:
 
@@ -241,27 +261,31 @@ As we move through the inbox, we either complete actions, or move them to the ap
 
 ### State
 
-    At any given time, an action is in one of the following states:
-    - Not Started 
-    - The default state when actions are created
-    - In Progress
-    - Intended to express actions an agent is actively focused on
-    - Blocked
-    - Expresses that an action cannot be worked on for some reason
-    - where possible, we would rather use proper dependencies to express state but this is often useful for external blockers
-    - Completed
-    - The action has been finished successfully
-    - Cancelled
-    - The action is no longer relevant and will not be completed
-    - Holding this distinction can be important for seeing when we wanted to do something but it was no longer relevant
+Action state records the lifecycle of one concrete act:
 
-    a normal workflow for an action would likely be:
-    Not Started -> In Progress -> Completed
+- `NotStarted` — open and not presently underway; the default for a new Action.
+- `InProgress` — presently underway. It is not another spelling of Charter
+  `Active`.
+- `Blocked` — open but unable to advance; explicit dependencies are preferred
+  when they accurately identify the blocker.
+- `Completed` — finished successfully and terminal.
+- `Cancelled` — intentionally abandoned and terminal.
 
-    While many more difficult actions could be:
-    Not Started -> In Progress -> Blocked -> Cancelled
+A common workflow is `NotStarted -> InProgress -> Completed`; blocked or
+cancelled paths remain valid. State transitions are local facts and do not
+implicitly mutate parent or child Actions.
 
-    These systems are not about judgement simply tracking this data as it moves through the traditional lifecyle
+`Ready` is derived and must not be stored as an Action state. A `NotStarted`
+Action is ready only when:
+
+1. its owning Charter and every ancestor Charter are `Active`;
+2. every predecessor is satisfied (`Completed` or `Cancelled`); and
+3. applicable schedule and context constraints permit execution.
+
+A trusted next-work projection surfaces admitted `InProgress` Actions before
+ready `NotStarted` Actions. Contradictory `InProgress` work beneath non-admitted
+Charter ancestry is reported as a coherence finding rather than silently treated
+as ready.
 
 ### On Closure
 
@@ -269,14 +293,17 @@ As we move through the inbox, we either complete actions, or move them to the ap
 
     All formats should support closure and when we have completed a plan the most upcoming action, which is the only one except for the case of a recurring action, is also completed, while all projected actions are removed as they were simply projections and we dont want to clutter the archive with them
 
-### On Children Actions
+### On Child Actions
 
-    One important note is that unless otherwise specified, and where relevant, the state of parent actions are determined by their children actions.
+Parent and child Action states remain independently asserted; neither direction
+cascades implicitly. Tooling may derive facts such as “subtree complete” or omit
+an open container from a next-work projection while an executable descendant
+exists, but those projections do not change the parent's stored state.
 
-    This means an action can be considered done if all the children are completed.
-    - This applies recursively up the tree such that an Action Plan is only done when all its sub-actions are done.
-
-    The reverse is also true, we want to avoid closed parent actions with open children actions as this creates confusion around what is actually done.
+A terminal parent with open descendants is contradictory and should be reported
+for deliberate reconciliation. An explicit command may offer a reviewed batch
+transition, but merely completing or cancelling one Action must not rewrite its
+relatives.
 
 ### Priority
 
