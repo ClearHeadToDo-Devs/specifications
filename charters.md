@@ -28,6 +28,7 @@ this is the only required field for now if a charter DOES exist within the platf
   - `Blocked` — unable to advance
   - `Closed` — finished and terminal
   - `Cancelled` — abandoned and terminal
+- defaults: any settings that shoud be applied to all descendants of the charter. primarily good for controlling structure and making consistent actions more alike. primarily done by setting key value pairs within the defaults dictionary.
 
 When `state` is omitted, semantic projections must expose it as `New`; omission
 must not be interpreted as `Active`. Effective engagement also requires every
@@ -60,6 +61,8 @@ even the description is optional, as the title is the only required content for 
 charters may also have a log section beneath the core section and this will be assumed to be a log of various events and changes that happened within the charter.
 
 good for keeping a running log if semantic activity
+
+
 
 ### Extra Sections
 
