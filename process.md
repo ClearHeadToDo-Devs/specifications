@@ -188,81 +188,60 @@ user deliberately requests cascading mutations.
 
 ## Plans
 
-    Plans are schedule definitions represented in `.ics` files. They define timing and recurrence, while `.actions` files hold the generated or manually-created actions.
+Plans are schedule definitions represented by the configured iCalendar component
+in `.ics` resources. `VEVENT` is the default codec and `VTODO` is an alternative;
+the choice changes the calendar integration surface, not the domain meaning.
+Plans own scheduling while `.actions` owns executable work and lifecycle state.
+
+An unscheduled Action has no Plan. Assigning a schedule creates a one-off Plan;
+clearing it removes that Plan without closing the Action. A calendar-created Plan
+creates a scheduled, not-started Action in its owning Charter. The durable
+relationship is recorded in the Action sidecar so an arbitrary calendar UID is
+never mistaken for Action identity.
 
 ### Recurring Actions
 
-    Recurring actions are prescribed by Plan `VTODO` masters carrying `RRULE`.
+A Plan carrying `RRULE` prescribes recurring occurrences regardless of whether
+its configured component is `VEVENT` or `VTODO`. The active occurrence is
+identified by the Plan UID plus its canonical recurrence key.
 
-    Template references may expand each occurrence into richer act structures.
+ClearHead materializes at most one current actionable occurrence in `.actions`.
+It never writes a window of future instances into `.actions` or an
+`.upcoming.actions` file. A write-path calendar synchronization/tick stamps the
+current occurrence; reads remain pure and do not create work. Resolving that
+occurrence advances the token to the first recurrence slot after the resolved
+slot that is not earlier than now, so missed unstamped periods do not become a
+backlog.
+
+Future occurrences are read-only planning projections and must not enter an
+index-shaped query whose rows claim an editable source location. Past terminal
+occurrences crystallize into the Action archive. For complex recurring work, a
+Plan may name a template through the leading `template: <name>` DESCRIPTION
+directive; the current occurrence is then stamped as the Plan-derived root with
+the template step forest grafted beneath it.
 
 ### Plans vs Actions
 
-    Plans/schedules and actions are distinct concerns:
-    - Plans/schedules live in `.ics`
-    - Actions live in `.actions`
+Plans and Actions are distinct, linked concerns:
 
-    Not all actions must have a formal schedule source (ad-hoc actions are valid).
+- Plans live in `.ics` resources and own start, end/duration, recurrence, and
+  occurrence schedule deviations.
+- Actions live in `.actions` and own lifecycle state, hierarchy, dependencies,
+  and ClearHead workflow semantics.
+- Not every Action has a Plan; ad-hoc and intentionally unscheduled Actions are
+  valid.
+- Selecting the `VTODO` Plan codec does not make its `STATUS` authoritative for
+  Action state.
 
-    please review [the workspace spec](./workspace.md) for the process of how they are moved from open, to closed, to archive within the file-based format
+Editing a Plan changes future recurrence and schedule behavior. It does not
+rewrite archived occurrence facts. Rescheduling a live recurring occurrence
+updates the matching `RECURRENCE-ID` override and the materialized Action while
+preserving the original recurrence key as identity.
 
-    please review the [ontology](./ontology.md) for more details on the relationship between plans and actions
-
-### Instance-Count Generation
-
-    Instances are generated per schedule based on two configured counts rather than a date horizon. This keeps generation cadence-agnostic: a daily habit and a quarterly review both produce a predictable number of queued instances regardless of recurrence frequency.
-
-    The two values (see [Configuration](./configuration.md)):
-    - `expansion_total_instances` (default: `2`) — total instances generated per schedule
-    - `expansion_primary_instances` (default: `1`) — how many land in the primary `.actions` file; the rest go to `.upcoming.actions`
-
-    Both can be overridden per-schedule via the `upcoming:` directive in the Plan VTODO DESCRIPTION.
-
-    See [ICS Schedule Spec](./ics_schedule_spec.md) for expansion details.
-
-### Expand Actions Workflow
-
-    The schedule expansion lifecycle is:
-
-    1. Read schedules from `.ics`
-    2. For each schedule, count open instances already in `.actions` and `.upcoming.actions`
-    3. Resolve template (charter-local first, then workspace root)
-    4. Generate or upsert instances up to `expansion_total_instances`, placing the first `expansion_primary_instances` into `<charter>.actions` and the remainder into `<charter>.upcoming.actions`
-
-    This process must be idempotent: rerunning expansion for the same schedule must not duplicate acts or change the placement of already-existing instances.
-
-### Upcoming Actions Workflow
-
-    Managing upcoming actions follows three stages:
-
-    **1. Expand**
-    Run `expand` (or equivalent) to ensure each schedule has its full complement of instances across both files. This is the entry point — the move command will warn if expansion has not been run.
-
-    **2. Archive**
-    Complete or cancel actions normally. Closed actions in `<charter>.actions` move to `<charter>.completed.actions` as usual. Closed or cancelled actions in `<charter>.upcoming.actions` are also moved to `<charter>.completed.actions` — they are never promoted to the primary file retroactively.
-
-    **3. Move**
-    Run the `move` command (or equivalent) to promote instances from `<charter>.upcoming.actions` into `<charter>.actions` when the primary file has open slots below `expansion_primary_instances` for a given schedule. The move command checks this invariant per schedule and pulls the next chronological instance from upcoming to fill each empty slot.
-
-    The move command will warn if `expand` has not been run and there are not enough upcoming instances to fill the slots.
-
-    These commands are the primary interface. Users who want a tighter conveyor belt can wire expand and move together (e.g. run both after closing actions), but they remain separate by default so that generation and promotion are explicit and debuggable.
-
-#### Schedule Edits
-
-    Editing a schedule updates future generation behavior.
-
-    - **Past acts:** remain historical records
-    - **Existing generated future acts:** implementation policy decides mutate vs replace
-    - **Not-yet-generated future acts:** reflect latest schedule/template state
-
-    Implementations should document their policy and keep behavior deterministic.
-
-### Children of Recurring Actions
-
-    For complex recurring workflows, schedules can reference templates via the Plan VTODO DESCRIPTION field (first line: `template: <name>`).
-
-    Rather than generating one flat act, expansion can generate a structured act tree per occurrence.
+See the [workspace specification](./workspace.md) for file placement and
+archival, the [iCalendar schedule specification](./ics_schedule_spec.md) for
+codec and synchronization semantics, and the [ontology](./ontology.md) for the
+Plan–Action relationship.
 
 ## Actions
 
@@ -298,9 +277,15 @@ as ready.
 
 ### On Closure
 
-    Closure is different from archiving which we will cover later.
+Closure and archival are separate transitions. Completing or cancelling an
+Action changes that concrete Action's lifecycle state; archival then moves the
+terminal record into durable history.
 
-    All formats should support closure and when we have completed a plan the most upcoming action, which is the only one except for the case of a recurring action, is also completed, while all projected actions are removed as they were simply projections and we dont want to clutter the archive with them
+A one-off Plan does not own Action completion and is not implicitly completed as
+a second lifecycle object. Resolving a materialized recurring occurrence records
+or preserves the schedule deviation required by the selected codec, snapshots
+its Plan UID and recurrence key into archived metadata, and advances the single
+live token. Future read-only projections are not Actions and are never archived.
 
 ### On Child Actions
 

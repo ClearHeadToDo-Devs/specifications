@@ -4,8 +4,8 @@ description: VEVENT/VTODO Plan codecs, Action realization, recurrence, and vdir 
 author: primary_desktop
 categories: Reference
 created: 2026-04-20T00:00:00-0800
-updated: 2026-08-24T00:00:00-0800
-version: 1.2.0
+updated: 2026-08-30T00:00:00-0800
+version: 1.3.0
 ---
 
 # iCalendar Plan projection specification
@@ -45,6 +45,33 @@ Collection ownership is constructed from each charter's canonical workspace anch
 VEVENT and VTODO are alternative encodings of the same Plan semantics. A workspace writes new resources using its configured codec. Implementations may read the alternate component during explicit migration or compatibility handling, but a mixed duplicate UID must be diagnosed rather than silently selected.
 
 The component choice does not move Action state into the calendar. In particular, VTODO `STATUS` and `COMPLETED` are not authoritative for Action lifecycle when that component is serving as a Plan.
+
+### Compatibility and codec migration
+
+Normal Plan discovery accepts either component so a workspace can change codecs
+without making existing resources unreadable. The configured value controls new
+resources and deliberate rewrites; it is not a license to select one of two
+same-UID masters. A resource containing duplicate master components for one UID,
+whether same-kind or mixed `VEVENT`/`VTODO`, is invalid and must be diagnosed
+with its path, UID, and observed component kinds.
+
+Changing the configured codec converts one logical Plan atomically: its master
+and every same-UID `RECURRENCE-ID` override move to the selected component kind
+in the same write. Conversion must not leave old-kind overrides beside the new
+master. Calendar-level metadata, alarms, unknown properties, the UID, recurrence
+keys, and the transport-selected resource path remain preserved wherever the
+target component permits them. A failed or lossy conversion leaves the original
+resource unchanged and reports the unsupported property rather than silently
+discarding it.
+
+The retired standalone-Action VTODO projection is migration input, not a second
+normal classification. A non-override VTODO without `RRULE` is a one-off Plan.
+During migration, a UUID UID matching an existing unlinked Action links that
+Action instead of creating a duplicate. An arbitrary UID may reuse an existing
+Action only when durable sidecar or prior projection-store evidence proves the
+old mirror relationship; otherwise ClearHead mints a native Action UUID and
+records the foreign Plan UID in its sidecar. After adoption, normal Plan/Action
+reconciliation applies and the compatibility evidence may be discarded.
 
 ## Plan components
 
@@ -100,7 +127,7 @@ The canonical occurrence address is:
 
 Calendar-side occurrence rescheduling updates the corresponding materialized Action when one exists. Action-side rescheduling writes or updates the matching `RECURRENCE-ID` component. Moving an occurrence never changes its identity: the recurrence key names the original slot while `DTSTART` carries the moved time.
 
-An `EXDATE` or explicitly cancelled occurrence skips the slot. Completing an Action remains Action-owned state; the VEVENT codec does not acquire task-state semantics merely to record completion. Durable completed history belongs to the Action archive. Codec-specific client compatibility may preserve foreign properties, but those properties do not override the Action's lifecycle state.
+An `EXDATE` or explicitly cancelled occurrence skips the slot. Completing an Action remains Action-owned state: the `VEVENT` codec writes no synthetic completion status or cancellation merely to encode completion. The `VTODO` codec may emit a completed same-UID override as a task-client compatibility projection, but that status is derived from the Action and never becomes authoritative on re-import. Durable completed history belongs to the Action archive. Codec-specific client compatibility must preserve foreign properties, but those properties do not override the Action's lifecycle state.
 
 ## Field authority
 
