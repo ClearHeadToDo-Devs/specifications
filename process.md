@@ -226,12 +226,15 @@ Plans and Actions are distinct, linked concerns:
 
 - Plans live in `.ics` resources and own start, end/duration, recurrence, and
   occurrence schedule deviations.
-- Actions live in `.actions` and own lifecycle state, hierarchy, dependencies,
-  and ClearHead workflow semantics.
+- Actions live durably in `.actions`; hierarchy, dependencies, and unmapped
+  ClearHead workflow semantics remain local there.
 - Not every Action has a Plan; ad-hoc and intentionally unscheduled Actions are
   valid.
-- Selecting the `VTODO` Plan codec does not make its `STATUS` authoritative for
-  Action state.
+- Selecting VEVENT provides schedule-only calendar reconciliation.
+- Selecting VTODO provides full task-client reconciliation for all supported
+  interoperable fields, including state, completion, title, description,
+  priority, and contexts. Each field reconciles independently; no peer silently
+  wins a conflict by global authority.
 
 Editing a Plan changes future recurrence and schedule behavior. It does not
 rewrite archived occurrence facts. Rescheduling a live recurring occurrence
@@ -281,11 +284,14 @@ Closure and archival are separate transitions. Completing or cancelling an
 Action changes that concrete Action's lifecycle state; archival then moves the
 terminal record into durable history.
 
-A one-off Plan does not own Action completion and is not implicitly completed as
-a second lifecycle object. Resolving a materialized recurring occurrence records
-or preserves the schedule deviation required by the selected codec, snapshots
-its Plan UID and recurrence key into archived metadata, and advances the single
-live token. Future read-only projections are not Actions and are never archived.
+A one-off Plan is not a second lifecycle object. Under VEVENT, Action completion
+remains local. Under VTODO, the linked component is the task-client projection:
+peer and local state/completion edits reconcile bidirectionally while `.actions`
+and its archive remain the durable history. Resolving a materialized recurring
+occurrence records or preserves the deviation required by the selected profile,
+snapshots its Plan UID and recurrence key into archived metadata, and advances
+the single live token. Future read-only projections are not Actions and are
+never archived.
 
 ### On Child Actions
 

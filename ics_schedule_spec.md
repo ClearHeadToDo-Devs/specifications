@@ -42,9 +42,12 @@ Collection ownership is constructed from each charter's canonical workspace anch
 | `vevent` | `VEVENT` | ordinary calendar scheduling; **default** |
 | `vtodo` | `VTODO` | task-oriented calendar/mobile clients |
 
-VEVENT and VTODO are alternative encodings of the same Plan semantics. A workspace writes new resources using its configured codec. Implementations may read the alternate component during explicit migration or compatibility handling, but a mixed duplicate UID must be diagnosed rather than silently selected.
+The configured component selects an integration profile, not merely an equivalent wire encoding. A workspace writes new resources using its configured profile. Implementations may read the alternate component during explicit migration or compatibility handling, but a mixed duplicate UID must be diagnosed rather than silently selected.
 
-The component choice does not move Action state into the calendar. In particular, VTODO `STATUS` and `COMPLETED` are not authoritative for Action lifecycle when that component is serving as a Plan.
+- `VEVENT` is the schedule-only profile. Calendar peers reconcile scheduling fields; Action lifecycle and task metadata remain local.
+- `VTODO` is the full task-integration profile. Calendar peers reconcile every existing interoperable field independently: `DTSTART`, `DUE`, `STATUS`, `COMPLETED`, `SUMMARY`, `DESCRIPTION`, `PRIORITY`, and `CATEGORIES`, plus supported standards-backed relationships. `X-CLEARHEAD-STATUS:blocked` preserves ClearHead's blocked state beside the interoperable `STATUS:NEEDS-ACTION` fallback.
+
+Both profiles preserve alarms, unknown properties, vendor extensions, UID, and transport-selected paths. ClearHead-only fields remain local unless an explicit standard or `X-CLEARHEAD-*` mapping exists.
 
 ### Compatibility and codec migration
 
@@ -127,7 +130,7 @@ The canonical occurrence address is:
 
 Calendar-side occurrence rescheduling updates the corresponding materialized Action when one exists. Action-side rescheduling writes or updates the matching `RECURRENCE-ID` component. Moving an occurrence never changes its identity: the recurrence key names the original slot while `DTSTART` carries the moved time.
 
-An `EXDATE` or explicitly cancelled occurrence skips the slot. Completing an Action remains Action-owned state: the `VEVENT` codec writes no synthetic completion status or cancellation merely to encode completion. The `VTODO` codec may emit a completed same-UID override as a task-client compatibility projection, but that status is derived from the Action and never becomes authoritative on re-import. Durable completed history belongs to the Action archive. Codec-specific client compatibility must preserve foreign properties, but those properties do not override the Action's lifecycle state.
+An `EXDATE` or explicitly cancelled occurrence skips the slot. In the VEVENT profile, completing an Action writes no synthetic calendar completion status. In the VTODO profile, same-UID occurrence overrides participate in the same bidirectional task-field reconciliation as one-off resources: a peer may complete or cancel the materialized root, and ClearHead projects local root-state changes back to `STATUS`/`COMPLETED`. Durable completed history still belongs to the Action archive rather than depending on a peer retaining old overrides.
 
 ## Field authority
 
@@ -138,11 +141,12 @@ The relationship deliberately has split authority:
 | scheduled start | Plan/calendar, bidirectionally reconciled | `DTSTART` |
 | end/duration or due schedule | Plan/calendar, bidirectionally reconciled | `DTEND`, `DUE`, or `DURATION` according to codec |
 | recurrence and exceptions | Plan/calendar | `RRULE`, `RDATE`, `EXDATE`, `RECURRENCE-ID` |
-| Action name and description | Action after adoption | projected to `SUMMARY`/`DESCRIPTION` for display |
-| lifecycle state and completion | Action | not Plan-authoritative |
-| hierarchy, dependencies, contexts, workflow metadata | Action/ClearHead | not required of the Plan codec |
+| Action name and description | VEVENT: Action display projection; VTODO: bidirectional | `SUMMARY`, `DESCRIPTION` |
+| lifecycle state and completion | VEVENT: Action-local; VTODO: bidirectional | `STATUS`, `COMPLETED`, `X-CLEARHEAD-STATUS` |
+| priority and contexts | VEVENT: Action-local; VTODO: bidirectional | `PRIORITY`, `CATEGORIES` |
+| hierarchy, dependencies, other workflow metadata | Action/ClearHead unless explicitly mapped | standards-backed relationship or `X-CLEARHEAD-*` extension |
 
-A calendar-created Plan uses its `SUMMARY` and optional description to seed the new Action. After adoption, ClearHead's Action remains authoritative for those display fields so calendar editing cannot silently rewrite workflow content while rescheduling.
+A calendar-created VEVENT uses its `SUMMARY` and optional description only to seed the new Action. After adoption they remain display projections. A calendar-created VTODO imports every supported task field and then reconciles each field independently through the same three-way merge discipline as scheduling.
 
 ## Reconciliation
 
