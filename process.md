@@ -237,9 +237,9 @@ Plans and Actions are distinct, linked concerns:
   wins a conflict by global authority.
 
 Editing a Plan changes future recurrence and schedule behavior. It does not
-rewrite archived occurrence facts. Rescheduling a live recurring occurrence
-updates the matching `RECURRENCE-ID` override and the materialized Action while
-preserving the original recurrence key as identity.
+rewrite archived occurrence facts. Rescheduling a live recurring occurrence updates the matching `RECURRENCE-ID`
+override and the materialized Action through field-wise three-way
+reconciliation while preserving the original recurrence key as identity.
 
 See the [workspace specification](./workspace.md) for file placement and
 archival, the [iCalendar schedule specification](./ics_schedule_spec.md) for

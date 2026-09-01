@@ -4,8 +4,8 @@ description: VEVENT/VTODO Plan codecs, Action realization, recurrence, and vdir 
 author: primary_desktop
 categories: Reference
 created: 2026-04-20T00:00:00-0800
-updated: 2026-08-30T00:00:00-0800
-version: 1.3.0
+updated: 2026-08-31T00:00:00-0800
+version: 1.3.1
 ---
 
 # iCalendar Plan projection specification
@@ -58,9 +58,11 @@ same-UID masters. A resource containing duplicate master components for one UID,
 whether same-kind or mixed `VEVENT`/`VTODO`, is invalid and must be diagnosed
 with its path, UID, and observed component kinds.
 
-Changing the configured codec converts one logical Plan atomically: its master
-and every same-UID `RECURRENCE-ID` override move to the selected component kind
-in the same write. Conversion must not leave old-kind overrides beside the new
+A calendar synchronization after changing the configured codec previews and
+converts one logical Plan atomically: its master and every same-UID
+`RECURRENCE-ID` override move to the selected component kind in the same write.
+Unresolved field conflicts defer conversion so VTODO-only peer edits are not
+lost before reconciliation. Conversion must not leave old-kind overrides beside the new
 master. Calendar-level metadata, alarms, unknown properties, the UID, recurrence
 keys, and the transport-selected resource path remain preserved wherever the
 target component permits them. A failed or lossy conversion leaves the original
@@ -128,7 +130,7 @@ The canonical occurrence address is:
 (Plan UID, canonical RECURRENCE-ID)
 ```
 
-Calendar-side occurrence rescheduling updates the corresponding materialized Action when one exists. Action-side rescheduling writes or updates the matching `RECURRENCE-ID` component. Moving an occurrence never changes its identity: the recurrence key names the original slot while `DTSTART` carries the moved time.
+Calendar-side occurrence rescheduling updates the corresponding materialized Action when one exists. Action-side rescheduling writes or updates the matching `RECURRENCE-ID` component. The projection store stamps the materialized occurrence's initial schedule and profile-field merge bases when the token is created, so later edits use ordinary three-way reconciliation. Moving an occurrence never changes its identity: the recurrence key names the original slot while `DTSTART` carries the moved time.
 
 An `EXDATE` or explicitly cancelled occurrence skips the slot. In the VEVENT profile, completing an Action writes no synthetic calendar completion status. In the VTODO profile, same-UID occurrence overrides participate in the same bidirectional task-field reconciliation as one-off resources: a peer may complete or cancel the materialized root, and ClearHead projects local root-state changes back to `STATUS`/`COMPLETED`. Durable completed history still belongs to the Action archive rather than depending on a peer retaining old overrides.
 
