@@ -56,14 +56,39 @@ in this way, the first header serves as the title and the content serves as the 
 
 even the description is optional, as the title is the only required content for a charter to be valid, but the description can be used to give more context about the charter and its purpose
 
+Another option is the use of the title property:
+
+```md
+---
+title: charter example
+---
+here is a small charter description
+```
+
+This mirrors common linter conventions for markdown
+
+### Extra Sections
+
+All subsections are included in the description while sibling sections are meant to be seen as extra content that can represent whatever is needed but will be saved separately when archived
+
 ## charter logs
 
 charters may also have a log section beneath the core section and this will be assumed to be a log of various events and changes that happened within the charter.
 
 good for keeping a running log if semantic activity
 
+### format
 
+with the log, we expect logs to be single lines that are within an unordered list
 
-### Extra Sections
+example
 
-All subsections are included in the description while sibling sections are meant to be seen as extra content that can represent whatever is needed but will be saved separately when archived
+```md
+# test
+
+test charter
+
+## Log
+
+- log line 1
+- log line 2
