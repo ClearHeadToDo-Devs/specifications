@@ -102,7 +102,7 @@ all closed charters are moved into the `archive/` region along with their childr
 
 All charters and subcharters live within the `charters/` directory. Users are free to symlink README files from the project root into `.clearhead/charters/` if desired, but the canonical location is always within `charters/`.
 
-Unless a specific `README.md` is present, the alias of the root charter is inferred from the project directory name. Users can override this by creating a `charters/README.md` with an explicit alias in the frontmatter.
+The root charter declares its alias in `charters/README.md` frontmatter, like every other charter. It is never inferred from the directory name at load time; see [The Root Charter](#the-root-charter).
 
 #### Hierarchy
 
@@ -112,15 +112,22 @@ Specifically, while we do support parent as front matter, the primary way that l
 
 In this way, we can structure charters and subcharters
 
-#### On Scoping
+#### The Root Charter
 
-For project-scoped structures, the root charter is the project directory itself. Its files live at:
+Every workspace, project or user, has exactly one root charter, and every other charter descends from it: flat charters in `charters/` are its direct children, and nested placement expresses deeper lineage. Scope changes how a workspace is discovered and which name `init` seeds, never the shape of the root.
 
-- `<project>/.clearhead/charters/next.actions` — root charter acts
-- `<project>/.clearhead/plans/next/` — root plans (vdir directory)
-- `<project>/.clearhead/charters/README.md` — root charter description (optional)
+The root is the `charters/` directory itself, anchored by reserved file roles:
 
-The charter name is inferred from the project directory name. `next.actions` at the root of `charters/` are the signal that this is the root charter rather than a named sub-charter.
+- `charters/README.md` — the root's prose and identity anchor; its frontmatter carries `id` and `alias` exactly as any [charter's](./charters.md#frontmatter) does
+- `charters/next.actions` — the root's action anchor, the same stem every directory-form charter uses for its own actions (`charters/<charter>/next.actions`)
+- `charters/.next.json` — the root's sidecar, mirroring the frontmatter `id`
+- `plans/next/` — the root's plan collection (vdir directory)
+
+`next` names a file role, not a charter: there is no charter entity named `next`, so a named charter can never collide with the root. Unlike a directory-form charter, the root cannot take its name from its directory, which is always `charters/`; its name is its frontmatter `alias`.
+
+Root identity is charter identity and follows the [concept identity](#concept-identity) rules: minted once, persisted in `charters/README.md`, read from there. It is distinct from [workspace identity](#workspace-identity): `workspace_name` seeds the root's alias at `init`, after which the two are independent facts. Neither is ever recomputed from the working directory or the environment.
+
+A root without `charters/README.md` or without its `id` still loads as the single root. Like a workspace without a `workspace_id`, it gets an ephemeral identity that is never persisted and never derived from a path, and its display name falls back to `workspace_name`. `doctor` reports the gap and offers to persist the identity; loading never writes it.
 
 #### Sidecar for data
 
@@ -185,7 +192,7 @@ All paths are relative to `charters/`:
 
 When a charter is archived, its known files (`charters/<charter>.actions`, `.completed.actions`, `.upcoming.actions`, the charter `.md`, and its `.json` sidecar) and every other charter-local supporting file in a directory-form charter (notes, inventories, and future formats) are moved verbatim into the `archive/` region, at the path they held under `charters/`. Nothing is serialized: the archived form is the same plaintext, just relocated out of the default read set.
 
-Charter stem derivation follows the same rules as plan name inference: `next.actions` uses the parent directory name; all other `.actions` files use the file stem. Unlike plan name inference, `inbox` is NOT skipped — `charters/inbox.actions` is valid.
+Charter stem derivation follows the same rules as plan name inference: `next.actions` in a directory-form charter uses that directory's name; `charters/next.actions` is the root's reserved anchor and takes its name from `charters/README.md` (see [The Root Charter](#the-root-charter)); all other `.actions` files use the file stem. Unlike plan name inference, `inbox` is NOT skipped — `charters/inbox.actions` is valid.
 
 ## Concept Identity
 
@@ -255,7 +262,7 @@ The scope is declared in config, not per-command. A user who configures addition
 `clearhead init` bootstraps a workspace:
 
 1. Generates a UUIDv7 and writes `workspace_id`, `workspace_name`, `created_at` to `.clearhead/workspace.json` (skipped if `workspace_id` already present). If an older workspace still carries these fields in `.clearhead/config.json`, `init` and `doctor` migrate them into the manifest and drop them from `config.json`.
-2. Creates the `charters/` directory structure and, for a project workspace, bootstraps the root charter as `charters/next.actions` with its identity in `charters/.next.json` (each skipped if already present). The root file is structural: it is the signal that lets flat named charters resolve as children of the project charter and keeps their plan-vdir slugs routable.
+2. Creates the `charters/` directory structure and, for a project workspace, bootstraps the root charter (each file skipped if already present): `charters/README.md` with a minted `id` and an `alias` seeded from `workspace_name`, `charters/next.actions`, and the `charters/.next.json` sidecar mirroring that `id`. These files are structural: they let flat named charters resolve as children of the root and keep their plan-vdir slugs routable.
 
 `init` is idempotent — rerunning it on an already-initialized workspace is safe and never overwrites existing data or identity. It may restore a missing root-charter scaffold. Pass `--force` to regenerate identity fields. This assigns a new graph URI, so any consumer that referenced the old one no longer resolves to this workspace; the workspace's plaintext data is untouched.
 

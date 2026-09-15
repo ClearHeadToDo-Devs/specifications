@@ -12,6 +12,8 @@ in this structure, we are primarily concerned with what is needed to give this s
 
 this is the only required field for now if a charter DOES exist within the platform that will be used
 
+The workspace root charter is no exception: its frontmatter lives in `charters/README.md`. See [The Root Charter](./workspace.md#the-root-charter).
+
 ### Optional Frontmatter
 
 - title: a human readable title for the charter, this is optional because it can be derived
