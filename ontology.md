@@ -97,7 +97,7 @@ workspace is:
 urn:clearhead:workspace:<uuid>
 ```
 
-where `<uuid>` is the stable `workspace_id` from `.clearhead/workspace.json`,
+where `<uuid>` is the stable `workspace_id` from `<data_root>/workspace.json`,
 generated once by `clearhead init` and never regenerated. See
 [Workspace — Named Graph Isolation][workspace-graphs] for how that UUID is
 created and why it must remain stable.

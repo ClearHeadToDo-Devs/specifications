@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://raw.githubusercontent.com/ClearHeadToDo-Devs/specifications/master/schemas/workspace.schema.json",
   "title": "ClearHead Workspace Manifest",
-  "description": "Per-workspace identity manifest, stored at .clearhead/workspace.json. Holds the durable facts that identify a workspace concept, kept deliberately separate from config.json: identity is a tool-managed fact about one workspace, not a human-authored setting, and it does NOT participate in the config precedence chain (global -> project -> local -> env -> args). The manifest is near-static: it changes on init and rename, essentially never otherwise. It carries workspace-level facts only; per-charter, per-action, and per-plan metadata live in their co-located sidecars (see charter_metadata.schema.json), never here.",
+  "description": "Per-workspace identity manifest, stored at <data_root>/workspace.json (.clearhead/ for a project, data_dir for the user workspace). Holds the durable facts that identify a workspace concept, kept deliberately separate from config.json: identity is a tool-managed fact about one workspace, not a human-authored setting, and it does NOT participate in the config precedence chain (global -> project -> local -> env -> args). The manifest is near-static: it changes on init and rename, essentially never otherwise. It carries workspace-level facts only; per-charter, per-action, and per-plan metadata live in their co-located sidecars (see charter_metadata.schema.json), never here.",
   "type": "object",
   "properties": {
     "workspace_id": {

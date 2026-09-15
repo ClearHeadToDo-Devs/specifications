@@ -206,7 +206,7 @@ They differ only in *where* the identity is persisted:
 
 | Concept   | Anchor                                             | Specified in |
 |-----------|----------------------------------------------------|--------------|
-| Workspace | `workspace_id` in `.clearhead/workspace.json`      | [Workspace Identity](#workspace-identity) |
+| Workspace | `workspace_id` in `<data_root>/workspace.json`     | [Workspace Identity](#workspace-identity) |
 | Charter   | frontmatter `id`, mirrored in the sidecar          | [Charters] |
 | Plan      | configured VEVENT/VTODO `UID` (canonical `.ics` filename) | [ICS Schedule Spec] |
 | Action    | inline id; its sidecar records the UID of any realized Plan | [Action File Format], [ICS Schedule Spec] |
@@ -226,7 +226,7 @@ Each workspace maps 1-1 to an RDF named graph. This enables querying a single wo
 
 ### Workspace Identity
 
-A workspace's identity is its `workspace_id`, stored in its own `.clearhead/workspace.json` **manifest** — deliberately separate from `config.json`:
+A workspace's identity is its `workspace_id`, stored in its own `<data_root>/workspace.json` **manifest** — deliberately separate from `config.json`. The data root is the directory holding `charters/` and `plans/`: `<project>/.clearhead/` for a project workspace, and the resolved `data_dir` (default `$XDG_DATA_HOME/clearhead/`) for the user workspace. The manifest's location follows that one rule in both scopes:
 
 ```json
 {
@@ -244,7 +244,7 @@ The named graph URI is derived from it as `urn:clearhead:workspace:<workspace_id
 
 That stability is a convenience, not a correctness requirement. A workspace without a `workspace_id` is fully queryable: the read side mints an **ephemeral** graph identity per load — distinct per workspace, never persisted, and never derived from the root path. Such a workspace answers queries correctly; its graph URI simply is not stable across sessions. `init` is how a workspace earns a durable URI — offered, never forced.
 
-`workspace_name` is the display name used in multi-workspace output and cross-workspace reference syntax (`name:charter/action`). Inferred from the project directory name by `init`; can be overridden manually.
+`workspace_name` is the display name used in multi-workspace output and cross-workspace reference syntax (`name:charter/action`). `init` persists it once: `--name` when given, otherwise the project directory name for a project workspace or the current username for the user workspace. Readers use the persisted value and never recompute it from the directory or environment; it can be edited manually afterwards.
 
 `created_at` records when the workspace was initialized. Informational only.
 
@@ -259,10 +259,10 @@ The scope is declared in config, not per-command. A user who configures addition
 
 ### Initialization
 
-`clearhead init` bootstraps a workspace:
+`clearhead init` bootstraps a project workspace at `<cwd>/.clearhead/`; `clearhead init --user` bootstraps the user workspace at the resolved `data_dir`. Both accept `--name` and perform the same steps against their data root:
 
-1. Generates a UUIDv7 and writes `workspace_id`, `workspace_name`, `created_at` to `.clearhead/workspace.json` (skipped if `workspace_id` already present). If an older workspace still carries these fields in `.clearhead/config.json`, `init` and `doctor` migrate them into the manifest and drop them from `config.json`.
-2. Creates the `charters/` directory structure and, for a project workspace, bootstraps the root charter (each file skipped if already present): `charters/README.md` with a minted `id` and an `alias` seeded from `workspace_name`, `charters/next.actions`, and the `charters/.next.json` sidecar mirroring that `id`. These files are structural: they let flat named charters resolve as children of the root and keep their plan-vdir slugs routable.
+1. Generates a UUIDv7 and writes `workspace_id`, `workspace_name`, `created_at` to `<data_root>/workspace.json` (skipped if `workspace_id` already present). If an older project workspace still carries these fields in `.clearhead/config.json`, `init` and `doctor` migrate them into the manifest and drop them from `config.json`.
+2. Creates the `charters/` directory structure and bootstraps the root charter (each file skipped if already present): `charters/README.md` with a minted `id` and an `alias` seeded from `workspace_name`, `charters/next.actions`, and the `charters/.next.json` sidecar mirroring that `id`. These files are structural: they let flat named charters resolve as children of the root and keep their plan-vdir slugs routable.
 
 `init` is idempotent — rerunning it on an already-initialized workspace is safe and never overwrites existing data or identity. It may restore a missing root-charter scaffold. Pass `--force` to regenerate identity fields. This assigns a new graph URI, so any consumer that referenced the old one no longer resolves to this workspace; the workspace's plaintext data is untouched.
 

@@ -46,36 +46,42 @@ All implementations MUST follow the XDG Base Directory specification:
 
 ### Default File Structure
 
-```
+```text
 ~/.config/clearhead/
-  └── config.json          # Primary configuration file
+└── config.json            # Primary configuration file
 
-~/.local/share/clearhead/charters/
-  └── inbox.actions        # Default action file 
-  |-- README.md             # Default Charter
+~/.local/share/clearhead/  # User data root (data_dir), bootstrapped by `clearhead init --user`
+├── workspace.json         # Workspace manifest: identity facts
+└── charters/
+    ├── README.md          # Root charter: id + alias frontmatter
+    ├── next.actions       # Root charter action anchor
+    ├── .next.json         # Root charter sidecar
+    └── inbox.actions      # Default action file
 ```
 
 #### On Project-Specific Config
 
 Within the example of a specific project, these subdirectories all reside within the .clearhead directory:
 
-```project_root/
-  └── .clearhead/
-      ├── workspace.json     # Workspace manifest: identity facts, committed (see below)
-      ├── config.json        # Project configuration, committed and shared (optional)
-      ├── config.local.json  # Personal override, git-ignored (optional)
-      ├── .gitignore         # Ignores config.local.json (written by `clearhead init`)
-      charters/
-          |-- README.md         # Project Root Charter
-          ├── next.actions      # Project-specific action file (optional)
-          |__ other files...        # Any other project-specific files
-
-
+```text
+project_root/
+└── .clearhead/            # Project data root, bootstrapped by `clearhead init`
+    ├── workspace.json     # Workspace manifest: identity facts, committed (see below)
+    ├── config.json        # Project configuration, committed and shared (optional)
+    ├── config.local.json  # Personal override, git-ignored (optional)
+    ├── .gitignore         # Ignores config.local.json (written by `clearhead init`)
+    └── charters/
+        ├── README.md      # Root charter: id + alias frontmatter
+        ├── next.actions   # Root charter action anchor
+        ├── .next.json     # Root charter sidecar
+        └── ...            # Other charters
 ```
+
+Both scopes share one shape; see [The Root Charter](./workspace.md#the-root-charter).
 
 `config.json` is committed so the whole team shares workspace *behavior* (`additional_workspaces`, `tag_hierarchies`, `plan_path`, …). `config.local.json` sits beside it as a git-ignored personal override: a single developer can set their own values (e.g. their own `plan_path`) without touching the shared file. The local file wins over the committed one. `clearhead init` writes a scoped `.clearhead/.gitignore` so the personal override stays out of version control.
 
-Workspace *identity* — `workspace_id`, `workspace_name`, `created_at` — does **not** live in `config.json`. It lives in a separate `.clearhead/workspace.json` **manifest**. The two are split because they behave differently: `config.json` is human-authored behavior that layers through the precedence chain below, while the manifest is a tool-managed fact about one workspace that must not layer (a `workspace_id` in a *global* config, or a `CLEARHEAD_WORKSPACE_ID` env override, is meaningless). The manifest is committed and near-static — it changes on `init` and rename, essentially never otherwise — and holds workspace-level facts only; per-charter metadata stays in its co-located sidecar. See [Workspace Identity](./workspace.md#workspace-identity) and the [manifest schema](./schemas/workspace.schema.json).
+Workspace *identity* — `workspace_id`, `workspace_name`, `created_at` — does **not** live in `config.json`. It lives in a separate `<data_root>/workspace.json` **manifest**. The two are split because they behave differently: `config.json` is human-authored behavior that layers through the precedence chain below, while the manifest is a tool-managed fact about one workspace that must not layer (a `workspace_id` in a *global* config, or a `CLEARHEAD_WORKSPACE_ID` env override, is meaningless). The manifest is committed and near-static — it changes on `init` and rename, essentially never otherwise — and holds workspace-level facts only; per-charter metadata stays in its co-located sidecar. See [Workspace Identity](./workspace.md#workspace-identity) and the [manifest schema](./schemas/workspace.schema.json).
 
 ## Configuration File Format
 
