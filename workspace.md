@@ -45,18 +45,13 @@ This scoping makes discovery trivial: implementors scan `charters/` for charter 
 
 By default, everyone should have a `charters/inbox.actions` file within that workspace. This file serves as the default location for uncategorized acts.
 
-### Mutation durability and locking
+### Mutation durability and concurrency
 
-Every ClearHead operation that writes more than one workspace file follows one concurrency policy:
+Every ClearHead mutation is planned as an `EffectBatch`: a set of file-level effects (write, remove, move), each paired with exactly one precondition — the resource's expected prior state, either missing or a specific content revision. Delivery validates every precondition against the live workspace *before* applying any effect; a mismatch, meaning another writer changed the resource since it was read, is rejected as a conflict and nothing in the batch is applied. This is optimistic concurrency control, not locking: there is no exclusive workspace lock to acquire and no multi-file journal to recover.
 
-1. acquire the workspace's exclusive OS lock at `<data_root>/.clearhead.lock`; fail on contention rather than continuing unlocked
-2. while holding the lock, recover any journaled `.pending` batch before reading mutation inputs
-3. stage every resulting file and commit the batch through the durability journal
-4. release the lock only after commit completes
+Within a batch, additions are applied before removals, in Core's emission order. That ordering is what makes partial application after a crash safe rather than corrupting: an interrupted archive, for example, can leave a completed action written to its new home *and* still present in the old one, but it is never removed from the old home without having already landed in the new one. Redundant, never lost.
 
-The lock file is persistent and contains the current owner's PID for diagnostics, but ownership is an OS file lock rather than the file's existence. The kernel releases ownership when a process exits or is killed, so stale PID text never blocks a later writer. Implementations must not delete the lock file on release because unlinking can allow two processes to lock different inodes for the same workspace.
-
-Single-file writes use atomic temp-file replacement and do not require the multi-file journal. Readers that expose raw diagnostic state may report a pending journal without replaying it; mutation entry points must always recover it before planning from workspace state.
+Single-file writes use atomic temp-file replacement directly and carry the same one-precondition-per-resource guarantee; they do not need a multi-file batch.
 
 ### Recovered source is quarantined from semantics
 
@@ -287,7 +282,7 @@ One concept that is very important to the workspace format is the process of "ar
 1. If we move a level up, we have the plans in `plans/<charter-name>/`, again, all plans start open but schedules simply "are no longer scheduled" they have no state explicitly however they are still logged as an example of a schedule
 1. Finally, like plans, the charters themselves at `charters/<charter>.md` can be archived after they are closed. Archival is a **move, not a translation**: the archived form is data, not a projection, so no Turtle or JSON-LD is written. Any RDF view of archived data is regenerated from the loaded domain model by Core's publication adapter, exactly like live data.
 1. archiving a parent charter archives its whole subtree as one unit; the open-actions precondition is recursive too — it refuses if *any* descendant still holds open actions
-1. the subtree's known files (`.actions`, `.completed.actions`, `.upcoming.actions`, the charter `.md`, and its `.json` sidecar) plus all supporting files owned by directory-form charters are moved **all-or-none** into the `archive/` region, preserving their path under `charters/` so the subtree's internal structure survives. The sidecar moves *with* the files rather than folding its `created_at` / `external_schedule_id` into the lines; atomicity (via the batch transaction, journalled in `charters/`) is what makes that safe — there is no half-archived state that orphans metadata
+1. the subtree's known files (`.actions`, `.completed.actions`, `.upcoming.actions`, the charter `.md`, and its `.json` sidecar) plus all supporting files owned by directory-form charters are moved into the `archive/` region as one precondition-checked `EffectBatch`, preserving their path under `charters/` so the subtree's internal structure survives. The sidecar moves *with* the files rather than folding its `created_at` / `external_schedule_id` into the lines. Additions land before removals, so an interruption mid-move can leave a file present in both `charters/` and `archive/` but never removed from `charters/` without already existing in `archive/` — safely retryable, never an orphaned or lost record
 1. any charter subdirectory left empty by the move is collapsed
 
 Because `archive/` is a sibling of `charters/`, the moved files leave the default read set automatically, but reference resolution can still look into them: an archived `<` target resolves to one of three states — **satisfied** (target Completed), **abandoned** (target Cancelled), or **dangling** (resolves nowhere). Keeping archives as readable plaintext is the whole reason that three-way signal is possible.
@@ -308,4 +303,16 @@ this is how we maintain a format that is able to evolve gracefully
 - [Process] — Workflow including recurring action behavior
 - [Reference Syntax] — Sub-charter and sub-plan references
 
-[action-file-format]: ./action_file_format.md [charter-sidecar-schema]: ./schemas/charter_metadata.schema.json [charters]: ./charters.md [configuration]: ./configuration.md [decision-28]: ../DECISIONS.md [decisions]: ../DECISIONS.md [examples]: ./examples/workspaces/ [ics-schedule-spec]: ./ics_schedule_spec.md [objectives]: ./objectives.md [ontology]: ./ontology.md [process]: ./process.md [reference-syntax]: ./reference_syntax.md [workspace-manifest-schema]: ./schemas/workspace.schema.json
+[action-file-format]: ./action_file_format.md
+[charter-sidecar-schema]: ./schemas/charter_metadata.schema.json
+[charters]: ./charters.md
+[configuration]: ./configuration.md
+[decision-28]: ../docs/DECISIONS.md
+[decisions]: ../docs/DECISIONS.md
+[examples]: ./examples/workspaces/
+[ics-schedule-spec]: ./ics_schedule_spec.md
+[objectives]: ./objectives.md
+[ontology]: ./ontology.md
+[process]: ./process.md
+[reference-syntax]: ./reference_syntax.md
+[workspace-manifest-schema]: ./schemas/workspace.schema.json
