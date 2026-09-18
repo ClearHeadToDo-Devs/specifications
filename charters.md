@@ -8,7 +8,7 @@ for the purposes of organization and reading, frontmatter allows charters to con
 
 in this structure, we are primarily concerned with what is needed to give this structure meaning within the platform and link it with other parsed works meaning we have:
 
-- id: a unique UUIDv7 for the charter that can be linked
+- id: a unique UUIDv7 for the charter that can be linked (optional in the file: a document without one still loads with an ephemeral identity and `doctor` reports it; see Concept Identity in [workspace.md](workspace.md))
 
 this is the only required field for now if a charter DOES exist within the platform that will be used
 

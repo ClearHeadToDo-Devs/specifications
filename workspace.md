@@ -198,10 +198,12 @@ They differ only in *where* the identity is persisted:
 | Plan      | configured VEVENT/VTODO `UID` (canonical `.ics` filename) | [ICS Schedule Spec] |
 | Action    | inline id; its sidecar records the UID of any realized Plan | [Action File Format], [ICS Schedule Spec] |
 
-Two rules keep this honest:
+Three rules keep this honest:
 
 - **Tool-managed, not typed.** Humans never write a UUID; `init`, the CLI, and the LSP mint and maintain them. "Invisible" means unobtrusive, not absent — a mutable action line carries its id quietly rather than re-deriving one on every read.
 - **Derivation is a bootstrap, never a live recompute.** An identity may be *derived once* to fill a gap and then persisted as truth. Recomputing an id from mutable content — from a title, from a path — is forbidden: change the content and you silently change the identity, orphaning every reference to it. A broken reference must fail *loudly*, into a dangling id that `doctor` can report, rather than rebinding silently to a different concept.
+
+- **A missing anchor is a reportable gap, not a write.** A concept whose anchor has not been written yet — a charter document with no `id`, like the root README above, or a workspace with no `workspace_id` — still loads: the reader supplies an **ephemeral** identity that is never persisted and never derived from content or path, and `doctor` reports the gap. Loading never writes identity, and no ordinary edit stamps one as a side effect. A durable id is minted only by a deliberate identity-minting pass, or when a whole new document is created. Anything that would *persist* an identity — an archive file name, a sidecar record — requires a declared one, and refuses otherwise.
 
 ### Actions carry their charter
 
