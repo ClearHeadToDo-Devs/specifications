@@ -3,3 +3,5 @@
     >[x] Add explicit workspace load/save contract examples for user scope vs project cope  $ include concrete trees and expected charter inference + parent mapping $ %2026-04-27T19:57 ^2026-04-06T00:15 #6e266ca4-2764-496a-bcee-f57f5ac95a56
     >[x] Add a testing guidance section recommending RON snapshots for normalized DomainModel and workspace manifests  %2026-04-20T12:00 ^2026-04-20T00:00 #019db200-0001-7000-0000-000000000001
 [x] add ICS schedule specification  2026-04-27T19  %2026-04-27T19:58 #019dd205-9773-74d1-b469-d5214421c970
+[x] specify user-workspace identity\: root is data_dir (XDG data default); decide where workspace_id lives (global config vs config.json at root) so init has a defined target !2 %2026-07-11T22:52 #019f54cf-540c-7530-aa16-1c8b712d644f
+[x] align configuration.md project layout example with the charters decision\: all actions files live under charters/, never at the data root (stale .clearhead/next.actions example) !2 %2026-07-12T09:56 #019f54cf-34a0-7f72-a6f7-83f87ba55fed
