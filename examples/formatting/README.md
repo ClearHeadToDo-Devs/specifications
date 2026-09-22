@@ -11,8 +11,8 @@ repositories.
 - `indentation/` — child depth is represented by two-space indentation while
   explicit `>` depth markers remain present;
 - `spacing/` — exactly one space separates state, name, and metadata fields;
-  spaces inside prose and around links normalize without separating a field
-  sigil from its value.
+  spaces around links normalize without separating a field sigil from its
+  value, while paragraph breaks inside descriptions remain verbatim.
 
 Each leaf directory contains `input.actions` and `expected.actions`. Cases are
 small and orthogonal so a byte mismatch names one formatting contract.
@@ -22,7 +22,8 @@ formatting/
 ├── indentation/01_nested_actions/
 ├── newlines/01_multiple_on_one_line/
 ├── spacing/01_field_boundaries/
-└── spacing/02_description_links/
+├── spacing/02_description_links/
+└── spacing/03_description_paragraphs/
 ```
 
 The grammar's Topiary test reads every category through `CLEARHEAD_SPEC_DIR`;

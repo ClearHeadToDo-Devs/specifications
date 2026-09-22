@@ -66,7 +66,29 @@ This is enforced at two levels, and both matter for idempotency:
 
 Because no token can absorb the boundary space itself, the two never compete, and `format(format(x)) == format(x)` for spacing.
 
+### Description paragraphs
+
+Whitespace inside a `$...$` description belongs to the description, not to the
+formatter. Formatters must preserve interior spaces and newlines verbatim,
+including blank lines between paragraphs. They may normalize only the boundary
+between the description field and neighboring fields.
+
+```actions
+[ ] Record outcome $first paragraph.
+
+second paragraph.$ !2
+```
+
+Parsing, formatting, and mutation must round-trip the description above as
+`"first paragraph.\n\nsecond paragraph."`; silently deleting or replacing its
+newlines is data loss.
+
 ## Version History
+
+### 3.1.2 (2026-09-22)
+
+- Description content is a formatter leaf: interior newlines and blank lines are
+  preserved verbatim instead of being discarded as grammar extras.
 
 ### 3.1.1 (2026-07-05)
 
