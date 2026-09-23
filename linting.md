@@ -343,6 +343,20 @@ not active conformance.
     genuinely invalid id (`#123`, `#abc-def`, `#not-a-uuid`) that no amount of
     further typing turns into the uuid at that position.
 
+#### W014: Decision Heading in an Action Description
+
+    **Fixable:** No (move the decision into DECISIONS.md and link to it)
+
+    A decision-labelled Markdown heading (`## Decision: ...`, `# Decision 42 ...`)
+    or a line beginning `Decision <number>:` inside an action description
+    duplicates the decision record. An action may cite a decision inline;
+    `Decision 42`, `DECIDED 2026-09-18`, and `RESOLVED ...` in ordinary prose
+    are not headings and are not flagged. Fenced Markdown examples are ignored.
+    The diagnostic points to the action.
+
+    **Rationale:** Decisions have one authoritative home in DECISIONS.md;
+    actions track work and link to that decision rather than copying its text.
+
 ### 3. Style and Conventions (Info)
 
 #### I001: Closed State Requires Completed Date
