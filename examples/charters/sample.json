@@ -1,0 +1,43 @@
+{
+  "charters": [
+    {
+      "id": "01951111-cfa6-718d-b303-d7107f4005b3",
+      "state": "active",
+      "title": "Home Renovation",
+      "alias": "reno",
+      "description": "Make the house livable before winter.",
+      "objectives": [
+        "comfortable-home"
+      ],
+      "defaults": {
+        "contexts": [
+          "home"
+        ]
+      },
+      "log": [
+        {
+          "at": "2025-01-10",
+          "text": "contractor quotes received"
+        },
+        {
+          "at": "2025-01-14T09:30",
+          "text": "chose the second quote"
+        },
+        {
+          "text": "undated hand-written note"
+        }
+      ],
+      "sections": [
+        {
+          "heading": "Budget",
+          "body": "Hard cap of $20k."
+        }
+      ]
+    },
+    {
+      "state": "new",
+      "title": "Kitchen",
+      "parent": "reno"
+    }
+  ]
+}

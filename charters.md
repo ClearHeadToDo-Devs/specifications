@@ -81,7 +81,11 @@ good for keeping a running log if semantic activity
 
 ### format
 
-with the log, we expect logs to be single lines that are within an unordered list
+Each log entry is a single item of an unordered list that begins with an ISO 8601 date or date-time, followed by ` — ` and the entry text. The entry carries its own date so it keeps its meaning when it is moved, archived, or read on its own; entries are appended, so their order in the document is their order in time.
+
+A date-time should carry its UTC offset (`2026-09-17T23:28-07:00`), since entries from different machines share one log and must order correctly; tools that write entries always include it. Editors may render the timestamp in a friendlier form, but the stored text stays ISO 8601.
+
+An entry without a leading date is still valid and is read as undated text. Linters should report it, but implementations must not add a date to an existing entry: the time of that edit is not the time the entry was written.
 
 example
 
@@ -92,5 +96,6 @@ test charter
 
 ## Log
 
-- log line 1
-- log line 2
+- 2026-09-17 — log line 1
+- 2026-09-17T23:28-07:00 — log line 2
+```
