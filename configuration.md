@@ -79,7 +79,7 @@ project_root/
 
 Both scopes share one shape; see [The Root Charter](./workspace.md#the-root-charter).
 
-`config.json` is committed so the whole team shares workspace *behavior* (`additional_workspaces`, `tag_hierarchies`, `plan_path`, …). `config.local.json` sits beside it as a git-ignored personal override: a single developer can set their own values (e.g. their own `plan_path`) without touching the shared file. The local file wins over the committed one. `clearhead init` writes a scoped `.clearhead/.gitignore` so the personal override stays out of version control.
+`config.json` is committed so the whole team shares workspace *behavior* (`additional_workspaces`, `tag_hierarchies`, `plan_component`, …). `config.local.json` sits beside it as a git-ignored personal override: a single developer can set their own values (e.g. their own `plan_component`) without touching the shared file. The local file wins over the committed one. `clearhead init` writes a scoped `.clearhead/.gitignore` so the personal override stays out of version control.
 
 Workspace *identity* — `workspace_id`, `workspace_name`, `created_at` — does **not** live in `config.json`. It lives in a separate `<data_root>/workspace.json` **manifest**. The two are split because they behave differently: `config.json` is human-authored behavior that layers through the precedence chain below, while the manifest is a tool-managed fact about one workspace that must not layer (a `workspace_id` in a *global* config, or a `CLEARHEAD_WORKSPACE_ID` env override, is meaningless). The manifest is committed and near-static — it changes on `init` and rename, essentially never otherwise — and holds workspace-level facts only; per-charter metadata stays in its co-located sidecar. See [Workspace Identity](./workspace.md#workspace-identity) and the [manifest schema](./schemas/workspace.schema.json).
 
@@ -142,7 +142,6 @@ All implementations MUST recognize these core settings:
 | `tag_hierarchies` | object | `{}` | Tag parent-child relationships for implicit inheritance |
 | `default_to_user_scope` | boolean | `false` | If true, only shows user-scoped actions (ignores project scope) |
 | `additional_workspaces` | array | `[]` | Additional workspaces to merge into the domain model. Entries may be relative paths, absolute paths (with `~` / env-var expansion), or URLs (planned). See [Additional workspaces](#additional-workspaces). |
-| `plan_path` | string | *(unset → `<data_root>/plans`)* | Configured iCalendar vdir at `<plan_path>/<charter>/<resource>.ics`. ClearHead assumes only the filesystem boundary; any CalDAV/file-sync transport is external. |
 | `plan_component` | string | `vevent` | iCalendar component used to encode Plans: `vevent` for ordinary calendar scheduling or `vtodo` for task-oriented calendar clients. This changes the integration surface, not Plan or Action domain semantics. |
 | `expansion_total_instances` | integer | `2` | Bounded number of recurring Plan occurrences exposed by planning projections. Materialized current instances and read-only future projections may apply different view policies. |
 

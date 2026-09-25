@@ -81,14 +81,6 @@
         ["~/work-projects/.clearhead", "~/personal/.clearhead"]
       ]
     },
-    "plan_path": {
-      "type": "string",
-      "description": "Configured iCalendar Plan vdir, laid out as <plan_path>/<charter>/<resource>.ics. ClearHead integrates only with this filesystem boundary; vdirsyncer, CalDAV, file synchronization, or no transport may sit behind it. When unset, the vdir lives at <data_root>/plans. Supports shell expansion.",
-      "examples": [
-        "~/.local/share/clearhead/plans",
-        "~/calendars/clearhead"
-      ]
-    },
     "plan_component": {
       "type": "string",
       "enum": ["vevent", "vtodo"],

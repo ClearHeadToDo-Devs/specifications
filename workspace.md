@@ -128,9 +128,9 @@ Note: we use the hidden file convention here to indicate that this is a sidecar 
 
 #### Plans
 
-The configured `plans/` path is a charter-scoped iCalendar vdir containing Plan resources. A Plan is the scheduling relationship for an Action: one-off when no RRULE is present and recurring when RRULE is present. Unscheduled Actions have no Plan resource.
+A workspace's `<data_root>/plans/` directory is a charter-scoped iCalendar vdir containing Plan resources. A Plan is the scheduling relationship for an Action: one-off when no RRULE is present and recurring when RRULE is present. Unscheduled Actions have no Plan resource.
 
-Every constructed charter owns one calculated collection path even when its directory does not exist. This relative path is derived from the charter's canonical workspace anchor and is not written into charter Markdown or sidecars. A configured `plan_path` replaces only the physical vdir root. Calendar resources attach to charters by exact collection ownership, never by mutable alias or title matching.
+Every constructed charter owns one calculated collection path even when its directory does not exist. This relative path is derived from the charter's canonical workspace anchor and is not written into charter Markdown or sidecars. The vdir's location is part of the workspace layout, not configuration, and it belongs to exactly one workspace; transport tooling points at it where it is. Calendar resources attach to charters by exact collection ownership, never by mutable alias or title matching.
 
 Each `.ics` file contains a single `VCALENDAR` with one primary Plan component plus any same-UID recurrence overrides. The configured `plan_component` chooses VEVENT (the default calendar integration) or VTODO (the task-client integration). Both encode the same Plan semantics; RRULE distinguishes recurring from one-off Plans rather than distinguishing Plans from Actions. ClearHead-created files use the component UID as filename, while readers identify resources by UID because transport tooling may choose another filename.
 
@@ -281,7 +281,7 @@ One concept that is very important to the workspace format is the process of "ar
 
 Because `archive/` is a sibling of `charters/`, the moved files leave the default read set automatically, but reference resolution can still look into them: an archived `<` target resolves to one of three states — **satisfied** (target Completed), **abandoned** (target Cancelled), or **dangling** (resolves nowhere). Keeping archives as readable plaintext is the whole reason that three-way signal is possible.
 
-The `.ics` files in `plans/<charter-name>/` are **not** touched by archival. Per [decision 31][decisions], the configured vdir is a shared projection boundary and archival must not infer that its resources should be deleted. Archived Action records retain history while the vdir remains independently manageable through calendar tooling. A collection left without a live charter owner is quarantined and reported by doctor; it is never silently adopted as an implicit charter.
+The `.ics` files in `plans/<charter-name>/` are **not** touched by archival. Per [decision 31][decisions], the plans vdir is a shared projection boundary and archival must not infer that its resources should be deleted. Archived Action records retain history while the vdir remains independently manageable through calendar tooling. A collection left without a live charter owner is quarantined and reported by doctor; it is never silently adopted as an implicit charter.
 
 REMEMBER, per the [process spec][process] it is assumed that all child plans are completed/cancelled which is why the open files above are expected to be empty or atleast emptyable before being moved into `archive/`
 

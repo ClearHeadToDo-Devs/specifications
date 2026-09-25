@@ -10,7 +10,7 @@ version: 1.3.1
 
 # iCalendar Plan projection specification
 
-This specification defines ClearHead's RFC 5545 Plan projection in the configured plans vdir. The vdir is the complete integration boundary: CalDAV, vdirsyncer, Syncthing, Git, a mounted filesystem, or no transport may sit behind it. ClearHead does not depend on server accounts, hrefs, ETags, or vendor metadata.
+This specification defines ClearHead's RFC 5545 Plan projection in each workspace's `<data_root>/plans/` vdir. The vdir is the complete integration boundary: CalDAV, vdirsyncer, Syncthing, Git, a mounted filesystem, or no transport may sit behind it. ClearHead does not depend on server accounts, hrefs, ETags, or vendor metadata.
 
 The core separation is:
 
@@ -31,7 +31,7 @@ plans/<charter-scope>/<resource>.ics
 
 ClearHead emits canonical files named `<uid>.ics`, but readers identify a resource by its RFC 5545 `UID`, not by its filename. Transport tooling may choose another filename. Duplicate Plan identities are errors; traversal order must never pick a winner.
 
-Collection ownership is constructed from each charter's canonical workspace anchor whether or not the directory or any resource exists. The configured `plan_path` changes the physical vdir root, not those relative ownership keys. Calendar loading attaches resources by exact collection path; aliases, titles, and arbitrary `next.actions` basenames are not collection identity.
+Collection ownership is constructed from each charter's canonical workspace anchor whether or not the directory or any resource exists. Calendar loading attaches resources by exact collection path; aliases, titles, and arbitrary `next.actions` basenames are not collection identity.
 
 ## Configured Plan codec
 
