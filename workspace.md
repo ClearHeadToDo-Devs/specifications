@@ -43,7 +43,7 @@ In general the data should reside in `XDG_DATA_HOME/clearhead/`. The workspace r
 
 This scoping makes discovery trivial: implementors scan `charters/` for charter content and `plans/` for schedule data, without needing exclusion lists. The `archive/` region is a sibling of `charters/`, so it falls outside the default read for free, while staying plaintext and parseable when something needs to look into it.
 
-By default, everyone should have a `charters/inbox.actions` file within that workspace. This file serves as the default location for uncategorized acts.
+The root charter's `charters/next.actions` (see [The Root Charter](#the-root-charter)) is the default location for uncategorized acts: capture lands at the top of the tree, and filing into a child charter is a later step. No other file is special. A `charters/inbox.actions`, where one exists, is an ordinary child charter named `inbox`.
 
 ### Recovered source is quarantined from semantics
 
@@ -140,14 +140,14 @@ Any charter with plans requires directory form. The `plans/` directory itself si
 
 All paths are relative to `<data_root>/plans/`. An example:
 
-- `inbox/<uid>.ics`
+- `next/<uid>.ics`
 - `work/<uid>.ics`
 - `work-feature/<uid>.ics`
 - `subproject/<uid>.ics`
 
   which maps to charters:
 
-- `inbox` charter
+- the root charter (`next` is its reserved plan collection)
 - `work` charter
 - `work/feature` sub-charter (hierarchy encoded with `-`)
 - `subproject` charter
@@ -173,13 +173,12 @@ All paths are relative to `charters/`:
 - `charters/<charter>.actions` — active acts for that charter (capped at `expansion_primary_instances` per schedule)
 - `charters/<charter>.upcoming.actions` — future generated instances beyond the primary cap, not yet in the active set
 - `charters/next.actions` — root charter acts (project or user workspace root)
-- `charters/inbox.actions` — inbox charter acts
 - `charters/<charter>.completed.actions` — completed and cancelled acts for that charter
 - `charters/<charter>/next.actions` — root acts for a folder-form charter
 
 When a charter is archived, its known files (`charters/<charter>.actions`, `.completed.actions`, `.upcoming.actions`, the charter `.md`, and its `.json` sidecar) and every other charter-local supporting file in a directory-form charter (notes, inventories, and future formats) are moved verbatim into the `archive/` region, at the path they held under `charters/`. Nothing is serialized: the archived form is the same plaintext, just relocated out of the default read set.
 
-Charter stem derivation follows the same rules as plan name inference: `next.actions` in a directory-form charter uses that directory's name; `charters/next.actions` is the root's reserved anchor and takes its name from `charters/README.md` (see [The Root Charter](#the-root-charter)); all other `.actions` files use the file stem. Unlike plan name inference, `inbox` is NOT skipped — `charters/inbox.actions` is valid.
+Charter stem derivation follows the same rules as plan name inference: `next.actions` in a directory-form charter uses that directory's name; `charters/next.actions` is the root's reserved anchor and takes its name from `charters/README.md` (see [The Root Charter](#the-root-charter)); all other `.actions` files use the file stem.
 
 ## Concept Identity
 

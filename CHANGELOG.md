@@ -1,5 +1,11 @@
 # Changelog - Actions Specifications
 
+## 2026-09-26
+
+### Changed
+
+**The root `next.actions` is the default capture target** (`workspace.md`, `configuration.md`, `process.md`, `schemas/config.schema.json`). `default_file` now defaults to `next.actions`, resolved relative to the workspace's `charters/` directory; the old text said `data_dir`, which no implementation followed. `charters/inbox.actions` loses its special status and, where it still exists, is an ordinary child charter named `inbox`. This finishes the unified workspace root: the root already owned `next.actions` as its action anchor, but capture still defaulted to the inbox, so choosing between the two files was a decision users had to make on every capture.
+
 ## 2026-09-25
 
 ### Changed

@@ -42,10 +42,10 @@
     },
     "default_file": {
       "type": "string",
-      "description": "Default action file name. Relative paths are resolved from data_dir.",
-      "default": "inbox.actions",
+      "description": "Default capture file. Relative paths are resolved from the workspace's charters/ directory.",
+      "default": "next.actions",
       "examples": [
-        "inbox.actions",
+        "next.actions",
         "work.actions"
       ]
     },
@@ -92,7 +92,7 @@
   "examples": [
     {
       "data_dir": "~/.local/share/clearhead",
-      "default_file": "inbox.actions",
+      "default_file": "next.actions",
       "tag_hierarchies": {
         "computer": ["terminal", "browser"],
         "terminal": ["neovim", "tmux"]

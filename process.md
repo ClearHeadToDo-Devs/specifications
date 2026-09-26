@@ -14,7 +14,7 @@ The process can be adapted to different implementation methods and delivery back
 
 Like GTD, we can always start our actions in the "Inbox" whether that be a file, a binary format, or a physical tray a core piece of the system is the idea of an inbox where all the new stuff is aggregated.
 
-Normally, it is assumed that people will be writing to the "inbox.actions" file located at the workspace root which you can read more about in the [Workspace specification](./workspace.md).
+Normally, it is assumed that people will be writing to the root charter's `next.actions` file which you can read more about in the [Workspace specification](./workspace.md).
 
 Remember, we arent putting all the details in yet, just get it out of your head and into the inbox.
 

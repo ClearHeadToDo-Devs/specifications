@@ -54,9 +54,8 @@ All implementations MUST follow the XDG Base Directory specification:
 ├── workspace.json         # Workspace manifest: identity facts
 └── charters/
     ├── README.md          # Root charter: id + alias frontmatter
-    ├── next.actions       # Root charter action anchor
-    ├── .next.json         # Root charter sidecar
-    └── inbox.actions      # Default action file
+    ├── next.actions       # Root charter action anchor; the default capture file
+    └── .next.json         # Root charter sidecar
 ```
 
 #### On Project-Specific Config
@@ -108,7 +107,7 @@ The configuration file uses a flat structure with implementation-specific namesp
 {
   "data_dir": "~/.local/share/clearhead",
   "config_dir": "~/.config/clearhead",
-  "default_file": "inbox.actions"
+  "default_file": "next.actions"
 }
 ```
 
@@ -117,7 +116,7 @@ The configuration file uses a flat structure with implementation-specific namesp
 ```json
 {
   "data_dir": "~/.local/share/clearhead",
-  "default_file": "inbox.actions",
+  "default_file": "next.actions",
 
   "cli_format": "table",
   "cli_indent_style": "spaces",
@@ -138,7 +137,7 @@ All implementations MUST recognize these core settings:
 | `data_dir` | string | `~/.local/share/clearhead` | Global directory for user data and action files |
 | `config_dir` | string | `~/.config/clearhead` | Global directory for configuration files |
 | `state_dir` | string | `~/.local/state/clearhead` | Directory for machine-specific runtime state and event logs |
-| `default_file` | string | `inbox.actions` | Default action file name (relative to data_dir) |
+| `default_file` | string | `next.actions` | Default capture file (relative to the workspace's `charters/` directory) |
 | `tag_hierarchies` | object | `{}` | Tag parent-child relationships for implicit inheritance |
 | `default_to_user_scope` | boolean | `false` | If true, only shows user-scoped actions (ignores project scope) |
 | `additional_workspaces` | array | `[]` | Additional workspaces to merge into the domain model. Entries may be relative paths, absolute paths (with `~` / env-var expansion), or URLs (planned). See [Additional workspaces](#additional-workspaces). |
@@ -148,7 +147,7 @@ All implementations MUST recognize these core settings:
 **Requirements:**
 
 - Core settings MUST support shell expansion (`~`, `$HOME`, environment variables)
-- Relative paths in `default_file` MUST be resolved from `data_dir`
+- Relative paths in `default_file` MUST be resolved from the workspace's `charters/` directory
 - Absolute paths MUST be used as-is
 
 ## Workspace Resolution
@@ -234,7 +233,7 @@ Implementations MAY add their own settings to the configuration file using a nam
 ```json
 {
   "data_dir": "~/.local/share/clearhead",
-  "default_file": "inbox.actions",
+  "default_file": "next.actions",
 
   "cli_format": "table",
   "cli_indent_style": "spaces",
@@ -364,11 +363,11 @@ Implementations MUST handle paths as follows:
 ```json
 {
   "data_dir": "~/Documents/clearhead",
-  "default_file": "inbox.actions"
+  "default_file": "next.actions"
 }
 ```
 
-Resolves to: `~/Documents/clearhead/inbox.actions`
+Resolves to: `~/Documents/clearhead/charters/next.actions`
 
 ### Error Handling
 
@@ -405,7 +404,7 @@ On first run, implementations SHOULD:
 1. Create config directory if missing
 2. Create data directory if missing
 3. Optionally create example `config.json` with commented defaults
-4. Create `inbox.actions` if it doesn't exist
+4. Bootstrap the root charter's anchors if missing (see [Initialization](./workspace.md#initialization))
 
 ## Examples
 
@@ -428,7 +427,7 @@ All other settings use defaults.
   "data_dir": "~/Dropbox/clearhead",
   "config_dir": "~/.config/clearhead",
   "state_dir": "~/.local/state/clearhead",
-  "default_file": "inbox.actions",
+  "default_file": "next.actions",
 }
 ```
 
@@ -448,7 +447,7 @@ export CLEARHEAD_NVIM_FORMAT_ON_SAVE="false"
 
 # Run commands - they'll use overridden values
 clearhead_cli read
-nvim inbox.actions
+nvim charters/next.actions
 ```
 
 ## Conformance
