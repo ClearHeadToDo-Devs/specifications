@@ -37,6 +37,16 @@ must not be interpreted as `Active`. Effective engagement also requires every
 ancestor Charter to be `Active`. This inherited eligibility is derived and never
 rewrites the local state.
 
+A Charter known only through its actions, with no document, is likewise `New`,
+and so is every newly created Charter. `New` is the planning state: creating a
+Charter does not mean its work is ready, and it usually needs more planning
+before it is. Activation is therefore always an explicit, requested transition.
+No operation that creates or edits a Charter's document may change its state as
+a side effect, and a document created for an existing Charter declares `New`
+unless that transition was requested. Because a `New` Charter's open actions are
+invisible to engagement, implementations should report a `New` Charter that owns
+open actions.
+
 Other states are permissible, but these are the minimum states Charter
 implementations must support. State transitions do not implicitly cascade to
 descendant Charters or Actions. The normative admission, readiness, transition,

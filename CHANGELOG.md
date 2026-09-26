@@ -1,5 +1,11 @@
 # Changelog - Actions Specifications
 
+## 2026-09-25
+
+### Changed
+
+**Charters without a declared state are always `New`** (`charters.md`, `workspace.md`). A Charter with no document, the root without `charters/README.md` included, is `New` like every newly created Charter; the root no longer loads as `Active` when its README is missing. `New` is the planning state: activation is always an explicit, requested transition, and no operation that creates or edits a Charter's document may change its state as a side effect. `clearhead init` writes the root as `New`. Because engagement requires every ancestor to be `Active`, a workspace is not engaged until its root is activated, so implementations should report a `New` Charter that owns open actions.
+
 ## 2026-07-18
 
 ### Removed
