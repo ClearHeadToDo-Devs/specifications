@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/ClearHeadToDo-Devs/specifications/master/schemas/charter_metadata.schema.json",
+  "$schema": "https://raw.githubusercontent.com/ClearHeadToDo-Devs/specifications/v0.1.0/schemas/charter_metadata.schema.json",
   "charter": {
     "id": "01a0dae1-07d8-7b90-82df-fcf896f2022d"
   },
