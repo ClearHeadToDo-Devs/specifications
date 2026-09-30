@@ -1,5 +1,13 @@
 # Changelog - Actions Specifications
 
+## v0.1.0 — 2026-09-30
+
+The first release: the specifications as of this entry, including every dated entry below. Releases are described in the README.
+
+### Changed
+
+**Schema identity names a release, not a branch** (`schemas/*.json`, `README.md`). Every schema's `$id` is now `https://raw.githubusercontent.com/ClearHeadToDo-Devs/specifications/v0.1.0/schemas/<name>.schema.json`. Six ids named the `master` branch, so a schema's identity moved with every commit; `actions` and `charters` used `github.com/.../schemas/...` URLs that did not resolve. Documents that declared a `master` URL as their `$schema` should declare the release they follow.
+
 ## 2026-09-26
 
 ### Changed

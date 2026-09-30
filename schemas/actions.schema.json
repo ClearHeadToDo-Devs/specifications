@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://github.com/ClearHeadToDo-Devs/specifications/schemas/actions.schema.json",
+  "$id": "https://raw.githubusercontent.com/ClearHeadToDo-Devs/specifications/v0.1.0/schemas/actions.schema.json",
   "title": "Actions File Serialization Format",
   "description": "JSON Schema for the canonical serialization of .actions files. Field names mirror the v4 actions ontology (https://clearhead.us/vocab/actions/v4) minus the 'has' prefix, so a single grep connects a serialized field to its ontology property and its .actions DSL token.",
   "type": "object",

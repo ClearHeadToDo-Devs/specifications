@@ -14,6 +14,18 @@ To avoid duplication and drift:
 - `specifications/` is the source of truth for platform-level interpretation and conformance guidance (how downstream tools should apply those ontology artifacts).
 - Implementation repositories (for example CLI or core libraries) are expected to document only implementation mechanics, and should reference these specifications for normative behavior.
 
+## Releases
+
+The specifications are released together under one [semantic version](https://semver.org), tagged `vMAJOR.MINOR.PATCH`; `CHANGELOG.md` records what each release changed. While the major version is 0, any release may change the contract.
+
+An implementation conforms to a release, never to a branch. Every schema's `$id` names the release it belongs to:
+
+```text
+https://raw.githubusercontent.com/ClearHeadToDo-Devs/specifications/<tag>/schemas/<name>.schema.json
+```
+
+and a document declares the schema it follows with that URL as its `$schema`. A release is one commit that moves every `$id` to the new tag and gives the changelog's pending entries that version; the tag points at that commit.
+
 # ClearHead Platform Overview
 
 Many of these other specifications cover rather precise technical details, but i want to take a bit of time to cover the overarch process that is guiding much of these specifications as a way to bring meaning to the disperate parts.

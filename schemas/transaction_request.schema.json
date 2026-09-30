@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/ClearHeadToDo-Devs/specifications/master/schemas/transaction_request.schema.json",
+  "$id": "https://raw.githubusercontent.com/ClearHeadToDo-Devs/specifications/v0.1.0/schemas/transaction_request.schema.json",
   "title": "ClearHead Transaction Request",
   "description": "A batch of semantic action operations that must validate together and commit together through one PendingBatch. Operations are applied in array order against trusted workspace state loaded under the workspace lock; any invalid operation rejects the whole batch before a write. This is NOT a JSON Patch or a desired-state document: each operation names an intent (update / complete / cancel) whose side effects (in-place field edits vs. cascade-close + date-stamp + file move) core owns. Single-item work should use the ordinary verbs; a transaction exists only for edits that must be atomic together. Dry-run is an invocation flag (`clearhead transact --dry-run`), not part of this document.",
   "type": "object",
