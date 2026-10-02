@@ -1,0 +1,16 @@
+# Only a completed status carries a time.
+# expect: Status
+@prefix : <https://example.org/fixture#> .
+@prefix cco: <https://www.commoncoreontologies.org/> .
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix actions: <https://clearhead.us/vocab/actions/v4#> .
+
+:plan a cco:ont00000974 ; rdfs:label "plan" ; obo:BFO_0000178 :objective , :a .
+:objective a cco:ont00000476 ; rdfs:label "objective" .
+:a a obo:IAO_0000007 ; rdfs:label "an action" .
+
+:act a cco:ont00000228 ; cco:ont00001920 :a .
+:s a cco:ont00000203 ; cco:ont00001868 :act .
+:s.v a cco:ont00000253 ; obo:BFO_0000101 :s ; cco:ont00001765 "in progress" ; cco:ont00001767 "2026-10-01T09:00:00"^^xsd:dateTime .

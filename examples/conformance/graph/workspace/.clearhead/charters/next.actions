@@ -1,0 +1,5 @@
+[-] Call the plumber =plumber $The kitchen tap drips.$ !2 +phone @2026-10-03T09:00 D15 :2026-10-04 ^2026-10-01T10:00 #01a0fb10-0000-7000-8000-000000000001
+[x] Pay the water bill %2026-09-30T18:00 #01a0fb10-0000-7000-8000-000000000002
+[_] Renew the magazine %2026-09-28T08:30 #01a0fb10-0000-7000-8000-000000000003
+[=] Hear back from the landlord about the fence $Asked on Monday.$ #01a0fb10-0000-7000-8000-000000000004
+[ ] Fix the fence +home #01a0fb10-0000-7000-8000-000000000005 <01a0fb10-0000-7000-8000-000000000004

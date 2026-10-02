@@ -1,0 +1,14 @@
+# A helper node must have an IRI, never a blank node.
+# expect: Graph
+@prefix : <https://example.org/fixture#> .
+@prefix cco: <https://www.commoncoreontologies.org/> .
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix actions: <https://clearhead.us/vocab/actions/v4#> .
+
+:plan a cco:ont00000974 ; rdfs:label "plan" ; obo:BFO_0000178 :objective , :a .
+:objective a cco:ont00000476 ; rdfs:label "objective" .
+:a a obo:IAO_0000007 ; rdfs:label "an action" .
+
+[] cco:ont00001808 :a .

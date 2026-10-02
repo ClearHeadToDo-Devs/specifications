@@ -1,0 +1,15 @@
+# A priority is 1 to 9.
+# expect: Priority
+@prefix : <https://example.org/fixture#> .
+@prefix cco: <https://www.commoncoreontologies.org/> .
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix actions: <https://clearhead.us/vocab/actions/v4#> .
+
+:plan a cco:ont00000974 ; rdfs:label "plan" ; obo:BFO_0000178 :objective , :a .
+:objective a cco:ont00000476 ; rdfs:label "objective" .
+:a a obo:IAO_0000007 ; rdfs:label "an action" .
+
+:p a cco:ont00000369 ; cco:ont00001811 :a .
+:p.v a cco:ont00000253 ; obo:BFO_0000101 :p ; cco:ont00001773 12 .

@@ -1,0 +1,184 @@
+# SHACL shapes for the RDF a workspace projects to (../ontology.md).
+#
+# They check the shape of the published graph: what nodes exist, how many,
+# with which values. Meaning is the ontology's to check (platform Decision 42).
+# Validate without inference: every type a shape targets is asserted by the
+# projection itself.
+
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix cco: <https://www.commoncoreontologies.org/> .
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+@prefix shape: <https://clearhead.us/specifications/graph-shapes#> .
+
+# --- Prefixes for the SPARQL constraints below ------------------------------
+
+shape: sh:declare
+    [ sh:prefix "cco" ; sh:namespace "https://www.commoncoreontologies.org/"^^xsd:anyURI ] ,
+    [ sh:prefix "obo" ; sh:namespace "http://purl.obolibrary.org/obo/"^^xsd:anyURI ] ,
+    [ sh:prefix "rdf" ; sh:namespace "http://www.w3.org/1999/02/22-rdf-syntax-ns#"^^xsd:anyURI ] .
+
+# --- The whole graph ---------------------------------------------------------
+
+shape:Graph a sh:NodeShape ;
+    sh:targetNode shape:graph ;
+    sh:sparql [
+        sh:message "Every node has an IRI (Helper node IRIs): no blank nodes." ;
+        sh:select """
+            SELECT $this ?value WHERE {
+                { ?value ?p ?o } UNION { ?s ?p ?value }
+                FILTER(isBlank(?value))
+            }""" ] ,
+    [
+        sh:message "No ClearHead vocabulary: the graph uses CCO, IAO, BFO, Dublin Core and SKOS terms only (v4 and ws: terms are retired)." ;
+        sh:select """
+            SELECT $this ?value WHERE {
+                { ?s ?value ?o } UNION { ?s rdf:type ?value }
+                FILTER(STRSTARTS(STR(?value), "https://clearhead.us/vocab/"))
+            }""" ] .
+
+# --- Entities from files ----------------------------------------------------
+
+shape:Action a sh:NodeShape ;
+    sh:targetClass obo:IAO_0000007 ;  # action specification
+    sh:property
+        [ sh:path rdfs:label ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ,
+        [ sh:path dcterms:description ; sh:maxCount 1 ; sh:datatype xsd:string ] ,
+        [ sh:path dcterms:created ; sh:maxCount 1 ;
+          sh:or ( [ sh:datatype xsd:dateTime ] [ sh:datatype xsd:date ] ) ] ,
+        [ sh:path [ sh:inversePath cco:ont00001811 ] ; sh:maxCount 1 ; sh:name "priority" ] ,
+        [ sh:path [ sh:inversePath cco:ont00001916 ] ; sh:maxCount 1 ; sh:name "alias" ] ,
+        [ sh:path [ sh:inversePath cco:ont00001920 ] ; sh:maxCount 1 ; sh:name "act" ] ,
+        [ sh:path [ sh:inversePath cco:ont00001868 ] ; sh:maxCount 1 ; sh:name "cancelled" ] ;
+    sh:sparql [
+        sh:message "Every action is part of a plan, directly or through other actions." ;
+        sh:select """
+            SELECT $this WHERE {
+                FILTER NOT EXISTS { ?plan a cco:ont00000974 ; obo:BFO_0000178+ $this }
+            }""" ] ,
+    [
+        sh:message "An action is either cancelled or has an act, not both." ;
+        sh:select """
+            SELECT $this WHERE {
+                ?cancelled cco:ont00001868 $this .
+                ?act cco:ont00001920 $this .
+            }""" ] .
+
+shape:Plan a sh:NodeShape ;
+    sh:targetClass cco:ont00000974 ;  # Plan: a charter
+    sh:property
+        [ sh:path rdfs:label ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ,
+        [ sh:path dcterms:description ; sh:maxCount 1 ; sh:datatype xsd:string ] ,
+        [ sh:path [ sh:inversePath cco:ont00001916 ] ; sh:maxCount 1 ; sh:name "alias" ] ,
+        [ sh:path [ sh:inversePath cco:ont00001868 ] ; sh:maxCount 1 ; sh:name "state" ] ,
+        [ sh:path obo:BFO_0000178 ;
+          sh:qualifiedValueShape [ sh:class cco:ont00000476 ] ; sh:qualifiedMinCount 1 ;
+          sh:severity sh:Warning ;
+          sh:message "A charter with no objective is not yet a plan (reported, never refused)." ] .
+
+shape:Objective a sh:NodeShape ;
+    sh:targetClass cco:ont00000476 ;
+    sh:property
+        [ sh:path rdfs:label ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ,
+        [ sh:path dcterms:description ; sh:maxCount 1 ; sh:datatype xsd:string ] ,
+        [ sh:path [ sh:inversePath cco:ont00001916 ] ; sh:maxCount 1 ; sh:name "alias" ] ,
+        [ sh:path [ sh:inversePath cco:ont00001868 ] ; sh:maxCount 1 ; sh:name "state" ] .
+
+# --- Conditions ------------------------------------------------------------
+
+shape:Condition a sh:NodeShape ;
+    sh:targetClass cco:ont00000127 ;  # Performance Specification
+    sh:message "A condition has exactly two parts: one action and one description (convention 7)." ;
+    sh:property
+        [ sh:path obo:BFO_0000178 ; sh:minCount 2 ; sh:maxCount 2 ] ,
+        [ sh:path obo:BFO_0000178 ; sh:qualifiedValueShape [ sh:class obo:IAO_0000007 ] ;
+          sh:qualifiedMinCount 1 ; sh:qualifiedMaxCount 1 ] ,
+        [ sh:path obo:BFO_0000178 ; sh:qualifiedValueShape [ sh:class cco:ont00000853 ] ;
+          sh:qualifiedMinCount 1 ; sh:qualifiedMaxCount 1 ] .
+
+shape:Description a sh:NodeShape ;
+    sh:targetClass cco:ont00000853 ;  # Descriptive ICE
+    sh:property [ sh:path cco:ont00001982 ; sh:maxCount 1 ; sh:name "describes" ] ;
+    sh:sparql [
+        sh:message "A condition's description either describes something or carries a value." ;
+        sh:select """
+            SELECT $this WHERE {
+                ?condition a cco:ont00000127 ; obo:BFO_0000178 $this .
+                FILTER NOT EXISTS { $this cco:ont00001982 ?described }
+                FILTER NOT EXISTS { ?bearer obo:BFO_0000101 $this }
+            }""" ] .
+
+# --- Measurements and records ----------------------------------------------
+
+shape:Priority a sh:NodeShape ;
+    sh:targetClass cco:ont00000369 ;
+    sh:property
+        [ sh:path cco:ont00001811 ; sh:minCount 1 ; sh:maxCount 1 ; sh:class obo:IAO_0000007 ] ,
+        [ sh:path ( [ sh:inversePath obo:BFO_0000101 ] cco:ont00001773 ) ;
+          sh:minCount 1 ; sh:maxCount 1 ; sh:minInclusive 1 ; sh:maxInclusive 9 ;
+          sh:message "A priority is one integer from 1 to 9." ] .
+
+shape:Duration a sh:NodeShape ;
+    sh:targetClass cco:ont00001163 ;  # Measurement ICE
+    sh:property
+        [ sh:path cco:ont00001808 ; sh:minCount 1 ; sh:maxCount 1 ; sh:class obo:IAO_0000007 ] ,
+        [ sh:path ( [ sh:inversePath obo:BFO_0000101 ] cco:ont00001773 ) ;
+          sh:minCount 1 ; sh:maxCount 1 ; sh:minInclusive 0 ] ,
+        [ sh:path ( [ sh:inversePath obo:BFO_0000101 ] cco:ont00001863 ) ;
+          sh:minCount 1 ; sh:maxCount 1 ; sh:hasValue cco:ont00001667 ;
+          sh:message "A duration is counted in minutes." ] .
+
+shape:Act a sh:NodeShape ;
+    sh:targetClass cco:ont00000228 ;  # Planned Act
+    sh:property
+        [ sh:path cco:ont00001920 ; sh:minCount 1 ; sh:maxCount 1 ; sh:class obo:IAO_0000007 ] ,
+        [ sh:path [ sh:inversePath cco:ont00001868 ] ; sh:minCount 1 ; sh:maxCount 1 ; sh:name "status" ] .
+
+shape:Status a sh:NodeShape ;
+    sh:targetClass cco:ont00000203 ;  # Event Status Nominal ICE
+    sh:property
+        [ sh:path cco:ont00001868 ; sh:minCount 1 ; sh:maxCount 1 ; sh:class cco:ont00000228 ] ,
+        [ sh:path ( [ sh:inversePath obo:BFO_0000101 ] cco:ont00001765 ) ;
+          sh:minCount 1 ; sh:maxCount 1 ; sh:in ( "in progress" "completed" ) ] ;
+    sh:sparql [
+        sh:message "Only a completed status carries a time." ;
+        sh:select """
+            SELECT $this WHERE {
+                ?bearer obo:BFO_0000101 $this ; cco:ont00001765 ?state ; cco:ont00001767 ?time .
+                FILTER(?state != "completed")
+            }""" ] .
+
+shape:State a sh:NodeShape ;
+    sh:targetClass cco:ont00000293 ;  # Nominal Measurement ICE: cancelled, or a charter's or objective's state
+    sh:property
+        [ sh:path cco:ont00001868 ; sh:minCount 1 ; sh:maxCount 1 ] ,
+        [ sh:path ( [ sh:inversePath obo:BFO_0000101 ] cco:ont00001765 ) ; sh:minCount 1 ; sh:maxCount 1 ] ;
+    sh:sparql [
+        sh:message "An action's only commitment state is cancelled; a charter's is new, active, blocked, closed or cancelled." ;
+        sh:select """
+            SELECT $this ?value WHERE {
+                $this cco:ont00001868 ?measured .
+                ?bearer obo:BFO_0000101 $this ; cco:ont00001765 ?value .
+                FILTER(
+                    (EXISTS { ?measured a obo:IAO_0000007 } && ?value != "cancelled") ||
+                    (EXISTS { ?measured a cco:ont00000974 } &&
+                        ?value NOT IN ("new", "active", "blocked", "closed", "cancelled"))
+                )
+            }""" ] .
+
+shape:Name a sh:NodeShape ;
+    sh:targetClass cco:ont00000003 ;  # Designative Name: an alias
+    sh:property
+        [ sh:path cco:ont00001916 ; sh:minCount 1 ; sh:maxCount 1 ] ,
+        [ sh:path ( [ sh:inversePath obo:BFO_0000101 ] cco:ont00001765 ) ; sh:minCount 1 ; sh:maxCount 1 ] .
+
+shape:Bearer a sh:NodeShape ;
+    sh:targetClass cco:ont00000253 ;  # Information Bearing Entity
+    sh:property
+        [ sh:path obo:BFO_0000101 ; sh:minCount 1 ; sh:maxCount 1 ] ,
+        [ sh:path cco:ont00001765 ; sh:maxCount 1 ; sh:datatype xsd:string ] ,
+        [ sh:path cco:ont00001773 ; sh:maxCount 1 ; sh:datatype xsd:integer ] ,
+        [ sh:path cco:ont00001767 ; sh:maxCount 1 ; sh:datatype xsd:dateTime ] ,
+        [ sh:path cco:ont00001771 ; sh:maxCount 1 ; sh:datatype xsd:date ] .

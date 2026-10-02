@@ -13,6 +13,7 @@ sources into their own tests and prove conformance at the boundary they own.
 | `diagnostics/` | lint emits the declared code at the declared source node | Core or another linter |
 | `archive/` | terminal structure is internally consistent and archive-ready | Core |
 | `syntax/` | exact recovery/escaping bytes produce the reviewed CST | grammar |
+| `graph/` | a workspace projects to exactly `expected.ttl`, which conforms to the [graph shapes](../../schemas/graph.shapes.ttl); each `invalid/` graph fails on the one shape its `# expect:` line names | Core or another projection |
 
 The grammar retains expected S-expressions because concrete node shape is its
 implementation detail. It reads the `.actions` sources here through
