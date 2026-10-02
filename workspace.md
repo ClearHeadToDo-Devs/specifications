@@ -59,6 +59,8 @@ this shows both the project and user scope for examples of mixed layouts that wo
 
 Objectives are all located in an `objectives` directory within the workspace where all objectives of the file format: `<objective-alias>.md` - a markdown file containing the description of the objective, its purpose, and any other relevant information as per [the objective spec][objectives]
 
+`objectives/README.md` is the root objective, mirroring the root charter's `charters/README.md`: what the workspace as a whole is for. The root charter names it in its `objectives` (see [The Root Objective](./objectives.md#the-root-objective)).
+
 in a project-local scope, this should reside within `<project-root>/.clearhead/objectives/` while in a user-wide scope, this should reside within `objectives/` folder within the user workspace
 
 #### Sub Objectives
@@ -251,6 +253,7 @@ The scope is declared in config, not per-command. A user who configures addition
 
 1. Generates a UUIDv7 and writes `workspace_id`, `workspace_name`, `created_at` to `<data_root>/workspace.json` (skipped if `workspace_id` already present). If an older project workspace still carries these fields in `.clearhead/config.json`, `init` and `doctor` migrate them into the manifest and drop them from `config.json`.
 2. Creates the `charters/` directory structure and bootstraps the root charter (each file skipped if already present): `charters/README.md` with a minted `id` and an `alias` seeded from `workspace_name`, `charters/next.actions`, and the `charters/.next.json` sidecar mirroring that `id`. These files are structural: they let flat named charters resolve as children of the root and keep their plan-vdir slugs routable.
+3. Bootstraps the root objective (skipped if already present): `objectives/README.md` with a minted `id` and an `alias` seeded from `workspace_name`. When step 2 creates `charters/README.md`, its `objectives` names that alias; an existing root charter is never edited, and `doctor` reports it if it names no objective.
 
 `init` is idempotent — rerunning it on an already-initialized workspace is safe and never overwrites existing data or identity. It may restore a missing root-charter scaffold. Pass `--force` to regenerate identity fields. This assigns a new graph URI, so any consumer that referenced the old one no longer resolves to this workspace; the workspace's plaintext data is untouched.
 
