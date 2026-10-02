@@ -26,7 +26,7 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "hasUUID — '#' in the DSL. UUIDv7 preferred.",
+          "description": "'#' in the DSL. UUIDv7 preferred.",
           "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
         },
         "state": {
@@ -42,7 +42,7 @@
         },
         "name": {
           "type": "string",
-          "description": "rdfs:label — the decoded semantic title, after DSL escapes are removed.",
+          "description": "The decoded semantic title, after DSL escapes are removed.",
           "minLength": 1
         },
         "description": {
@@ -51,13 +51,13 @@
         },
         "priority": {
           "type": "integer",
-          "description": "hasPriority — '!' in the DSL. RFC 5545-aligned, 1 (highest) to 9 (lowest).",
+          "description": "'!' in the DSL. RFC 5545-aligned, 1 (highest) to 9 (lowest).",
           "minimum": 1,
           "maximum": 9
         },
         "contexts": {
           "type": "array",
-          "description": "hasContextIdentifier — '+' in the DSL.",
+          "description": "'+' in the DSL.",
           "items": {
             "type": "string",
             "minLength": 1
@@ -66,24 +66,24 @@
         },
         "scheduledDateTime": {
           "type": "string",
-          "description": "hasScheduledDateTime — '@' in the DSL. ISO 8601 local lower bound of the Action's feasible execution range; the Action is not intended to be worked before this value. Effective bounds inherited from ancestors are derived and are not serialized here."
+          "description": "'@' in the DSL. ISO 8601 local lower bound of the Action's feasible execution range; the Action is not intended to be worked before this value. Effective bounds inherited from ancestors are derived and are not serialized here."
         },
         "durationMinutes": {
           "type": "integer",
-          "description": "hasDurationMinutes — 'D' in the DSL.",
+          "description": "'D' in the DSL.",
           "minimum": 1
         },
         "dueDateTime": {
           "type": "string",
-          "description": "hasDueDateTime — ':' in the DSL. ISO 8601 local upper bound of the Action's feasible execution range; the Action is intended to be completed no later than this value. Effective bounds inherited from ancestors are derived and are not serialized here."
+          "description": "':' in the DSL. ISO 8601 local upper bound of the Action's feasible execution range; the Action is intended to be completed no later than this value. Effective bounds inherited from ancestors are derived and are not serialized here."
         },
         "completedDateTime": {
           "type": "string",
-          "description": "hasCompletedDateTime — '%' in the DSL. ISO 8601 completion time."
+          "description": "'%' in the DSL. ISO 8601 completion time."
         },
         "createdDateTime": {
           "type": "string",
-          "description": "hasCreatedDateTime — '^' in the DSL. ISO 8601 creation time."
+          "description": "'^' in the DSL. ISO 8601 creation time."
         },
         "charter": {
           "type": "string",
@@ -92,12 +92,12 @@
         },
         "alias": {
           "type": "string",
-          "description": "hasAlias — a short human handle.",
+          "description": "A short human handle.",
           "minLength": 1
         },
         "sequentialChildren": {
           "type": "boolean",
-          "description": "hasSequentialChildren — '~' in the DSL. When true, each child implicitly depends on the previous sibling completing."
+          "description": "'~' in the DSL. When true, each child implicitly depends on the previous sibling completing."
         },
         "predecessors": {
           "type": "array",
@@ -109,11 +109,11 @@
         },
         "externalScheduleId": {
           "type": "string",
-          "description": "hasExternalScheduleId — external schedule-series identifier (e.g. an ICS UID)."
+          "description": "External schedule-series identifier (e.g. an ICS UID)."
         },
         "externalOccurrenceKey": {
           "type": "string",
-          "description": "hasExternalOccurrenceKey — external occurrence-level identifier within a series."
+          "description": "External occurrence-level identifier within a series."
         },
         "parentId": {
           "type": "string",
