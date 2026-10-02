@@ -1,0 +1,170 @@
+# Expected application graph for the graph conformance fixture (ontology.md at the repository root).
+# The workspace in ./workspace projects to exactly these triples, in the
+# workspace's named graph urn:clearhead:workspace:01a0fb10-0000-7000-8000-000000000000,
+# with the viewer's zone UTC. Paths are relative to the data root (.clearhead/).
+
+@prefix app: <https://clearhead.us/vocab/app/v1#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+# Charters
+<urn:uuid:01a0fb10-0000-7000-8000-0000000000c0> a app:Charter ;
+  rdfs:label "Run the household" ;
+  dcterms:description "Everything that keeps the house going." ;
+  app:alias "home" ;
+  app:state app:Active ;
+  app:serves <urn:uuid:01a0fb10-0000-7000-8000-0000000000b0> ;
+  app:file "charters/README.md" .
+
+<urn:uuid:01a0fb10-0000-7000-8000-0000000000c1> a app:Charter ;
+  rdfs:label "Groceries" ;
+  app:alias "groceries" ;
+  app:state app:New ;
+  app:partOf <urn:uuid:01a0fb10-0000-7000-8000-0000000000c0> ;
+  app:serves <urn:uuid:01a0fb10-0000-7000-8000-0000000000b1> ;
+  app:file "charters/groceries.md" .
+
+# Objectives
+<urn:uuid:01a0fb10-0000-7000-8000-0000000000b0> a app:Objective ;
+  rdfs:label "Eat well" ;
+  dcterms:description "Meals at home most days, with food we like." ;
+  app:alias "eat-well" ;
+  app:file "objectives/eat-well.md" .
+
+<urn:uuid:01a0fb10-0000-7000-8000-0000000000b1> a app:Objective ;
+  rdfs:label "Keep food in the house" ;
+  app:alias "keep-food" ;
+  app:partOf <urn:uuid:01a0fb10-0000-7000-8000-0000000000b0> ;
+  app:metric <urn:uuid:295c019b-5793-5d72-82dd-69a32e9e713a> ;
+  app:file "objectives/keep-food.md" .
+
+<urn:uuid:295c019b-5793-5d72-82dd-69a32e9e713a> a app:Metric ;
+  rdfs:label "fridge stocked" ;
+  app:target "milk, eggs and vegetables on hand" .
+
+# Actions in charters/next.actions (the root charter's)
+<urn:uuid:01a0fb10-0000-7000-8000-000000000001> a app:Action ;
+  rdfs:label "Call the plumber" ;
+  dcterms:description "The kitchen tap drips." ;
+  dcterms:created "2026-10-01T10:00:00"^^xsd:dateTime ;
+  app:alias "plumber" ;
+  app:state app:InProgress ;
+  app:priority 2 ;
+  app:context <urn:uuid:aa0d0a8e-8a8b-5ef1-b25b-f894935d2d82> ;
+  app:start "2026-10-03T09:00:00"^^xsd:dateTime ;
+  app:due "2026-10-04"^^xsd:date ;
+  app:notBefore "2026-10-03T09:00:00Z"^^xsd:dateTime ;
+  app:lateFrom "2026-10-05T00:00:00Z"^^xsd:dateTime ;
+  app:durationMinutes 15 ;
+  app:partOf <urn:uuid:01a0fb10-0000-7000-8000-0000000000c0> ;
+  app:file "charters/next.actions" ; app:line 1 .
+
+<urn:uuid:01a0fb10-0000-7000-8000-000000000002> a app:Action ;
+  rdfs:label "Pay the water bill" ;
+  app:state app:Completed ;
+  app:closed "2026-09-30T18:00:00"^^xsd:dateTime ;
+  app:partOf <urn:uuid:01a0fb10-0000-7000-8000-0000000000c0> ;
+  app:file "charters/next.actions" ; app:line 2 .
+
+<urn:uuid:01a0fb10-0000-7000-8000-000000000003> a app:Action ;
+  rdfs:label "Renew the magazine" ;
+  app:state app:Cancelled ;
+  app:closed "2026-09-28T08:30:00"^^xsd:dateTime ;
+  app:partOf <urn:uuid:01a0fb10-0000-7000-8000-0000000000c0> ;
+  app:file "charters/next.actions" ; app:line 3 .
+
+<urn:uuid:01a0fb10-0000-7000-8000-000000000004> a app:Action ;
+  rdfs:label "Hear back from the landlord about the fence" ;
+  dcterms:description "Asked on Monday." ;
+  app:state app:Blocked ;
+  app:partOf <urn:uuid:01a0fb10-0000-7000-8000-0000000000c0> ;
+  app:file "charters/next.actions" ; app:line 4 .
+
+<urn:uuid:01a0fb10-0000-7000-8000-000000000005> a app:Action ;
+  rdfs:label "Fix the fence" ;
+  app:state app:NotStarted ;
+  app:context <urn:uuid:0e55438d-0967-5a02-bd80-14ed8b659721> ;
+  app:after <urn:uuid:01a0fb10-0000-7000-8000-000000000004> ;
+  app:waitsOn <urn:uuid:01a0fb10-0000-7000-8000-000000000004> ;
+  app:partOf <urn:uuid:01a0fb10-0000-7000-8000-0000000000c0> ;
+  app:file "charters/next.actions" ; app:line 5 .
+
+<urn:uuid:01a0fb10-0000-7000-8000-000000000006> a app:Action ;
+  rdfs:label "Paint the shed" ;
+  app:state app:NotStarted ;
+  app:after <urn:uuid:01a0fb10-0000-7000-8000-000000000004> ;
+  app:waitsOn <urn:uuid:01a0fb10-0000-7000-8000-000000000004> ;
+  app:partOf <urn:uuid:01a0fb10-0000-7000-8000-0000000000c0> ;
+  app:file "charters/next.actions" ; app:line 6 .
+
+# Inherits its parent's wait (Effective windows and waits)
+<urn:uuid:01a0fb10-0000-7000-8000-000000000007> a app:Action ;
+  rdfs:label "Buy paint" ;
+  app:state app:NotStarted ;
+  app:waitsOn <urn:uuid:01a0fb10-0000-7000-8000-000000000004> ;
+  app:partOf <urn:uuid:01a0fb10-0000-7000-8000-000000000006> ;
+  app:file "charters/next.actions" ; app:line 7 .
+
+<urn:uuid:01a0fb10-0000-7000-8000-000000000008> a app:Action ;
+  rdfs:label "Plan the party" ;
+  app:state app:NotStarted ;
+  app:due "2026-10-04"^^xsd:date ;
+  app:lateFrom "2026-10-05T00:00:00Z"^^xsd:dateTime ;
+  app:partOf <urn:uuid:01a0fb10-0000-7000-8000-0000000000c0> ;
+  app:file "charters/next.actions" ; app:line 8 .
+
+# Narrows its parent's window: the earlier due wins
+<urn:uuid:01a0fb10-0000-7000-8000-000000000009> a app:Action ;
+  rdfs:label "Send invites" ;
+  app:state app:NotStarted ;
+  app:due "2026-10-03"^^xsd:date ;
+  app:lateFrom "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+  app:partOf <urn:uuid:01a0fb10-0000-7000-8000-000000000008> ;
+  app:file "charters/next.actions" ; app:line 9 .
+
+# Inherits its parent's due: no app:due of its own, but a lateFrom
+<urn:uuid:01a0fb10-0000-7000-8000-00000000000a> a app:Action ;
+  rdfs:label "Bake the cake" ;
+  app:state app:NotStarted ;
+  app:lateFrom "2026-10-05T00:00:00Z"^^xsd:dateTime ;
+  app:partOf <urn:uuid:01a0fb10-0000-7000-8000-000000000008> ;
+  app:file "charters/next.actions" ; app:line 10 .
+
+# Actions in charters/groceries.actions
+<urn:uuid:01a0fb10-0000-7000-8000-000000000010> a app:Action ;
+  rdfs:label "Weekly shop" ;
+  app:state app:NotStarted ;
+  app:sequential true ;
+  app:context <urn:uuid:64c88ec0-94dc-5583-a02e-8f4ae1f80d9b> ;
+  app:partOf <urn:uuid:01a0fb10-0000-7000-8000-0000000000c1> ;
+  app:file "charters/groceries.actions" ; app:line 1 .
+
+<urn:uuid:01a0fb10-0000-7000-8000-000000000011> a app:Action ;
+  rdfs:label "Write the list" ;
+  app:state app:NotStarted ;
+  app:partOf <urn:uuid:01a0fb10-0000-7000-8000-000000000010> ;
+  app:file "charters/groceries.actions" ; app:line 2 .
+
+<urn:uuid:01a0fb10-0000-7000-8000-000000000012> a app:Action ;
+  rdfs:label "Buy the food" ;
+  app:state app:NotStarted ;
+  app:waitsOn <urn:uuid:01a0fb10-0000-7000-8000-000000000011> ;
+  app:partOf <urn:uuid:01a0fb10-0000-7000-8000-000000000010> ;
+  app:file "charters/groceries.actions" ; app:line 3 .
+
+<urn:uuid:01a0fb10-0000-7000-8000-000000000013> a app:Action ;
+  rdfs:label "Cook the soup" ;
+  app:state app:NotStarted ;
+  app:after <urn:uuid:01a0fb10-0000-7000-8000-000000000012> ;
+  app:waitsOn <urn:uuid:01a0fb10-0000-7000-8000-000000000012> ;
+  app:partOf <urn:uuid:01a0fb10-0000-7000-8000-0000000000c1> ;
+  app:file "charters/groceries.actions" ; app:line 4 .
+
+# Contexts: one node per slug; config's hierarchy as skos:broader
+<urn:uuid:aa0d0a8e-8a8b-5ef1-b25b-f894935d2d82> a app:Context ; rdfs:label "phone" .
+<urn:uuid:0e55438d-0967-5a02-bd80-14ed8b659721> a app:Context ; rdfs:label "home" .
+<urn:uuid:64c88ec0-94dc-5583-a02e-8f4ae1f80d9b> a app:Context ; rdfs:label "errands" ;
+  skos:broader <urn:uuid:60ca6b33-f718-5a81-b8cc-b1c457d0e3e3> .
+<urn:uuid:60ca6b33-f718-5a81-b8cc-b1c457d0e3e3> a app:Context ; rdfs:label "out" .
