@@ -1,8 +1,8 @@
 # Ontology & Linked Data
 
-> **Draft** (platform Decision 43, charter emit-the-ontology). This replaces the v4 term reference. Until implementations move, they still emit v4; the sections marked *unchanged* already hold.
+> **Draft** (platform Decisions 45 to 47, charter emit-the-ontology). Until implementations move, they still emit v4; the sections marked *unchanged* already hold.
 
-What ClearHead's data means is defined by the [ClearHead ontology](https://github.com/ClearHeadToDo-Devs/ontology): CCO v2.2 and IAO terms, nothing of ClearHead's own, described in its [domain reference](https://github.com/ClearHeadToDo-Devs/ontology/blob/main/docs/domain.md). This specification defines how a workspace is **represented** in those terms: which RDF a conforming implementation publishes for each field of each file. The ontology owns meaning; this document owns the mapping; the SHACL shapes in [`schemas/`](./schemas/) test it (Decision 42).
+A conforming implementation publishes a workspace as the **application graph**: RDF in ClearHead's application vocabulary, `app:`, defined here. It is what queries read and what an export writes. What each `app:` term *means* is defined by its mapping to CCO v2.2 and IAO terms, the [ClearHead ontology](https://github.com/ClearHeadToDo-Devs/ontology) (see its [domain reference](https://github.com/ClearHeadToDo-Devs/ontology/blob/main/docs/domain.md)); an `app:` term asserts nothing its mapping does not, and every term has one. The [CCO graph](#meaning-the-cco-graph) below is that meaning, written out for the conformance fixture. The SHACL shapes in [`schemas/`](./schemas/) test both graphs (Decision 42).
 
 ## Canonical RDF Dataset
 
@@ -24,7 +24,130 @@ The single projection is authoritative for every ClearHead RDF statement. JSON-L
 
 *Unchanged.* Every workspace occupies exactly one named graph, `urn:clearhead:workspace:<uuid>`, where `<uuid>` is the stable `workspace_id` from `<data_root>/workspace.json` (see [Workspace — Named Graph Isolation][workspace-graphs]). TriG and N-Quads preserve it; Turtle and compact JSON-LD carry one graph and lose it.
 
-## Conventions
+## Application Graph
+
+Namespace `https://clearhead.us/vocab/app/v1#`, prefix `app:`. Also used: `rdfs:` `http://www.w3.org/2000/01/rdf-schema#`, `dcterms:` `http://purl.org/dc/terms/`, `skos:` `http://www.w3.org/2004/02/skos/core#`, `xsd:` `http://www.w3.org/2001/XMLSchema#`.
+
+### Rules
+
+1. **Standard terms where they fit.** A name is `rdfs:label`, a description `dcterms:description`, a creation time `dcterms:created`, a context hierarchy `skos:broader`. `app:` names only what ClearHead adds.
+2. **Written and derived terms.** A written term carries a value as the file states it. A derived term is computed from the files and the viewer's context (the zone in [Time](#time)), so queries need not recompute it; it is never written back, and it is mapped to CCO like any other term. Each derived term below says how it is computed.
+3. **Where an entity is kept.** `app:file` is the path of the file holding it, relative to the data root (the directory holding `charters/`, `plans/` and `objectives/`), with `/` separators and no leading `./`. `app:line` is the 1-based line where an action starts. The graph names no root; a client resolves paths against the data root it already knows. If another backend has no files, these are absent.
+4. **IRIs.** An entity from a file is `urn:uuid:<id>`. A context is `urn:uuid:<UUIDv5(context namespace, slug)>` (see [Context terms](#context-terms)). A metric is `urn:uuid:<UUIDv5(objective id, "metric/<slug>")>`, its slug made as a context's is. No blank nodes.
+5. **Containment points up.** A part `app:partOf` its whole: a child action its parent action, a top-level action its charter, a charter its parent charter, an objective its parent objective. Each has at most one.
+6. **Every action, charter and objective has exactly one `app:state`** whose value is one of the IRIs in [State values](#state-values). Absent fields emit nothing.
+
+### Action terms
+
+An action is `app:Action`. Fields are those of [`actions.schema.json`](./schemas/actions.schema.json).
+
+| Field | DSL | Terms |
+| --- | --- | --- |
+| `id` | `#` | The IRI. |
+| `name` | text | `rdfs:label` |
+| `description` | `$ … $` | `dcterms:description` |
+| `state` | `[ ]` … | `app:state` (below) |
+| `priority` | `!` | `app:priority`, an integer |
+| `contexts` | `+` | `app:context`, per tag, its context node |
+| `scheduledDateTime` | `@` | `app:start`, written; see [Time](#time) |
+| `dueDateTime` | `:` | `app:due`, written; see [Time](#time) |
+| `durationMinutes` | `\|` | `app:durationMinutes`, an integer |
+| `completedDateTime` | `%` | `app:closed`, written: when the action was completed or cancelled |
+| `createdDateTime` | `^` | `dcterms:created`, written |
+| `predecessors` | `<` | `app:after`, per reference, the action it names; see [Waits](#waits) |
+| `sequentialChildren` | `~` | `app:sequential true` |
+| `parentId`, `charter` | `>`, the file | `app:partOf` (rule 5) |
+| `alias` | `=` | `app:alias` |
+| `externalScheduleId`, `externalOccurrenceKey` | none | Not emitted. |
+
+Derived: `app:notBefore`, `app:lateFrom` ([Time](#time)) and `app:waitsOn` ([Waits](#waits)). Location: `app:file`, `app:line`.
+
+### State values
+
+| Entity | `app:state` values |
+| --- | --- |
+| Action | `app:NotStarted` `[ ]`, `app:InProgress` `[-]`, `app:Blocked` `[=]`, `app:Completed` `[x]`, `app:Cancelled` `[_]` |
+| Charter | `app:New`, `app:Active`, `app:Blocked`, `app:Closed`, `app:Cancelled`, from its `state` (`app:New` when unset) |
+| Objective | Not yet defined ([objectives](./objectives.md) gives objectives a state without naming its values); none is emitted. |
+
+### Time
+
+`app:start`, `app:due`, `app:closed` and `dcterms:created` are **as written**: a date alone is an `xsd:date`; a date and time is an `xsd:dateTime` of the form `YYYY-MM-DDThh:mm:ss`, with an offset or `Z` only if the file wrote one.
+
+A bound written as a date covers the whole day (Decision 47). The derived instants say when an action's **effective window** opens and closes, each an `xsd:dateTime` with an offset:
+
+- `app:notBefore`: the first instant the action may be worked. The latest of its own `@` and every ancestor action's, taking a date's first instant.
+- `app:lateFrom`: the first instant the action is late. The earliest of its own `:` and every ancestor action's, taking a date's following midnight and a date and time as itself.
+
+A child with no bound of its own therefore inherits its parent's, and one with its own narrows it ([action file format](./action_file_format.md#do-datetime-optional)). A time written without an offset, and every date, is resolved in the **viewer's zone**, the zone in which the graph is projected, using the time-zone database. Queries compare these instants, never the written values: an `xsd:date`, a floating `xsd:dateTime` and one with an offset do not compare reliably in SPARQL.
+
+### Waits
+
+`app:after` is each predecessor as written. `app:waitsOn` is derived: everything that must be closed before the action can start. It is the action's own `app:after` targets, the sibling before it when its parent is `app:sequential`, and its parent action's `app:waitsOn`. An action is free to start when every `app:waitsOn` target is completed or cancelled.
+
+### Charter terms
+
+A charter (a [charter document](./charters.md)) is `app:Charter`.
+
+| Field | Terms |
+| --- | --- |
+| `id` | The IRI. |
+| title (H1 or `title`) | `rdfs:label` |
+| body text | `dcterms:description` |
+| `alias` | `app:alias` |
+| `parent` | `app:partOf` the parent charter |
+| `objectives` | `app:serves`, per objective |
+| `state` | `app:state` |
+| its file | `app:file`: the charter document, or its actions file if it has none |
+
+### Objective terms
+
+An objective (an [objective file](./objectives.md)) is `app:Objective`.
+
+| Field | Terms |
+| --- | --- |
+| `id`, title, body, `alias`, `parent` | As for charters; `app:partOf` the parent objective. |
+| `metrics` | `app:metric`, per metric, an `app:Metric` with `rdfs:label` its name, `dcterms:description`, `app:target` (text) and `app:reviewDate` (written) when given. |
+| its file | `app:file` |
+
+### Context terms
+
+A plus-tag names a context: where, with what or by whom an action can be done (Decision 43). The set is open. Each tag is one `app:Context`, `urn:uuid:<UUIDv5(context namespace, slug)>`, with `rdfs:label` the slug (leading `+` stripped, trimmed, lowercased, spaces to `-`). The context namespace is `0d8937ce-eb24-52d2-9532-39ea299f888b`, itself the UUIDv5 of `https://clearhead.us/context` under the RFC 9562 URL namespace. Hierarchies from workspace configuration are `skos:broader`, child to parent; a context named only as a parent is emitted too.
+
+### Recurrence
+
+Not yet specified for the application graph. A materialized occurrence is an ordinary action with its own bounds; the recurring plan itself and its rule are the open part (the fixture has neither).
+
+### Example
+
+The line
+
+```text
+[-] Call the plumber !2 +phone @2026-10-03T09:00 :2026-10-04 =plumber #01a0faa2-0000-7000-8000-000000000001
+```
+
+at line 1 of `charters/next.actions`, a top-level action of the root charter, projects in a UTC viewer's zone as:
+
+```turtle
+<urn:uuid:01a0faa2-0000-7000-8000-000000000001> a app:Action ;
+  rdfs:label "Call the plumber" ;
+  app:state app:InProgress ;
+  app:priority 2 ;
+  app:context <urn:uuid:aa0d0a8e-8a8b-5ef1-b25b-f894935d2d82> ;   # phone
+  app:start "2026-10-03T09:00:00"^^xsd:dateTime ;
+  app:due "2026-10-04"^^xsd:date ;
+  app:notBefore "2026-10-03T09:00:00Z"^^xsd:dateTime ;
+  app:lateFrom "2026-10-05T00:00:00Z"^^xsd:dateTime ;
+  app:alias "plumber" ;
+  app:partOf <urn:uuid:01a0faa2-0000-7000-8000-0000000000c0> ;   # the root charter
+  app:file "charters/next.actions" ; app:line 1 .
+```
+
+## Meaning: the CCO Graph
+
+> Moving to the ontology repository as the mapping from `app:` to CCO (Decision 45). Until then, this section defines the CCO graph the fixture's `expected.ttl` holds. It states each action's own bounds and waits; the derived `app:` terms have no rows here yet.
+
+### Conventions
 
 These rules decide every row of the mapping below.
 
@@ -38,7 +161,7 @@ These rules decide every row of the mapping below.
 
 Prefixes: `cco:` `https://www.commoncoreontologies.org/`, `obo:` `http://purl.obolibrary.org/obo/`, `dcterms:` `http://purl.org/dc/terms/`, `skos:` `http://www.w3.org/2004/02/skos/core#`, `rdfs:` as usual.
 
-## Actions
+### Actions
 
 An action (one line of a [`.actions` file](./action_file_format.md)) is an IAO action specification, `obo:IAO_0000007`. Fields are those of [`actions.schema.json`](./schemas/actions.schema.json).
 
@@ -62,7 +185,7 @@ An action (one line of a [`.actions` file](./action_file_format.md)) is an IAO a
 | `completedDateTime` | `%` | The time on the bearer of the record that closed the action: the act's completed status, or the cancelled measurement (below). |
 | `externalScheduleId`, `externalOccurrenceKey` | none | Not emitted (convention 3). |
 
-### Action state
+#### Action state
 
 State is never one field in the graph (ontology Decisions 4 and 5): what is shown is derived from records.
 
@@ -74,7 +197,7 @@ State is never one field in the graph (ontology Decisions 4 and 5): what is show
 | Blocked | `[=]` | A condition describing something outside the data the action waits on: a Descriptive ICE with text `waiting` and no `describes` target. |
 | Cancelled | `[_]` | A Nominal Measurement ICE (`cco:ont00000293`) that `is a nominal measurement of` the action itself, text `cancelled`; the cancellation time, if any, on the same bearer. |
 
-## Charters
+### Charters
 
 A charter (a [charter document](./charters.md)) is a Plan, `cco:ont00000974`.
 
@@ -89,7 +212,7 @@ A charter (a [charter document](./charters.md)) is a Plan, `cco:ont00000974`.
 | `state` | A Nominal Measurement ICE that `is a nominal measurement of` the plan, text `new`, `active`, `blocked`, `closed` or `cancelled`. |
 | its actions | The charter `has continuant part` each top-level action. |
 
-## Objectives
+### Objectives
 
 An objective (an [objective file](./objectives.md)) is an Objective, `cco:ont00000476`.
 
@@ -101,17 +224,17 @@ An objective (an [objective file](./objectives.md)) is an Objective, `cco:ont000
 | `state` | A Nominal Measurement ICE of the objective, confirmed by an agent (ontology Decision 5). |
 | `metrics` | Per metric, a Descriptive ICE `is about` the objective, its done-condition, with text `<name>: <target>` (or `<name>` with no target) on its bearer. The slug in its role is the name's, as for contexts. |
 
-## Contexts
+### Contexts
 
 A plus-tag names a context: where, with what or by whom an action can be done (Decision 43). The set is open. Each tag is one node, `urn:uuid:<UUIDv5(context namespace, slug)>`, with `rdfs:label` the slug (leading `+` stripped, trimmed, lowercased, spaces to `-`). It is not typed: a tag may name a site, a tool, a person or a state of the doer, and the projection cannot know which. Hierarchies from workspace configuration are `skos:broader`, child to parent. This makes each context a `skos:Concept` by inference, which is harmless while SKOS is not merged with BFO for reasoning.
 
-## Recurring plans
+### Recurring plans
 
 A recurring schedule (an [`.ics` plan](./ics_schedule_spec.md)) is an action specification that prescribes many acts (ontology Decision 6), a part of its charter. Its recurrence is a time condition like any other (convention 7), one that repeats: the condition's description carries the RFC 5545 `RRULE` as text on its bearer, and the due recurrence likewise. This specification owns the rule's semantics; the graph does not take it apart. No BFO-family ontology structures a recurrence rule (searched CCO v2.2, IAO and the OBO library, 2026-10-01); the structured alternatives, schema.org `Schedule` and the W3C RDF Calendar `ical:rrule`, sit outside it. Cost: a query cannot tell a recurring condition from a one-off one except by its text. Revisit if a question ever needs to reason inside a rule.
 
 Each materialized occurrence is its own action specification, a part of the recurring one, with its own scheduled or due condition. When an occurrence is done, its act is the calendar event: a Planned Act in its temporal region, as for any action.
 
-## Helper node IRIs
+### Helper node IRIs
 
 A helper node's IRI is `urn:uuid:` followed by the RFC 9562 UUIDv5 whose namespace is its owner's UUID and whose name is its role, UTF-8 encoded. The owner is the action, charter or objective the node serves. `<slug>` is a context slug (see [Contexts](#contexts)); `<uuid>` is a predecessor's id in canonical lowercase form.
 
@@ -134,7 +257,7 @@ A helper node's IRI is `urn:uuid:` followed by the RFC 9562 UUIDv5 whose namespa
 
 A context node is owned by no entity: its IRI is the UUIDv5 of its slug under the context namespace `0d8937ce-eb24-52d2-9532-39ea299f888b` (itself UUIDv5 of `https://clearhead.us/context` under the RFC 9562 URL namespace).
 
-## Worked example
+### Worked example
 
 The line
 
@@ -169,17 +292,22 @@ projects as follows. Helper IRIs are shortened to `:a.<role>` with dots for slas
 
 Twenty-odd triples for one line, against eight in v4. That is the trade-off Decision 43 accepted.
 
+### Times
+
+Times are emitted as written. A date and time is `has datetime value` (`cco:ont00001767`), an `xsd:dateTime` in the form `YYYY-MM-DDThh:mm:ss`, with the offset or `Z` only if the file wrote one. A date alone is `has date value` (`cco:ont00001771`), an `xsd:date`. `dcterms:created` follows the same rule.
+
 ## Conformance
 
-[`schemas/graph.shapes.ttl`](./schemas/graph.shapes.ttl) holds the SHACL shapes for this graph, validated without inference. [`examples/conformance/graph/`](./examples/conformance/graph/) holds the oracle: a workspace, the exact graph it projects to (`expected.ttl`), graphs that must each fail on one named shape (`invalid/`), and a graph that must pass with only a warning (`warning/`). A conforming implementation projects the workspace to a graph isomorphic to `expected.ttl`. The expected graph, merged with the ontology, must also reason consistent.
+[`examples/conformance/graph/`](./examples/conformance/graph/) holds the oracle: a workspace and the exact graphs it projects to.
+
+- **Application graph.** A conforming implementation, projecting in the UTC zone, produces a graph isomorphic to `expected-app.ttl`. [`schemas/app.shapes.ttl`](./schemas/app.shapes.ttl) holds its SHACL shapes, including that the derived terms agree with the written ones; `invalid-app/` holds a graph per rule that must fail on exactly the shape it names.
+- **CCO graph.** `expected.ttl` is the same workspace's meaning. [`schemas/graph.shapes.ttl`](./schemas/graph.shapes.ttl) holds its SHACL shapes, validated without inference; `invalid/` holds graphs that must each fail on one named shape and `warning/` one that must pass with only a warning. Merged with the ontology, it must reason consistent.
 
 Not yet covered by the fixture: recurring plans and objective states.
 
 ## Determinism
 
-For a given workspace, a given serialization is byte-deterministic: node order is stable and documented, and helper IRIs follow [Helper node IRIs](#helper-node-iris).
-
-Times are emitted **as written**, so the graph does not depend on the machine's time zone. A date and time is `has datetime value` (`cco:ont00001767`), an `xsd:dateTime` in the form `YYYY-MM-DDThh:mm:ss`, with the offset or `Z` only if the file wrote one. A date alone is `has date value` (`cco:ont00001771`), an `xsd:date`. `dcterms:created` follows the same rule.
+For a given workspace and viewer's zone, a given serialization is byte-deterministic: node order is stable and documented, and IRIs follow the rules above. Written values never depend on the machine. The derived instants `app:notBefore` and `app:lateFrom` depend on the viewer's zone wherever a time was written without an offset or a bound is a date; a graph exported from one zone and read in another keeps the instants of the zone that projected it.
 
 ## Optional Local SPARQL Evaluation
 

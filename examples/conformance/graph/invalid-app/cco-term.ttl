@@ -1,0 +1,12 @@
+# The application graph never mixes in CCO terms.
+# expect: Graph
+@prefix : <https://example.org/fixture#> .
+@prefix app: <https://clearhead.us/vocab/app/v1#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+:root a app:Charter ; rdfs:label "Root" ; app:state app:Active ; app:file "charters/README.md" .
+
+:a a app:Action ; rdfs:label "a" ; app:state app:NotStarted ; app:partOf :root ;
+    app:file "charters/next.actions" ; app:line 1 ;
+    <https://www.commoncoreontologies.org/ont00001765> "a" .

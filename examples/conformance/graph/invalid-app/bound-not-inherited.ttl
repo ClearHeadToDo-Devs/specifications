@@ -1,0 +1,15 @@
+# A child inherits its parent's due: it has a lateFrom no later than the parent's.
+# expect: Window
+@prefix : <https://example.org/fixture#> .
+@prefix app: <https://clearhead.us/vocab/app/v1#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+:root a app:Charter ; rdfs:label "Root" ; app:state app:Active ; app:file "charters/README.md" .
+
+:parent a app:Action ; rdfs:label "parent" ; app:state app:NotStarted ; app:partOf :root ;
+    app:file "charters/next.actions" ; app:line 1 ;
+    app:due "2026-10-04"^^xsd:date ;
+    app:lateFrom "2026-10-05T00:00:00Z"^^xsd:dateTime .
+:child a app:Action ; rdfs:label "child" ; app:state app:NotStarted ; app:partOf :parent ;
+    app:file "charters/next.actions" ; app:line 2 .

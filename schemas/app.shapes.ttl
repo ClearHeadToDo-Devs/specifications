@@ -1,0 +1,193 @@
+# SHACL shapes for the application graph a workspace projects to (../ontology.md,
+# Application Graph). They check what nodes exist, how many, with which values,
+# and that the derived terms agree with the written ones. Validate without
+# inference: every type a shape targets is asserted by the projection.
+
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix app: <https://clearhead.us/vocab/app/v1#> .
+@prefix shape: <https://clearhead.us/specifications/app-shapes#> .
+
+shape: sh:declare
+    [ sh:prefix "app" ; sh:namespace "https://clearhead.us/vocab/app/v1#"^^xsd:anyURI ] ,
+    [ sh:prefix "rdf" ; sh:namespace "http://www.w3.org/1999/02/22-rdf-syntax-ns#"^^xsd:anyURI ] .
+
+# --- The whole graph ---------------------------------------------------------
+
+shape:Graph a sh:NodeShape ;
+    sh:targetNode shape:graph ;
+    sh:sparql [
+        sh:message "Every node has an IRI (rule 4): no blank nodes." ;
+        sh:select """
+            SELECT $this ?value WHERE {
+                { ?value ?p ?o } UNION { ?s ?p ?value }
+                FILTER(isBlank(?value))
+            }""" ] ,
+    [
+        sh:message "Only app:, RDF Schema, Dublin Core and SKOS terms: the CCO graph is the mapping's output, never mixed in (rule 1)." ;
+        sh:prefixes shape: ;
+        sh:select """
+            SELECT $this ?value WHERE {
+                { ?s ?value ?o } UNION { ?s rdf:type ?value }
+                FILTER(?value != rdf:type)
+                FILTER(!STRSTARTS(STR(?value), "https://clearhead.us/vocab/app/v1#")
+                    && !STRSTARTS(STR(?value), "http://www.w3.org/2000/01/rdf-schema#")
+                    && !STRSTARTS(STR(?value), "http://purl.org/dc/terms/")
+                    && !STRSTARTS(STR(?value), "http://www.w3.org/2004/02/skos/core#"))
+            }""" ] .
+
+# --- Actions -----------------------------------------------------------------
+
+shape:Action a sh:NodeShape ;
+    sh:targetClass app:Action ;
+    sh:property
+        [ sh:path rdfs:label ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ,
+        [ sh:path dcterms:description ; sh:maxCount 1 ; sh:datatype xsd:string ] ,
+        [ sh:path app:state ; sh:minCount 1 ; sh:maxCount 1 ;
+          sh:in ( app:NotStarted app:InProgress app:Blocked app:Completed app:Cancelled ) ;
+          sh:message "An action has exactly one action state (State values)." ] ,
+        [ sh:path app:partOf ; sh:minCount 1 ; sh:maxCount 1 ;
+          sh:or ( [ sh:class app:Action ] [ sh:class app:Charter ] ) ;
+          sh:message "An action is part of exactly one action or charter (rule 5)." ] ,
+        [ sh:path app:priority ; sh:maxCount 1 ; sh:datatype xsd:integer ;
+          sh:minInclusive 1 ; sh:maxInclusive 9 ] ,
+        [ sh:path app:durationMinutes ; sh:maxCount 1 ; sh:datatype xsd:integer ; sh:minInclusive 1 ] ,
+        [ sh:path app:alias ; sh:maxCount 1 ; sh:datatype xsd:string ] ,
+        [ sh:path app:sequential ; sh:maxCount 1 ; sh:in ( true ) ] ,
+        [ sh:path app:context ; sh:class app:Context ] ,
+        [ sh:path app:after ; sh:class app:Action ] ,
+        [ sh:path app:waitsOn ; sh:class app:Action ] ,
+        [ sh:path app:start ; sh:maxCount 1 ; sh:or ( [ sh:datatype xsd:date ] [ sh:datatype xsd:dateTime ] ) ] ,
+        [ sh:path app:due ; sh:maxCount 1 ; sh:or ( [ sh:datatype xsd:date ] [ sh:datatype xsd:dateTime ] ) ] ,
+        [ sh:path app:closed ; sh:maxCount 1 ; sh:or ( [ sh:datatype xsd:date ] [ sh:datatype xsd:dateTime ] ) ] ,
+        [ sh:path dcterms:created ; sh:maxCount 1 ; sh:or ( [ sh:datatype xsd:date ] [ sh:datatype xsd:dateTime ] ) ] ,
+        [ sh:path app:notBefore ; sh:maxCount 1 ; sh:datatype xsd:dateTime ] ,
+        [ sh:path app:lateFrom ; sh:maxCount 1 ; sh:datatype xsd:dateTime ] ,
+        [ sh:path app:file ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ;
+          sh:pattern "^[^/.][^\\\\]*$" ;
+          sh:message "An action's file is a path relative to the data root (rule 3)." ] ,
+        [ sh:path app:line ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:integer ; sh:minInclusive 1 ] ;
+    sh:sparql [
+        sh:message "Only a completed or cancelled action has a closed time." ;
+        sh:prefixes shape: ;
+        sh:select """
+            SELECT $this ?value WHERE {
+                $this app:closed ?value ; app:state ?state .
+                FILTER(?state NOT IN (app:Completed, app:Cancelled))
+            }""" ] ,
+    [
+        sh:message "A derived instant carries an offset (Time): it is resolved in the viewer's zone." ;
+        sh:prefixes shape: ;
+        sh:select """
+            SELECT $this ?value WHERE {
+                $this app:notBefore|app:lateFrom ?value .
+                FILTER(TZ(?value) = "")
+            }""" ] .
+
+# --- Effective window (Time) -------------------------------------------------
+
+shape:Window a sh:NodeShape ;
+    sh:targetClass app:Action ;
+    sh:sparql [
+        sh:message "An action with its own @ has a notBefore, and one with its own : a lateFrom." ;
+        sh:prefixes shape: ;
+        sh:select """
+            SELECT $this ?value WHERE {
+                { $this app:start ?value FILTER NOT EXISTS { $this app:notBefore ?n } }
+                UNION
+                { $this app:due ?value FILTER NOT EXISTS { $this app:lateFrom ?l } }
+            }""" ] ,
+    [
+        sh:message "A child's window lies within its parent's: it inherits each bound the parent has and never widens it." ;
+        sh:prefixes shape: ;
+        sh:select """
+            SELECT $this ?value WHERE {
+                $this app:partOf ?parent . ?parent a app:Action .
+                {
+                    ?parent app:notBefore ?value .
+                    OPTIONAL { $this app:notBefore ?mine }
+                    FILTER(!BOUND(?mine) || ?mine < ?value)
+                } UNION {
+                    ?parent app:lateFrom ?value .
+                    OPTIONAL { $this app:lateFrom ?mine }
+                    FILTER(!BOUND(?mine) || ?mine > ?value)
+                }
+            }""" ] .
+
+# --- Effective waits (Waits) -------------------------------------------------
+
+shape:Waits a sh:NodeShape ;
+    sh:targetClass app:Action ;
+    sh:sparql [
+        sh:message "An action waits on everything it is written to come after, and everything its parent waits on." ;
+        sh:prefixes shape: ;
+        sh:select """
+            SELECT $this ?value WHERE {
+                { $this app:after ?value }
+                UNION
+                { $this app:partOf ?parent . ?parent a app:Action ; app:waitsOn ?value }
+                FILTER NOT EXISTS { $this app:waitsOn ?value }
+            }""" ] ,
+    [
+        sh:message "Under a sequential parent, each child after the first waits on the one before it." ;
+        sh:prefixes shape: ;
+        sh:select """
+            SELECT $this ?value WHERE {
+                $this app:partOf ?parent ; app:line ?line .
+                ?parent app:sequential true .
+                ?value app:partOf ?parent ; app:line ?before .
+                FILTER(?before < ?line)
+                FILTER NOT EXISTS {
+                    ?between app:partOf ?parent ; app:line ?middle .
+                    FILTER(?before < ?middle && ?middle < ?line)
+                }
+                FILTER NOT EXISTS { $this app:waitsOn ?value }
+            }""" ] .
+
+# --- Charters, objectives, metrics, contexts ---------------------------------
+
+shape:Charter a sh:NodeShape ;
+    sh:targetClass app:Charter ;
+    sh:property
+        [ sh:path rdfs:label ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ,
+        [ sh:path dcterms:description ; sh:maxCount 1 ; sh:datatype xsd:string ] ,
+        [ sh:path app:alias ; sh:maxCount 1 ; sh:datatype xsd:string ] ,
+        [ sh:path app:state ; sh:minCount 1 ; sh:maxCount 1 ;
+          sh:in ( app:New app:Active app:Blocked app:Closed app:Cancelled ) ;
+          sh:message "A charter has exactly one charter state (State values)." ] ,
+        [ sh:path app:partOf ; sh:maxCount 1 ; sh:class app:Charter ] ,
+        [ sh:path app:serves ; sh:class app:Objective ] ,
+        [ sh:path app:file ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^[^/.][^\\\\]*$" ] .
+
+shape:Objective a sh:NodeShape ;
+    sh:targetClass app:Objective ;
+    sh:property
+        [ sh:path rdfs:label ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ,
+        [ sh:path dcterms:description ; sh:maxCount 1 ; sh:datatype xsd:string ] ,
+        [ sh:path app:alias ; sh:maxCount 1 ; sh:datatype xsd:string ] ,
+        [ sh:path app:state ; sh:maxCount 0 ;
+          sh:message "Objective states are not yet defined (State values), so none is emitted." ] ,
+        [ sh:path app:partOf ; sh:maxCount 1 ; sh:class app:Objective ] ,
+        [ sh:path app:metric ; sh:class app:Metric ] ,
+        [ sh:path app:file ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^[^/.][^\\\\]*$" ] .
+
+shape:Metric a sh:NodeShape ;
+    sh:targetClass app:Metric ;
+    sh:property
+        [ sh:path rdfs:label ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ,
+        [ sh:path dcterms:description ; sh:maxCount 1 ; sh:datatype xsd:string ] ,
+        [ sh:path app:target ; sh:maxCount 1 ; sh:datatype xsd:string ] ,
+        [ sh:path app:reviewDate ; sh:maxCount 1 ; sh:datatype xsd:date ] ,
+        [ sh:path [ sh:inversePath app:metric ] ; sh:minCount 1 ; sh:maxCount 1 ;
+          sh:message "A metric belongs to exactly one objective." ] .
+
+shape:Context a sh:NodeShape ;
+    sh:targetClass app:Context ;
+    sh:property
+        [ sh:path rdfs:label ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ;
+          sh:pattern "^[^+\\s]+$" ;
+          sh:message "A context is labelled by its slug: no leading +, no spaces." ] ,
+        [ sh:path skos:broader ; sh:class app:Context ] .
