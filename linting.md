@@ -222,9 +222,7 @@ These rules detect logical inconsistencies that block core functionality. These 
 This rule is retired. Creation provenance is persisted in the action sidecar and
 may be bootstrapped from a UUIDv7 timestamp; it is not required to appear as a
 `^` field in every `.actions` line. An implementation must not warn merely
-because the plaintext field is absent. The historical fixture remains under
-`examples/linting/legacy_W004_missing_creation_date/` for compatibility context,
-not active conformance.
+because the plaintext field is absent.
 
 #### W005: Creation Date in Future
 

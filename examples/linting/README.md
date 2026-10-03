@@ -34,18 +34,7 @@ The retired `E012`/`E013` labels from the old monolithic conformance example are
 not valid codes. Diagnostic conformance pins code and source-node span, not the
 human-readable message.
 
-## Retired fixtures
-
-- `legacy_E002_recurrence_without_do_date/` documents the removed `R:` syntax;
-  recurrence now lives in iCalendar Plans.
-- `legacy_E001_duration_without_do_date/` documents the removed `D` duration;
-  duration is now the length of the `@` block (Decision 51).
-- `legacy_W004_missing_creation_date/` documents the former requirement to
-  repeat creation provenance in plaintext; sidecar/UUIDv7 provenance makes a
-  missing `^` field non-diagnostic.
-
-Retired fixtures are historical context and must not be included in active
-conformance sweeps.
+Retired rules keep their heading in `linting.md` but have no fixtures; git history holds the old ones.
 
 ## Adding a fixture
 
