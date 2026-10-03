@@ -190,7 +190,7 @@ Duration is never written; it is the length of the `@` block. Earlier files
 wrote it as `D<minutes>` after `@` (`@2026-10-03T09:00 D15`); parsers should
 keep reading that form, and formatters write it as the equivalent block
 (`@2026-10-03T09:00/2026-10-03T09:15`). A `D` after a date-only `@` has no
-equivalent block and is left as written.
+equivalent block; it is dropped, and the whole day stays planned.
 
 ## Due date/time (optional)
 
