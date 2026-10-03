@@ -73,14 +73,14 @@ Derived: `app:notBefore`, `app:lateFrom`, `app:durationMinutes` ([Time](#time)) 
 
 `app:plannedStart`, `app:plannedEnd`, `app:availableFrom`, `app:due`, `app:closed` and `dcterms:created` are **as written**: a date alone is an `xsd:date`; a date and time is an `xsd:dateTime` of the form `YYYY-MM-DDThh:mm:ss`, with an offset or `Z` only if the file wrote one.
 
-The window is `:` alone; `@` is intent and bounds nothing (Decision 48). A bound covers its written precision: a date its day, a minute its minute (Decisions 47 and 48). Because `xsd:dateTime` always carries seconds, a written minute and a written second look alike in the as-written terms; the derived instants keep the difference. They say when an action's **effective window** opens and closes, each an `xsd:dateTime` with an offset:
+The window is `:` alone; `@` is intent and bounds nothing (Decision 48). A date covers its day and a time is an instant (Decisions 47 and 51). The derived instants say when an action's **effective window** opens and closes, each an `xsd:dateTime` with an offset:
 
-- `app:notBefore`: the first instant the action may be worked. The latest of its own `app:availableFrom` and every ancestor action's, taking the first instant of its unit.
-- `app:lateFrom`: the first instant the action is late. The earliest of its own `app:due` and every ancestor action's, taking the start of the unit after it: a date's following midnight, a minute's next minute.
+- `app:notBefore`: the first instant the action may be worked. The latest of its own `app:availableFrom` and every ancestor action's, taking a date's first instant.
+- `app:lateFrom`: the first instant the action is late. The earliest of its own `app:due` and every ancestor action's, taking where it ends: a date's following midnight, a time itself.
 
 A child with no bound of its own therefore inherits its parent's, and one with its own narrows it ([action file format](./action_file_format.md#due-datetime-optional)). A time written without an offset, and every date, is resolved in the **viewer's zone**, the zone in which the graph is projected, using the time-zone database. Queries compare these instants, never the written values: an `xsd:date`, a floating `xsd:dateTime` and one with an offset do not compare reliably in SPARQL.
 
-The planned block is `@`, never inherited, and its end is read as a calendar reads one, not as a deadline (Decision 51): a date end covers its day, a time end is the instant written.
+The planned block is `@`, never inherited, and read as the window is.
 
 - `app:durationMinutes`: the block's length in whole minutes, rounded down, from the first instant of `app:plannedStart` to the end of `app:plannedEnd` (a date's following midnight, a time itself). Emitted only for an interval of at least a minute; a single `@` value has no duration.
 

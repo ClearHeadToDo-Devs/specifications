@@ -377,9 +377,9 @@ not active conformance.
     **Fixable:** No
 
     The planned block, the `@` range, falls outside the Action's effective
-    window: it starts before the window opens, or ends after it closes. A window
-    bound covers its written precision, so `@2026-11-01` is inside a window
-    opening `2026-11-01`; and both ends are exclusive, so
+    window: it starts before the window opens, or ends after it closes. A date
+    covers its day, so `@2026-11-01` is inside a window opening `2026-11-01`;
+    and both ends are exclusive, so
     `@2026-12-15T23:00/2026-12-16T00:00` is inside a window closing `2026-12-15`.
 
     ```actions

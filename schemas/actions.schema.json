@@ -66,11 +66,11 @@
         },
         "scheduledDateTime": {
           "type": "string",
-          "description": "'@' in the DSL. When the Action is planned to be worked: an ISO 8601 local date/time (the planned start), or an ISO 8601 interval `start/end` (a planned block, its end exclusive: a date end covers its day, a time end is the instant written). Duration is the block's length and is not serialized. Intent only: it bounds nothing and is not inherited (Decisions 48 and 51)."
+          "description": "'@' in the DSL. When the Action is planned to be worked: an ISO 8601 local date/time (the planned start), or an ISO 8601 interval `start/end` (a planned block, its end exclusive). Duration is the block's length and is not serialized. Intent only: it bounds nothing and is not inherited (Decisions 48 and 51)."
         },
         "dueDateTime": {
           "type": "string",
-          "description": "':' in the DSL. The Action's window: an ISO 8601 local date/time (a deadline), or an ISO 8601 interval `start/end` (a lower bound and a deadline). A bound covers its written precision. Effective bounds inherited from ancestors are derived and are not serialized here."
+          "description": "':' in the DSL. The Action's window: an ISO 8601 local date/time (a deadline), or an ISO 8601 interval `start/end` (a lower bound and a deadline). A date covers its day; a time is an instant. Effective bounds inherited from ancestors are derived and are not serialized here."
         },
         "completedDateTime": {
           "type": "string",

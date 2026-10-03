@@ -86,6 +86,12 @@ Supported time forms:
 
 Timezones are optional; local time is assumed when omitted. Offsets and `Z` are allowed.
 
+A date covers its whole day. A date and time is an instant, however precisely it
+is written: `T17:00` and `T17:00:00` are the same instant. A range `start/end` is
+half-open: it begins at the start's first instant and ends where the end does, a
+date's following midnight or a time itself. `@` and `:` read dates, times and
+ranges the same way (Decisions 47 and 51).
+
 # Field Semantics
 
 ## Depth (required for children)
@@ -176,12 +182,9 @@ Action may be worked before or after it. It takes one of two forms:
 - `@<datetime>/<datetime>`: an ISO 8601 interval, a planned block. Only the full
   `start/end` form is valid, as for `:`.
 
-The block is half-open and its end is read as a calendar reads one: a date end
-covers its day, a time end is the instant written. So
-`@2026-10-03T09:00/2026-10-03T09:30` is thirty minutes and
-`@2026-10-03/2026-10-05` is three whole days. A start is its first instant.
-This differs from `:` on purpose: a deadline is "by", a block is "until"
-(Decision 51).
+The block is read as any range is ([Date and Time](#date-and-time)), as a
+calendar reads one: `@2026-10-03T09:00/2026-10-03T09:30` is thirty minutes and
+`@2026-10-03/2026-10-05` is three whole days.
 
 Duration is never written; it is the length of the `@` block. Earlier files
 wrote it as `D<minutes>` after `@` (`@2026-10-03T09:00 D15`); parsers should
@@ -199,12 +202,10 @@ forms:
   and a deadline. Only this full `start/end` form is valid: no ISO 8601
   durations and no abbreviated end.
 
-A bound covers its written precision, as ISO 8601 reads a reduced-precision
-value: a date covers its day, a minute its minute, a second its second. The
-window is half-open: it opens at the first instant of its lower bound and the
-Action is late from the start of the unit after its deadline. So `:2026-10-05`
-is late from `2026-10-06T00:00`, and `:2026-10-05T17:00` is late from 17:01, while
-`:2026-10-05T17:00:00` is late from 17:00:01.
+The window is read as any range is ([Date and Time](#date-and-time)): it opens
+at its lower bound, and the Action is late from where its deadline ends. So
+`:2026-10-05` is late from `2026-10-06T00:00`, and `:2026-10-05T17:00` is late
+from 17:00.
 
 Action hierarchy composes windows without changing the locally stored values.
 An Action's effective window opens at the latest lower bound asserted by itself
