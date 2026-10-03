@@ -1,0 +1,12 @@
+# A context is a condition describing the context node (see context-nodes.rq).
+PREFIX app: <https://clearhead.us/vocab/app/v1#>
+PREFIX cco: <https://www.commoncoreontologies.org/>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+CONSTRUCT {
+  _:condition a cco:ont00000127 ; obo:BFO_0000178 ?a , _:description .  # Performance Specification
+  _:description a cco:ont00000853 ; cco:ont00001982 ?context .           # Descriptive ICE, describes
+} WHERE { ?a app:context ?context }

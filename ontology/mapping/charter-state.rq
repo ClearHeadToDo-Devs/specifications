@@ -1,0 +1,17 @@
+# A charter's state is a Nominal Measurement of the plan.
+PREFIX app: <https://clearhead.us/vocab/app/v1#>
+PREFIX cco: <https://www.commoncoreontologies.org/>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+CONSTRUCT {
+  _:m a cco:ont00000293 ; cco:ont00001868 ?c .
+  _:bearer a cco:ont00000253 ; obo:BFO_0000101 _:m ; cco:ont00001765 ?text .
+} WHERE {
+  VALUES (?state ?text) {
+    (app:New "new") (app:Active "active") (app:Blocked "blocked") (app:Closed "closed") (app:Cancelled "cancelled")
+  }
+  ?c a app:Charter ; app:state ?state .
+}

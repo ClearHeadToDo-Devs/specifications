@@ -1,0 +1,14 @@
+# A wait is a condition describing the awaited action. From app:waitsOn, the
+# effective waits: written predecessors, the sequential sibling before, and the
+# parent's waits, so an inherited wait is true of the child.
+PREFIX app: <https://clearhead.us/vocab/app/v1#>
+PREFIX cco: <https://www.commoncoreontologies.org/>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+CONSTRUCT {
+  _:condition a cco:ont00000127 ; obo:BFO_0000178 ?a , _:description .
+  _:description a cco:ont00000853 ; cco:ont00001982 ?awaited .
+} WHERE { ?a app:waitsOn ?awaited }

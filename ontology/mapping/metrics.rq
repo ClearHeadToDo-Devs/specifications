@@ -1,0 +1,20 @@
+# A metric is a Descriptive ICE about its objective (its done-condition),
+# keeping its IRI, with "<name>: <target>" (or the name alone) on a bearer and
+# its description as a Dublin Core annotation (convention 2).
+PREFIX app: <https://clearhead.us/vocab/app/v1#>
+PREFIX cco: <https://www.commoncoreontologies.org/>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+CONSTRUCT {
+  ?m a cco:ont00000853 ; cco:ont00001808 ?o ; dcterms:description ?description .
+  _:bearer a cco:ont00000253 ; obo:BFO_0000101 ?m ; cco:ont00001765 ?text .
+} WHERE {
+  ?o app:metric ?m .
+  ?m a app:Metric ; rdfs:label ?name .
+  OPTIONAL { ?m app:target ?target }
+  OPTIONAL { ?m dcterms:description ?description }
+  BIND(IF(BOUND(?target), CONCAT(?name, ": ", ?target), ?name) AS ?text)
+}

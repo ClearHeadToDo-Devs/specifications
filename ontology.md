@@ -107,7 +107,7 @@ An objective (an [objective file](./objectives.md)) is `app:Objective`.
 | Field | Terms |
 | --- | --- |
 | `id`, title, body, `alias`, `parent` | As for charters; `app:partOf` the parent objective. |
-| `metrics` | `app:metric`, per metric, an `app:Metric` with `rdfs:label` its name, `dcterms:description`, `app:target` (text) and `app:reviewDate` (written) when given. |
+| `metrics` | `app:metric`, per metric, an `app:Metric` with `rdfs:label` its name, `dcterms:description` and `app:target` (text) when given. |
 | its file | `app:file` |
 
 ### Context terms
@@ -146,7 +146,7 @@ at line 1 of `charters/next.actions`, a top-level action of the root charter, pr
 
 ## Meaning: the CCO Graph
 
-> Moving to the ontology repository as the mapping from `app:` to CCO (Decision 45). Until then, this section defines the CCO graph the fixture's `expected.ttl` holds. It states each action's own bounds and waits; the derived `app:` terms have no rows here yet.
+> The mapping is [`ontology/mapping/`](./ontology/mapping/) (Decisions 45 and 50): one SPARQL CONSTRUCT per structure, run over the application graph. This section describes what it produces; the queries are authoritative. The gate checks that mapping the fixture's `expected-app.ttl` yields its `expected.ttl`, and that every application term is read by a query or listed, with why, in [`ontology/unmapped.ttl`](./ontology/unmapped.ttl).
 
 ### Conventions
 
@@ -157,8 +157,9 @@ These rules decide every row of the mapping below.
 3. **The graph carries no storage facts.** No file paths, line numbers, workspace roots or calendar identifiers (`UID`, `RECURRENCE-ID`): they describe where a copy is kept, not the work, and would not exist in another backend. Queries return identities; where an entity is stored is answered by the implementation that stores it, from those identities. The workspace's identity stays, as the named graph.
 4. **Literal values sit on a bearer.** As CCO requires, a measurement or description carries its value through an Information Bearing Entity (`cco:ont00000253`) that `is carrier of` it (`obo:BFO_0000101`), with `has text value` (`cco:ont00001765`), `has integer value` (`cco:ont00001773`) or `has datetime value` (`cco:ont00001767`).
 5. **Containment is published downward.** A whole `has continuant part` (`obo:BFO_0000178`) each part; the inverse is derivable and not emitted.
-6. **Every node has a deterministic IRI.** Entities from files use `urn:uuid:<id>`. A helper node (a condition, a measurement, a bearer, an act) is `urn:uuid:<UUIDv5(owner id, role)>`, with the roles in [Helper node IRIs](#helper-node-iris), so exports diff cleanly and no blank nodes appear.
+6. **Entities keep their IRIs; helper nodes are blank** (Decision 49). Actions, charters, objectives, metrics and contexts are IRIs; a condition, description, measurement, bearer, intent or act exists only as part of its owner and nothing outside the graph refers to it, so it is a blank node. Exports that must diff byte for byte are canonicalized with RDF Dataset Canonicalization (RDFC-1.0); fixtures compare by graph isomorphism.
 7. **One condition per Performance Specification.** Each wait, context, energy level or time is its own Performance Specification (`cco:ont00000127`) whose parts are the action and one Descriptive ICE (`cco:ont00000853`) that `describes` (`cco:ont00001982`) the condition.
+8. **Conditions are effective.** An action carries every wait and window bound that applies to it, its own and those it inherits, read from `app:waitsOn`, `app:notBefore` and `app:lateFrom` rather than from the terms as written: one fact, one condition. An inherited condition is true of the child.
 
 Prefixes: `cco:` `https://www.commoncoreontologies.org/`, `obo:` `http://purl.obolibrary.org/obo/`, `dcterms:` `http://purl.org/dc/terms/`, `skos:` `http://www.w3.org/2004/02/skos/core#`, `rdfs:` as usual.
 
@@ -174,11 +175,11 @@ An action (one line of a [`.actions` file](./action_file_format.md)) is an IAO a
 | `state` | `[ ]` … | See [Action state](#action-state). |
 | `priority` | `!` | A Priority Measurement ICE (`cco:ont00000369`) that `is an ordinal measurement of` (`cco:ont00001811`) the action; integer on its bearer, 1 first. |
 | `contexts` | `+` | Per tag, a condition describing the [context](#contexts). |
-| `scheduledDateTime` | `@` | Intent, not a condition (Decision 48); its mapping is decided in `app-to-cco`. |
-| `dueDateTime` | `:` | A condition: by this time; and, when `:` is an interval, a condition: not before its lower bound. Each datetime sits on its condition's bearer, not on a BFO temporal instant designated through a CCO identifier, which would add two nodes per time. |
+| `scheduledDateTime` | `@` | Intent (Decision 48): a Prescriptive ICE (`cco:ont00000965`) that is part of the action, the planned time on its bearer. Not a condition, and no act exists until the work starts (ontology Decision 4). |
+| `dueDateTime` | `:` | The effective window (convention 8): per bound, a condition whose description's bearer carries the text `not before` or `late from` and the instant, from `app:notBefore` and `app:lateFrom`. The time sits on the bearer, not on a BFO temporal instant designated through a CCO identifier, which would add two nodes per time. |
 | `durationMinutes` | `D` | A Measurement ICE (`cco:ont00001163`) `is about` (`cco:ont00001808`) the action; its bearer has the integer and `uses measurement unit` (`cco:ont00001863`) Minute (`cco:ont00001667`). |
-| `predecessors` | `<` | Per predecessor, a condition describing the predecessor action. |
-| `sequentialChildren` | `~` | Expanded: each child after the first gets a condition describing the child before it. The marker itself is not emitted. |
+| `predecessors` | `<` | Per effective wait (`app:waitsOn`, convention 8), a condition describing the awaited action. |
+| `sequentialChildren` | `~` | Expanded through `app:waitsOn`: each child after the first waits on the child before it. The marker itself is not emitted. |
 | `parentId`, `children` | `>` | The parent `has continuant part` the child. A top-level action is a part of its charter. |
 | `charter` | `*` | No triple: membership is the containment above. |
 | `alias` | `=` | A Designative Name (`cco:ont00000003`) that `designates` (`cco:ont00001916`) the action; text on its bearer. |
@@ -223,7 +224,7 @@ An objective (an [objective file](./objectives.md)) is an Objective, `cco:ont000
 | title, body, `alias` | As for charters. |
 | `parent` | The parent objective `has continuant part` this one. |
 | `state` | A Nominal Measurement ICE of the objective, confirmed by an agent (ontology Decision 5). |
-| `metrics` | Per metric, a Descriptive ICE `is about` the objective, its done-condition, with text `<name>: <target>` (or `<name>` with no target) on its bearer. The slug in its role is the name's, as for contexts. |
+| `metrics` | Per metric, a Descriptive ICE `is about` the objective, its done-condition, keeping the metric's IRI, with text `<name>: <target>` (or `<name>` with no target) on its bearer and its description as `dcterms:description`. |
 
 ### Contexts
 
@@ -235,28 +236,11 @@ A recurring schedule (an [`.ics` plan](./ics_schedule_spec.md)) is an action spe
 
 Each materialized occurrence is its own action specification, a part of the recurring one, with its own scheduled or due condition. When an occurrence is done, its act is the calendar event: a Planned Act in its temporal region, as for any action.
 
-### Helper node IRIs
+### Helper nodes
 
-A helper node's IRI is `urn:uuid:` followed by the RFC 9562 UUIDv5 whose namespace is its owner's UUID and whose name is its role, UTF-8 encoded. The owner is the action, charter or objective the node serves. `<slug>` is a context slug (see [Contexts](#contexts)); `<uuid>` is a predecessor's id in canonical lowercase form.
+Every node that is not an action, charter, objective, metric or context is a blank node (convention 6). A query reaches it from its owner through the pattern its row gives, never by name.
 
-| Role | Node |
-| --- | --- |
-| `priority`, `priority/value` | Priority measurement and its bearer |
-| `duration`, `duration/value` | Duration measurement and its bearer |
-| `alias`, `alias/value` | Designative name and its bearer |
-| `when/context/<slug>`, `…/condition` | A context condition and its description |
-| `when/after/<uuid>`, `…/condition` | A wait on a predecessor and its description |
-| `when/waiting`, `…/condition`, `…/condition/value` | Blocked: the outside wait, its description and bearer |
-| `when/not-before`, `…/condition`, `…/condition/value` | Not before a time: the lower bound of `:` |
-| `when/due`, `…/condition`, `…/condition/value` | By a time |
-| `when/recurrence`, `…/condition`, `…/condition/value` | Repeating time (RRULE text) |
-| `when/due-recurrence`, `…/condition`, `…/condition/value` | Repeating deadline (RRULE text) |
-| `act`, `act/status`, `act/status/value` | The act, its progress status and bearer |
-| `cancelled`, `cancelled/value` | Cancelled measurement and its bearer |
-| `state`, `state/value` | A charter's or objective's state and its bearer |
-| `metric/<slug>`, `metric/<slug>/value` | An objective's metric and its bearer |
-
-A context node is owned by no entity: its IRI is the UUIDv5 of its slug under the context namespace `0d8937ce-eb24-52d2-9532-39ea299f888b` (itself UUIDv5 of `https://clearhead.us/context` under the RFC 9562 URL namespace).
+A context node keeps an IRI of its own: the UUIDv5 of its slug under the context namespace `0d8937ce-eb24-52d2-9532-39ea299f888b` (itself UUIDv5 of `https://clearhead.us/context` under the RFC 9562 URL namespace).
 
 ### Worked example
 
@@ -266,36 +250,36 @@ The line
 [-] Call the plumber !2 +phone @2026-10-03T09:00 =plumber #01a0faa2-0000-7000-8000-000000000001
 ```
 
-projects as follows. Helper IRIs are shortened to `:a.<role>` with dots for slashes; each is a UUIDv5 as above.
+projects as follows, with `:a` the action and `:phone` its context; the blank-node labels are only for reading.
 
 ```turtle
-:a a obo:IAO_0000007 ; rdfs:label "Call the plumber" .
+:a a obo:IAO_0000007 ; rdfs:label "Call the plumber" ;
+    obo:BFO_0000178 _:intent .                                    # @: planned for 09:00
 
-:a.priority a cco:ont00000369 ; cco:ont00001811 :a .
-:a.priority.value a cco:ont00000253 ; obo:BFO_0000101 :a.priority ; cco:ont00001773 2 .
-
-:a.when.context.phone a cco:ont00000127 ; obo:BFO_0000178 :a , :a.when.context.phone.condition .
-:a.when.context.phone.condition a cco:ont00000853 ; cco:ont00001982 :phone .
-:phone rdfs:label "phone" .
-
-:a.when.scheduled a cco:ont00000127 ; obo:BFO_0000178 :a , :a.when.scheduled.condition .
-:a.when.scheduled.condition a cco:ont00000853 .
-:a.when.scheduled.condition.value a cco:ont00000253 ; obo:BFO_0000101 :a.when.scheduled.condition ;
+_:intent a cco:ont00000965 .
+_:intent-value a cco:ont00000253 ; obo:BFO_0000101 _:intent ;
     cco:ont00001767 "2026-10-03T09:00:00"^^xsd:dateTime .
 
-:a.alias a cco:ont00000003 ; cco:ont00001916 :a .  # designates
-:a.alias.value a cco:ont00000253 ; obo:BFO_0000101 :a.alias ; cco:ont00001765 "plumber" .
+_:priority a cco:ont00000369 ; cco:ont00001811 :a .
+_:priority-value a cco:ont00000253 ; obo:BFO_0000101 _:priority ; cco:ont00001773 2 .
 
-:a.act a cco:ont00000228 ; cco:ont00001920 :a .
-:a.act.status a cco:ont00000203 ; cco:ont00001868 :a.act .
-:a.act.status.value a cco:ont00000253 ; obo:BFO_0000101 :a.act.status ; cco:ont00001765 "in progress" .
+_:phone a cco:ont00000127 ; obo:BFO_0000178 :a , _:phone-condition .
+_:phone-condition a cco:ont00000853 ; cco:ont00001982 :phone .
+:phone rdfs:label "phone" .
+
+_:alias a cco:ont00000003 ; cco:ont00001916 :a .                  # designates
+_:alias-value a cco:ont00000253 ; obo:BFO_0000101 _:alias ; cco:ont00001765 "plumber" .
+
+_:act a cco:ont00000228 ; cco:ont00001920 :a .
+_:status a cco:ont00000203 ; cco:ont00001868 _:act .
+_:status-value a cco:ont00000253 ; obo:BFO_0000101 _:status ; cco:ont00001765 "in progress" .
 ```
 
-Twenty-odd triples for one line, against eight in v4. That is the trade-off Decision 43 accepted.
+With `:2026-10-04` on the line, it would also carry a condition whose bearer holds `"late from"` and `"2026-10-05T00:00:00Z"`; its children would carry the same one unless they had an earlier deadline of their own.
 
 ### Times
 
-Times are emitted as written. A date and time is `has datetime value` (`cco:ont00001767`), an `xsd:dateTime` in the form `YYYY-MM-DDThh:mm:ss`, with the offset or `Z` only if the file wrote one. A date alone is `has date value` (`cco:ont00001771`), an `xsd:date`. `dcterms:created` follows the same rule.
+A window bound is the effective instant from the application graph: `has datetime value` (`cco:ont00001767`), an `xsd:dateTime` with an offset, resolved in the viewer's zone (convention 8). Every other time is as written: an intent, a completion or cancellation time and `dcterms:created`. A date and time is `has datetime value`, an `xsd:dateTime` in the form `YYYY-MM-DDThh:mm:ss`, with the offset or `Z` only if the file wrote one; a date alone is `has date value` (`cco:ont00001771`), an `xsd:date`.
 
 ## Conformance
 

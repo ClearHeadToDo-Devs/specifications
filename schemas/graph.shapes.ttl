@@ -25,10 +25,11 @@ shape: sh:declare
 shape:Graph a sh:NodeShape ;
     sh:targetNode shape:graph ;
     sh:sparql [
-        sh:message "Every node has an IRI (Helper node IRIs): no blank nodes." ;
+        sh:message "Actions, plans, objectives and contexts keep their IRIs; only helper nodes are blank (Decision 49)." ;
         sh:select """
             SELECT $this ?value WHERE {
-                { ?value ?p ?o } UNION { ?s ?p ?value }
+                { ?value a ?class FILTER(?class IN (obo:IAO_0000007, cco:ont00000974, cco:ont00000476)) }
+                UNION { ?value <http://www.w3.org/2000/01/rdf-schema#label> ?label }
                 FILTER(isBlank(?value))
             }""" ] ,
     [
@@ -97,6 +98,27 @@ shape:Condition a sh:NodeShape ;
           sh:qualifiedMinCount 1 ; sh:qualifiedMaxCount 1 ] ,
         [ sh:path obo:BFO_0000178 ; sh:qualifiedValueShape [ sh:class cco:ont00000853 ] ;
           sh:qualifiedMinCount 1 ; sh:qualifiedMaxCount 1 ] .
+
+shape:TimeCondition a sh:NodeShape ;
+    sh:targetClass cco:ont00000853 ;  # Descriptive ICE
+    sh:sparql [
+        sh:message "A time on a condition says which bound of the window it is: \"not before\" or \"late from\" (Decision 48)." ;
+        sh:select """
+            SELECT $this WHERE {
+                ?condition a cco:ont00000127 ; obo:BFO_0000178 $this .
+                ?bearer obo:BFO_0000101 $this .
+                { ?bearer cco:ont00001767 ?time FILTER NOT EXISTS { ?bearer cco:ont00001765 ?bound FILTER(?bound IN ("not before", "late from")) } }
+                UNION
+                { ?bearer cco:ont00001765 ?bound FILTER(?bound IN ("not before", "late from")) FILTER NOT EXISTS { ?bearer cco:ont00001767 ?time } }
+            }""" ] .
+
+shape:Intent a sh:NodeShape ;
+    sh:targetClass cco:ont00000965 ;  # Prescriptive ICE: @, when the act is planned (Decision 48)
+    sh:property
+        [ sh:path [ sh:inversePath obo:BFO_0000178 ] ; sh:minCount 1 ; sh:maxCount 1 ; sh:class obo:IAO_0000007 ;
+          sh:message "An intent is part of exactly one action." ] ,
+        [ sh:path [ sh:inversePath obo:BFO_0000101 ] ; sh:minCount 1 ; sh:maxCount 1 ;
+          sh:message "An intent has one bearer, with its planned time." ] .
 
 shape:Description a sh:NodeShape ;
     sh:targetClass cco:ont00000853 ;  # Descriptive ICE

@@ -1,5 +1,19 @@
 # Changelog - Actions Specifications
 
+## 2026-10-03
+
+### Added
+
+**The mapping from the application vocabulary to CCO** (`ontology/mapping/*.rq`, `ontology/unmapped.ttl`; platform Decisions 45, 49 and 50). One SPARQL CONSTRUCT per structure; mapping the fixture's `expected-app.ttl` yields `expected.ttl`, and every application term is read by a query or listed in `unmapped.ttl` with why. The mapping reads effective terms (`app:waitsOn`, `app:notBefore`, `app:lateFrom`), so an inherited wait or window bound is a condition of the child, and each fact is one condition.
+
+### Changed
+
+**The CCO graph** (`ontology.md`, `schemas/graph.shapes.ttl`, the graph fixture). Helper nodes are blank nodes; entities keep their IRIs (Decision 49). A window bound's condition carries the text `not before` or `late from` with its effective instant, so the two are told apart by structure rather than by IRI. `@` is intent: a Prescriptive ICE that is part of the action, its planned time on a bearer, not a condition and not an act. A metric's description is carried as `dcterms:description`.
+
+### Removed
+
+**A metric's `review_date`** (`objectives.md`, `schemas/app.shapes.ttl`, `ontology.md`). Reviewing a metric is work: an action, recurring or with a due date, in a charter that serves the objective.
+
 ## 2026-10-02
 
 ### Changed

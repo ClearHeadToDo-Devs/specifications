@@ -1,0 +1,12 @@
+# An alias is a Designative Name that designates its entity, text on a bearer.
+PREFIX app: <https://clearhead.us/vocab/app/v1#>
+PREFIX cco: <https://www.commoncoreontologies.org/>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+CONSTRUCT {
+  _:name a cco:ont00000003 ; cco:ont00001916 ?e .                         # Designative Name, designates
+  _:bearer a cco:ont00000253 ; obo:BFO_0000101 _:name ; cco:ont00001765 ?alias .
+} WHERE { ?e app:alias ?alias }

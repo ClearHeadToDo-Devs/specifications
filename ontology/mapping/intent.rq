@@ -1,0 +1,20 @@
+# @ is intent (Decision 48): when the act is planned, not a condition. A
+# Prescriptive ICE that is part of the action, its time on a bearer. No act
+# exists until the work starts (ontology Decision 4).
+PREFIX app: <https://clearhead.us/vocab/app/v1#>
+PREFIX cco: <https://www.commoncoreontologies.org/>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+CONSTRUCT {
+  ?a obo:BFO_0000178 _:intent .
+  _:intent a cco:ont00000965 .                                            # Prescriptive ICE
+  _:bearer a cco:ont00000253 ; obo:BFO_0000101 _:intent ;
+    cco:ont00001767 ?datetime ; cco:ont00001771 ?date .                    # has datetime / date value
+} WHERE {
+  ?a app:start ?start .
+  OPTIONAL { ?a app:start ?datetime FILTER(datatype(?datetime) = xsd:dateTime) }
+  OPTIONAL { ?a app:start ?date FILTER(datatype(?date) = xsd:date) }
+}

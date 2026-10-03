@@ -1,0 +1,14 @@
+# Application terms the mapping deliberately does not read (Decision 45: every
+# term is mapped or listed here, with why). The check reads the term list from
+# ../schemas/app.shapes.ttl and the used terms from ./mapping/*.rq.
+
+@prefix app: <https://clearhead.us/vocab/app/v1#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+app:file rdfs:comment "Where the entity is stored, not the work (Decision 44)." .
+app:line rdfs:comment "Where the entity is stored, not the work (Decision 44)." .
+app:after rdfs:comment "As written; its meaning is carried by app:waitsOn, which includes it (one fact, one condition)." .
+app:sequential rdfs:comment "As written; its meaning is carried by app:waitsOn on the children." .
+app:availableFrom rdfs:comment "As written; its meaning is carried by app:notBefore, the effective lower bound." .
+app:due rdfs:comment "As written; its meaning is carried by app:lateFrom, the effective deadline." .
+app:NotStarted rdfs:comment "Not started is the absence of any act or status (ontology Decision 4)." .

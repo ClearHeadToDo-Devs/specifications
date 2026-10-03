@@ -1,0 +1,13 @@
+# A duration is a Measurement about the action, in minutes.
+PREFIX app: <https://clearhead.us/vocab/app/v1#>
+PREFIX cco: <https://www.commoncoreontologies.org/>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+CONSTRUCT {
+  _:m a cco:ont00001163 ; cco:ont00001808 ?a .                            # Measurement ICE, is about
+  _:bearer a cco:ont00000253 ; obo:BFO_0000101 _:m ;
+    cco:ont00001773 ?minutes ; cco:ont00001863 cco:ont00001667 .           # uses measurement unit: Minute
+} WHERE { ?a app:durationMinutes ?minutes }

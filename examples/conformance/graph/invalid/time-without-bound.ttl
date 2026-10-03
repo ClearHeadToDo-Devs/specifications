@@ -1,5 +1,3 @@
-# An action keeps its IRI; only helper nodes may be blank (Decision 49).
-# expect: Graph
 @prefix : <https://example.org/fixture#> .
 @prefix cco: <https://www.commoncoreontologies.org/> .
 @prefix obo: <http://purl.obolibrary.org/obo/> .
@@ -7,6 +5,13 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix actions: <https://clearhead.us/vocab/actions/v4#> .
 
+# A time on a condition says which bound of the window it is (Decision 48).
+# expect: TimeCondition
+
 :plan a cco:ont00000974 ; rdfs:label "plan" ; obo:BFO_0000178 :objective , :a .
 :objective a cco:ont00000476 ; rdfs:label "objective" .
-:a a obo:IAO_0000007 ; rdfs:label "an action" ; obo:BFO_0000178 [ a obo:IAO_0000007 ; rdfs:label "a blank sub-action" ] .
+:a a obo:IAO_0000007 ; rdfs:label "an action" .
+
+:w a cco:ont00000127 ; obo:BFO_0000178 :a , :d .
+:d a cco:ont00000853 .
+:v a cco:ont00000253 ; obo:BFO_0000101 :d ; cco:ont00001767 "2026-10-05T00:00:00Z"^^xsd:dateTime .

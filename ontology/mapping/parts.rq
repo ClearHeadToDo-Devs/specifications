@@ -1,0 +1,14 @@
+# Containment is published downward (convention 5): a whole has its parts.
+# A charter has its sub-charters, objectives and top-level actions; an action its
+# sub-actions; an objective its sub-objectives.
+PREFIX app: <https://clearhead.us/vocab/app/v1#>
+PREFIX cco: <https://www.commoncoreontologies.org/>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+CONSTRUCT { ?whole obo:BFO_0000178 ?part . }   # has continuant part
+WHERE {
+  { ?part app:partOf ?whole } UNION { ?whole app:serves ?part }
+}

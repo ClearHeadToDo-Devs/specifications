@@ -25,9 +25,10 @@ For objectives that have a measurable outcome, we can also include a `metrics` f
 - `name`: the name of the metric, this is required for the metric to be valid
 - `description`: a description of the metric, this is optional but can be used to give
 - `target`: the target value for the metric, this is optional but can be used to give a clear goal for the metric
-- `review_date`: the date by which the metric should be reviewed, this is optional but can be used to give a clear timeline for the metric
 
 these small metrics allow for measurable objectives that can be later linked to data systems that track the actual data for runtime calculations of steps
+
+A metric says what success looks like, not when to check it. Reviewing a metric is work: an action, recurring or with a due date, in a charter that serves the objective.
 
 ## Content
 For the purposes of parsing, the first H1 header is assumed to be the title of the objective, and the content below it is assumed to be the description of the objective. 

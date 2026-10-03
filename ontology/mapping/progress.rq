@@ -1,0 +1,19 @@
+# In progress and completed are Event Status measurements of the act the action
+# prescribes; a completion time sits on the same bearer.
+PREFIX app: <https://clearhead.us/vocab/app/v1#>
+PREFIX cco: <https://www.commoncoreontologies.org/>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+CONSTRUCT {
+  _:act a cco:ont00000228 ; cco:ont00001920 ?a .                          # Planned Act, prescribed by
+  _:status a cco:ont00000203 ; cco:ont00001868 _:act .                    # Event Status, nominal measurement of
+  _:bearer a cco:ont00000253 ; obo:BFO_0000101 _:status ;
+    cco:ont00001765 ?text ; cco:ont00001767 ?closed .
+} WHERE {
+  VALUES (?state ?text) { (app:InProgress "in progress") (app:Completed "completed") }
+  ?a a app:Action ; app:state ?state .
+  OPTIONAL { ?a app:closed ?closed }
+}
