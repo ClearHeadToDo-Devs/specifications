@@ -60,7 +60,8 @@ shape:Action a sh:NodeShape ;
         [ sh:path app:context ; sh:class app:Context ] ,
         [ sh:path app:after ; sh:class app:Action ] ,
         [ sh:path app:waitsOn ; sh:class app:Action ] ,
-        [ sh:path app:start ; sh:maxCount 1 ; sh:or ( [ sh:datatype xsd:date ] [ sh:datatype xsd:dateTime ] ) ] ,
+        [ sh:path app:plannedStart ; sh:maxCount 1 ; sh:or ( [ sh:datatype xsd:date ] [ sh:datatype xsd:dateTime ] ) ] ,
+        [ sh:path app:plannedEnd ; sh:maxCount 1 ; sh:or ( [ sh:datatype xsd:date ] [ sh:datatype xsd:dateTime ] ) ] ,
         [ sh:path app:availableFrom ; sh:maxCount 1 ; sh:or ( [ sh:datatype xsd:date ] [ sh:datatype xsd:dateTime ] ) ] ,
         [ sh:path app:due ; sh:maxCount 1 ; sh:or ( [ sh:datatype xsd:date ] [ sh:datatype xsd:dateTime ] ) ] ,
         [ sh:path app:closed ; sh:maxCount 1 ; sh:or ( [ sh:datatype xsd:date ] [ sh:datatype xsd:dateTime ] ) ] ,
@@ -86,6 +87,20 @@ shape:Action a sh:NodeShape ;
             SELECT $this ?value WHERE {
                 $this app:notBefore|app:lateFrom ?value .
                 FILTER(TZ(?value) = "")
+            }""" ] .
+
+# --- Planned block (Time) ----------------------------------------------------
+
+shape:PlannedBlock a sh:NodeShape ;
+    sh:targetClass app:Action ;
+    sh:sparql [
+        sh:message "A planned end has a planned start, and only a planned block has a duration (Time)." ;
+        sh:prefixes shape: ;
+        sh:select """
+            SELECT $this ?value WHERE {
+                { $this app:plannedEnd ?value FILTER NOT EXISTS { $this app:plannedStart ?s } }
+                UNION
+                { $this app:durationMinutes ?value FILTER NOT EXISTS { $this app:plannedEnd ?e } }
             }""" ] .
 
 # --- Effective window (Time) -------------------------------------------------

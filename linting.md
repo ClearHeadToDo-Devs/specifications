@@ -26,7 +26,7 @@ Parser recovery is diagnostic input, not semantic authorization. Tree-sitter `ER
 
 Linter rules are categorized into three levels that map to LSP diagnostic severity:
 
-- **Errors:** Logical inconsistencies that block core functionality (e.g., duration without do-date, circular dependencies)
+- **Errors:** Logical inconsistencies that block core functionality (e.g., an empty window, circular dependencies)
 - **Warnings:** Semantic issues that don't block functionality but may indicate problems (e.g., completed parent with uncompleted children, invalid dates)
 - **Info:** Style violations and process improvements (e.g., metadata order, completed date missing)
 
@@ -55,18 +55,14 @@ A linter is *optional* and *configurable* - teams choose which rules to enforce 
 
 These rules detect logical inconsistencies that block core functionality. These are NOT parse errors - the parser accepts this input, but the linter identifies semantic problems.
 
-#### E001: Duration Without Do-Date
+#### E001: Duration Without Do-Date (Retired)
 
     **Fixable:** No
 
-    Duration (`D`) requires a do-date (`@`) to be meaningful.
+    This rule is retired as of Decision 51.
 
-    ```actions
-    [ ] Meeting D60
-    [ ] Meeting @2025-01-20T14:00 D60
-    ```
-
-    **Rationale:** A duration without a start time is nonsensical.
+    Duration is no longer written; it is the length of the `@` block, so a
+    duration cannot exist without a do-date.
 
 #### E002: Recurrence Without Do-Date (Retired)
 
@@ -154,16 +150,19 @@ These rules detect logical inconsistencies that block core functionality. These 
     **Fixable:** No
 
     An Action's effective window (its own `:` intersected with every ancestor's)
-    opens at or after it closes, so the Action can never be done on time.
+    opens at or after it closes, so the Action can never be done on time; or its
+    `@` block ends at or before it starts.
 
     ```actions
     [ ] Submit forms :2026-12-15/2026-11-01
     [ ] Enrollment :2026-11-01/2026-12-15
     >[ ] Submit forms :2026-10-20
+    [ ] Call the plumber @2026-10-03T09:30/2026-10-03T09:00
     ```
 
     **Rationale:** a window is a constraint from the world; an empty one is a
-    contradiction, not a plan (Decision 48).
+    contradiction, not a plan (Decision 48). An empty block is the same mistake
+    in intent (Decision 51).
 
 ### 2. Warnings
 
@@ -377,14 +376,15 @@ not active conformance.
 
     **Fixable:** No
 
-    The planned block, `@` plus its duration (`|`), falls outside the Action's
-    effective window: `@` before the window opens, or the block ending after it
-    closes. A bound covers its written precision, so `@2026-11-01` is inside a
-    window opening `2026-11-01`.
+    The planned block, the `@` range, falls outside the Action's effective
+    window: it starts before the window opens, or ends after it closes. A window
+    bound covers its written precision, so `@2026-11-01` is inside a window
+    opening `2026-11-01`; and both ends are exclusive, so
+    `@2026-12-15T23:00/2026-12-16T00:00` is inside a window closing `2026-12-15`.
 
     ```actions
     [ ] Submit forms @2026-10-20 :2026-11-01/2026-12-15
-    [ ] Submit forms @2026-12-15T23:30 |60 :2026-11-01/2026-12-15
+    [ ] Submit forms @2026-12-15T23:30/2026-12-16T00:30 :2026-11-01/2026-12-15
     ```
 
     **Rationale:** `@` is intent and bounds nothing, so planning outside the
@@ -529,11 +529,11 @@ not active conformance.
     **Severity:** Info
     **Fixable:** No
 
-    Very long durations may indicate data entry errors.
+    A very long `@` block may indicate a data entry error.
 
     ```actions
-    [ ] Task @2025-01-20 D10080  # 1 week = 168 hours
-    [ ] Task @2025-01-20 D120  # 2 hours
+    [ ] Task @2025-01-20T09:00/2025-01-27T09:00  # 1 week = 168 hours
+    [ ] Task @2025-01-20T09:00/2025-01-20T11:00  # 2 hours
     ```
 
     **Configuration:** `max_duration_minutes` (default: 480 = 8 hours)

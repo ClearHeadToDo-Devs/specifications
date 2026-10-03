@@ -45,7 +45,7 @@ Collection ownership is constructed from each charter's canonical workspace anch
 The configured component selects an integration profile, not merely an equivalent wire encoding. A workspace writes new resources using its configured profile. Implementations may read the alternate component during explicit migration or compatibility handling, but a mixed duplicate UID must be diagnosed rather than silently selected.
 
 - `VEVENT` is the schedule-only profile. Calendar peers reconcile scheduling fields; Action lifecycle and task metadata remain local.
-- `VTODO` is the full task-integration profile. Calendar peers reconcile every existing interoperable field independently: `DTSTART`, `DUE`, `STATUS`, `COMPLETED`, `SUMMARY`, `DESCRIPTION`, `PRIORITY`, and `CATEGORIES`, plus supported standards-backed relationships. `X-CLEARHEAD-STATUS:blocked` preserves ClearHead's blocked state beside the interoperable `STATUS:NEEDS-ACTION` fallback.
+- `VTODO` is the full task-integration profile. Calendar peers reconcile every existing interoperable field independently: `DTSTART`, `DURATION`, `STATUS`, `COMPLETED`, `SUMMARY`, `DESCRIPTION`, `PRIORITY`, and `CATEGORIES`, plus supported standards-backed relationships. `X-CLEARHEAD-STATUS:blocked` preserves ClearHead's blocked state beside the interoperable `STATUS:NEEDS-ACTION` fallback.
 
 Both profiles preserve alarms, unknown properties, vendor extensions, UID, and transport-selected paths. ClearHead-only fields remain local unless an explicit standard or `X-CLEARHEAD-*` mapping exists.
 
@@ -89,7 +89,18 @@ A Plan component has:
 - `RDATE`/`EXDATE` (optional): recurrence additions and exclusions;
 - `RECURRENCE-ID` components (optional): sparse occurrence rescheduling or cancellation;
 - `DESCRIPTION` (optional): Plan directives followed by human-readable notes;
-- `DTEND` or `DURATION` for VEVENT, or `DUE`/`DURATION` for VTODO (optional): the end/duration side of the normalized schedule interval.
+- `DTEND` for VEVENT, or `DURATION` for VTODO (optional): the end of the planned block, the `@` range's end (Decision 51).
+
+A Plan carries the `@` block and nothing else of the Action's time. The block and
+`DTSTART` with its end mean the same interval: both are half-open, a `DATE` end
+is exclusive (the day after the last date written in `@`), and a time end is the
+instant written. VTODO writes the end as a `DURATION` because RFC 5545 forbids
+`DURATION` beside `DUE`, and ClearHead writes no `DUE`. On import, a VEVENT
+`DURATION` is read as the `DTEND` it implies; a VTODO `DUE` written by another
+client is a deadline, not a block end, so it is preserved and not read.
+
+The Action's window (`:`) is not synchronized: a calendar component holds one
+interval, and the Plan's is the block. Deadlines are seen in ClearHead.
 
 ClearHead MUST preserve the original time value type and frame when possible: UTC, floating local time, all-day DATE, and IANA `TZID` values are valid. Unknown/custom time zones must not be silently interpreted as the machine's local zone.
 
@@ -140,8 +151,9 @@ The relationship deliberately has split authority:
 
 | Meaning | Authority | Calendar representation |
 | --- | --- | --- |
-| scheduled start | Plan/calendar, bidirectionally reconciled | `DTSTART` |
-| end/duration or due schedule | Plan/calendar, bidirectionally reconciled | `DTEND`, `DUE`, or `DURATION` according to codec |
+| planned start (`@`) | Plan/calendar, bidirectionally reconciled | `DTSTART` |
+| planned end (`@` range end) | Plan/calendar, bidirectionally reconciled | VEVENT `DTEND`; VTODO `DURATION` |
+| window (`:`) | Action-local | none |
 | recurrence and exceptions | Plan/calendar | `RRULE`, `RDATE`, `EXDATE`, `RECURRENCE-ID` |
 | Action name and description | VEVENT: Action display projection; VTODO: bidirectional | `SUMMARY`, `DESCRIPTION` |
 | lifecycle state and completion | VEVENT: Action-local; VTODO: bidirectional | `STATUS`, `COMPLETED`, `X-CLEARHEAD-STATUS` |

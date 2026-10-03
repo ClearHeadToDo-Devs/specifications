@@ -53,7 +53,8 @@
   app:state app:InProgress ;
   app:priority 2 ;
   app:context <urn:uuid:aa0d0a8e-8a8b-5ef1-b25b-f894935d2d82> ;
-  app:start "2026-10-03T09:00:00"^^xsd:dateTime ;
+  app:plannedStart "2026-10-03T09:00:00"^^xsd:dateTime ;
+  app:plannedEnd "2026-10-03T09:15:00"^^xsd:dateTime ;
   app:availableFrom "2026-10-03"^^xsd:date ;
   app:due "2026-10-04"^^xsd:date ;
   app:notBefore "2026-10-03T00:00:00Z"^^xsd:dateTime ;

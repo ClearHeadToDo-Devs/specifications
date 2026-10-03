@@ -14,7 +14,7 @@ CONSTRUCT {
   _:bearer a cco:ont00000253 ; obo:BFO_0000101 _:intent ;
     cco:ont00001767 ?datetime ; cco:ont00001771 ?date .                    # has datetime / date value
 } WHERE {
-  ?a app:start ?start .
-  OPTIONAL { ?a app:start ?datetime FILTER(datatype(?datetime) = xsd:dateTime) }
-  OPTIONAL { ?a app:start ?date FILTER(datatype(?date) = xsd:date) }
+  ?a app:plannedStart ?start .
+  OPTIONAL { ?a app:plannedStart ?datetime FILTER(datatype(?datetime) = xsd:dateTime) }
+  OPTIONAL { ?a app:plannedStart ?date FILTER(datatype(?date) = xsd:date) }
 }

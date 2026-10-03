@@ -10,5 +10,6 @@ app:line rdfs:comment "Where the entity is stored, not the work (Decision 44)." 
 app:after rdfs:comment "As written; its meaning is carried by app:waitsOn, which includes it (one fact, one condition)." .
 app:sequential rdfs:comment "As written; its meaning is carried by app:waitsOn on the children." .
 app:availableFrom rdfs:comment "As written; its meaning is carried by app:notBefore, the effective lower bound." .
+app:plannedEnd rdfs:comment "As written; the block's meaning is its start, on the intent, and its length, app:durationMinutes." .
 app:due rdfs:comment "As written; its meaning is carried by app:lateFrom, the effective deadline." .
 app:NotStarted rdfs:comment "Not started is the absence of any act or status (ontology Decision 4)." .

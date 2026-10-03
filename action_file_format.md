@@ -86,8 +86,6 @@ Supported time forms:
 
 Timezones are optional; local time is assumed when omitted. Offsets and `Z` are allowed.
 
-Durations should use ISO 8601 duration format, for example `PT30M`.
-
 # Field Semantics
 
 ## Depth (required for children)
@@ -170,9 +168,26 @@ Aliases provide stable references independent of name changes:
 
 ## Do date/time (optional)
 
-`@<datetime>` is intent: when the Action is planned to be worked. It bounds
-nothing; the Action may be worked before or after it. With a duration (`|`),
-`@` starts the planned block.
+`@` is intent: when the Action is planned to be worked. It bounds nothing; the
+Action may be worked before or after it. It takes one of two forms:
+
+- `@<datetime>`: the planned start. A date alone plans the whole day, as an
+  all-day event; a date and time plans a point.
+- `@<datetime>/<datetime>`: an ISO 8601 interval, a planned block. Only the full
+  `start/end` form is valid, as for `:`.
+
+The block is half-open and its end is read as a calendar reads one: a date end
+covers its day, a time end is the instant written. So
+`@2026-10-03T09:00/2026-10-03T09:30` is thirty minutes and
+`@2026-10-03/2026-10-05` is three whole days. A start is its first instant.
+This differs from `:` on purpose: a deadline is "by", a block is "until"
+(Decision 51).
+
+Duration is never written; it is the length of the `@` block. Earlier files
+wrote it as `D<minutes>` after `@` (`@2026-10-03T09:00 D15`); parsers should
+keep reading that form, and formatters write it as the equivalent block
+(`@2026-10-03T09:00/2026-10-03T09:15`). A `D` after a date-only `@` has no
+equivalent block and is left as written.
 
 ## Due date/time (optional)
 
@@ -199,10 +214,11 @@ child may narrow the inherited window. `@` is not inherited.
 
 Coherence:
 
-- A planned block outside the effective window is a warning: `@` before the
-  window opens, or `@` plus its duration ending after it closes.
+- A planned block outside the effective window is a warning: `@` starting
+  before the window opens, or its block ending after it closes.
 - A local window bound outside an ancestor's window is a warning.
-- An empty effective window, which opens at or after it closes, is a violation.
+- An empty effective window, which opens at or after it closes, is a violation,
+  as is an `@` block that ends at or before it starts.
 
 Queries use the effective window, but tools must not write inherited bounds into
 source unless the user explicitly requests a materializing operation.
