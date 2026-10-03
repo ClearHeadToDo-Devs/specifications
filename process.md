@@ -53,13 +53,14 @@ calendar is often overwhelming and requires more knowledge of the future than is
 available. Undated Actions should therefore remain normal and rely on priority
 and context when no calendar commitment demands attention.
 
-When timing constraints are real, the Action's do date (`@`) is the lower bound
-of its feasible execution range and its due date (`:`) is the upper bound. An
-Action hierarchy composes these constraints by intersection: the effective lower
-bound is the latest lower bound on the Action or any ancestor, and the effective
-upper bound is the earliest corresponding upper bound. The complete field and
+When timing constraints are real, they live in the Action's due window (`:`): a
+deadline, optionally with a lower bound before which it cannot be done. The do
+date (`@`) is separate: when we intend to work it, which bounds nothing. An
+Action hierarchy composes windows by intersection: the effective window opens at
+the latest lower bound on the Action or any ancestor, and closes at the earliest
+deadline. The complete field and
 coherence semantics are defined in
-[Actions File Format](./action_file_format.md#do-datetime-optional).
+[Actions File Format](./action_file_format.md#due-datetime-optional).
 
 These effective values are query-time derivations. They do not justify writing
 inherited dates into descendants or manufacturing calendar commitments merely

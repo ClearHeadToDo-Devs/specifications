@@ -66,7 +66,7 @@
         },
         "scheduledDateTime": {
           "type": "string",
-          "description": "'@' in the DSL. ISO 8601 local lower bound of the Action's feasible execution range; the Action is not intended to be worked before this value. Effective bounds inherited from ancestors are derived and are not serialized here."
+          "description": "'@' in the DSL. ISO 8601 local date/time when the Action is planned to be worked. Intent only: it bounds nothing and is not inherited (Decision 48)."
         },
         "durationMinutes": {
           "type": "integer",
@@ -75,7 +75,7 @@
         },
         "dueDateTime": {
           "type": "string",
-          "description": "':' in the DSL. ISO 8601 local upper bound of the Action's feasible execution range; the Action is intended to be completed no later than this value. Effective bounds inherited from ancestors are derived and are not serialized here."
+          "description": "':' in the DSL. The Action's window: an ISO 8601 local date/time (a deadline), or an ISO 8601 interval `start/end` (a lower bound and a deadline). A bound covers its written precision. Effective bounds inherited from ancestors are derived and are not serialized here."
         },
         "completedDateTime": {
           "type": "string",

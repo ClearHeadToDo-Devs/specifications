@@ -61,6 +61,7 @@ shape:Action a sh:NodeShape ;
         [ sh:path app:after ; sh:class app:Action ] ,
         [ sh:path app:waitsOn ; sh:class app:Action ] ,
         [ sh:path app:start ; sh:maxCount 1 ; sh:or ( [ sh:datatype xsd:date ] [ sh:datatype xsd:dateTime ] ) ] ,
+        [ sh:path app:availableFrom ; sh:maxCount 1 ; sh:or ( [ sh:datatype xsd:date ] [ sh:datatype xsd:dateTime ] ) ] ,
         [ sh:path app:due ; sh:maxCount 1 ; sh:or ( [ sh:datatype xsd:date ] [ sh:datatype xsd:dateTime ] ) ] ,
         [ sh:path app:closed ; sh:maxCount 1 ; sh:or ( [ sh:datatype xsd:date ] [ sh:datatype xsd:dateTime ] ) ] ,
         [ sh:path dcterms:created ; sh:maxCount 1 ; sh:or ( [ sh:datatype xsd:date ] [ sh:datatype xsd:dateTime ] ) ] ,
@@ -92,11 +93,11 @@ shape:Action a sh:NodeShape ;
 shape:Window a sh:NodeShape ;
     sh:targetClass app:Action ;
     sh:sparql [
-        sh:message "An action with its own @ has a notBefore, and one with its own : a lateFrom." ;
+        sh:message "An action with its own window lower bound has a notBefore, and one with its own deadline a lateFrom." ;
         sh:prefixes shape: ;
         sh:select """
             SELECT $this ?value WHERE {
-                { $this app:start ?value FILTER NOT EXISTS { $this app:notBefore ?n } }
+                { $this app:availableFrom ?value FILTER NOT EXISTS { $this app:notBefore ?n } }
                 UNION
                 { $this app:due ?value FILTER NOT EXISTS { $this app:lateFrom ?l } }
             }""" ] ,

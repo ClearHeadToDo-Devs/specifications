@@ -1,5 +1,11 @@
 # Changelog - Actions Specifications
 
+## 2026-10-02
+
+### Changed
+
+**`:` is the window; `@` is intent** (`action_file_format.md`, `process.md`, `ontology.md`, `linting.md`, `schemas/actions.schema.json`, `schemas/app.shapes.ttl`; platform Decision 48). `:` takes a deadline or an ISO 8601 interval `start/end`, a lower bound and a deadline; `@` is when the Action is planned and no longer bounds anything or is inherited. A bound covers its written precision, so `:…T17:00` is late from 17:01, and the window is half-open. The application graph gains `app:availableFrom`, the written lower bound; `app:notBefore` now derives from it instead of `app:start`. New lints: E008 Empty Window, W015 Planned Outside the Window. Files that used `@` to mean "not before" should move that date into `:`.
+
 ## v0.1.0 — 2026-09-30
 
 The first release: the specifications as of this entry, including every dated entry below. Releases are described in the README.

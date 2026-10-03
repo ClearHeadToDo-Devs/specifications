@@ -170,27 +170,46 @@ Aliases provide stable references independent of name changes:
 
 ## Do date/time (optional)
 
-`@<datetime>` is the local lower bound of the Action's feasible execution
-range: the Action is not intended to be worked before this value.
+`@<datetime>` is intent: when the Action is planned to be worked. It bounds
+nothing; the Action may be worked before or after it. With a duration (`|`),
+`@` starts the planned block.
 
 ## Due date/time (optional)
 
-`:<datetime>` is the local upper bound of the Action's feasible execution
-range: the Action is intended to be completed no later than this value.
+`:` is the Action's window: when it can and must be done. It takes one of two
+forms:
 
-Either bound may be omitted. When both are present they form an inclusive local
-range, and the do date/time must not be later than the due date/time.
+- `:<datetime>`: a deadline only.
+- `:<datetime>/<datetime>`: an ISO 8601 interval, a lower bound ("not before")
+  and a deadline. Only this full `start/end` form is valid: no ISO 8601
+  durations and no abbreviated end.
 
-Action hierarchy composes these constraints without changing the locally stored
-values. An Action's effective lower bound is the latest do date/time asserted by
-itself or any ancestor; its effective upper bound is the earliest due date/time
-asserted by itself or any ancestor. A missing local bound therefore inherits an
-ancestor's bound naturally, while a child may narrow the inherited range.
+A bound covers its written precision, as ISO 8601 reads a reduced-precision
+value: a date covers its day, a minute its minute, a second its second. The
+window is half-open: it opens at the first instant of its lower bound and the
+Action is late from the start of the unit after its deadline. So `:2026-10-05`
+is late from `2026-10-06T00:00`, and `:2026-10-05T17:00` is late from 17:01, while
+`:2026-10-05T17:00:00` is late from 17:00:01.
 
-A local bound outside an ancestor's range should produce a coherence warning. An
-empty effective range is a violation. Queries use the effective range, but tools
-must not write inherited bounds into source unless the user explicitly requests
-a materializing operation.
+Action hierarchy composes windows without changing the locally stored values.
+An Action's effective window opens at the latest lower bound asserted by itself
+or any ancestor and closes at the earliest deadline asserted by itself or any
+ancestor. A missing bound therefore inherits an ancestor's naturally, while a
+child may narrow the inherited window. `@` is not inherited.
+
+Coherence:
+
+- A planned block outside the effective window is a warning: `@` before the
+  window opens, or `@` plus its duration ending after it closes.
+- A local window bound outside an ancestor's window is a warning.
+- An empty effective window, which opens at or after it closes, is a violation.
+
+Queries use the effective window, but tools must not write inherited bounds into
+source unless the user explicitly requests a materializing operation.
+
+Work that can happen outside an Action's window, such as preparing before it
+opens, belongs in its own Action with its own window, related by `<` where
+order matters.
 
 Note: recurrence is not represented in `.actions`.
 

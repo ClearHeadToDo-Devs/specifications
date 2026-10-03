@@ -49,8 +49,8 @@ An action is `app:Action`. Fields are those of [`actions.schema.json`](./schemas
 | `state` | `[ ]` … | `app:state` (below) |
 | `priority` | `!` | `app:priority`, an integer |
 | `contexts` | `+` | `app:context`, per tag, its context node |
-| `scheduledDateTime` | `@` | `app:start`, written; see [Time](#time) |
-| `dueDateTime` | `:` | `app:due`, written; see [Time](#time) |
+| `scheduledDateTime` | `@` | `app:start`, written: when the action is planned; bounds nothing (Decision 48) |
+| `dueDateTime` | `:` | `app:due`, the deadline as written, and `app:availableFrom`, the window's lower bound as written when `:` is an interval; see [Time](#time) |
 | `durationMinutes` | `\|` | `app:durationMinutes`, an integer |
 | `completedDateTime` | `%` | `app:closed`, written: when the action was completed or cancelled |
 | `createdDateTime` | `^` | `dcterms:created`, written |
@@ -72,14 +72,14 @@ Derived: `app:notBefore`, `app:lateFrom` ([Time](#time)) and `app:waitsOn` ([Wai
 
 ### Time
 
-`app:start`, `app:due`, `app:closed` and `dcterms:created` are **as written**: a date alone is an `xsd:date`; a date and time is an `xsd:dateTime` of the form `YYYY-MM-DDThh:mm:ss`, with an offset or `Z` only if the file wrote one.
+`app:start`, `app:availableFrom`, `app:due`, `app:closed` and `dcterms:created` are **as written**: a date alone is an `xsd:date`; a date and time is an `xsd:dateTime` of the form `YYYY-MM-DDThh:mm:ss`, with an offset or `Z` only if the file wrote one.
 
-A bound written as a date covers the whole day (Decision 47). The derived instants say when an action's **effective window** opens and closes, each an `xsd:dateTime` with an offset:
+The window is `:` alone; `@` is intent and bounds nothing (Decision 48). A bound covers its written precision: a date its day, a minute its minute (Decisions 47 and 48). Because `xsd:dateTime` always carries seconds, a written minute and a written second look alike in the as-written terms; the derived instants keep the difference. They say when an action's **effective window** opens and closes, each an `xsd:dateTime` with an offset:
 
-- `app:notBefore`: the first instant the action may be worked. The latest of its own `@` and every ancestor action's, taking a date's first instant.
-- `app:lateFrom`: the first instant the action is late. The earliest of its own `:` and every ancestor action's, taking a date's following midnight and a date and time as itself.
+- `app:notBefore`: the first instant the action may be worked. The latest of its own `app:availableFrom` and every ancestor action's, taking the first instant of its unit.
+- `app:lateFrom`: the first instant the action is late. The earliest of its own `app:due` and every ancestor action's, taking the start of the unit after it: a date's following midnight, a minute's next minute.
 
-A child with no bound of its own therefore inherits its parent's, and one with its own narrows it ([action file format](./action_file_format.md#do-datetime-optional)). A time written without an offset, and every date, is resolved in the **viewer's zone**, the zone in which the graph is projected, using the time-zone database. Queries compare these instants, never the written values: an `xsd:date`, a floating `xsd:dateTime` and one with an offset do not compare reliably in SPARQL.
+A child with no bound of its own therefore inherits its parent's, and one with its own narrows it ([action file format](./action_file_format.md#due-datetime-optional)). `app:start` is never inherited. A time written without an offset, and every date, is resolved in the **viewer's zone**, the zone in which the graph is projected, using the time-zone database. Queries compare these instants, never the written values: an `xsd:date`, a floating `xsd:dateTime` and one with an offset do not compare reliably in SPARQL.
 
 ### Waits
 
@@ -123,7 +123,7 @@ Not yet specified for the application graph. A materialized occurrence is an ord
 The line
 
 ```text
-[-] Call the plumber !2 +phone @2026-10-03T09:00 :2026-10-04 =plumber #01a0faa2-0000-7000-8000-000000000001
+[-] Call the plumber !2 +phone @2026-10-03T09:00 :2026-10-03/2026-10-04 =plumber #01a0faa2-0000-7000-8000-000000000001
 ```
 
 at line 1 of `charters/next.actions`, a top-level action of the root charter, projects in a UTC viewer's zone as:
@@ -135,8 +135,9 @@ at line 1 of `charters/next.actions`, a top-level action of the root charter, pr
   app:priority 2 ;
   app:context <urn:uuid:aa0d0a8e-8a8b-5ef1-b25b-f894935d2d82> ;   # phone
   app:start "2026-10-03T09:00:00"^^xsd:dateTime ;
+  app:availableFrom "2026-10-03"^^xsd:date ;
   app:due "2026-10-04"^^xsd:date ;
-  app:notBefore "2026-10-03T09:00:00Z"^^xsd:dateTime ;
+  app:notBefore "2026-10-03T00:00:00Z"^^xsd:dateTime ;
   app:lateFrom "2026-10-05T00:00:00Z"^^xsd:dateTime ;
   app:alias "plumber" ;
   app:partOf <urn:uuid:01a0faa2-0000-7000-8000-0000000000c0> ;   # the root charter
@@ -173,8 +174,8 @@ An action (one line of a [`.actions` file](./action_file_format.md)) is an IAO a
 | `state` | `[ ]` … | See [Action state](#action-state). |
 | `priority` | `!` | A Priority Measurement ICE (`cco:ont00000369`) that `is an ordinal measurement of` (`cco:ont00001811`) the action; integer on its bearer, 1 first. |
 | `contexts` | `+` | Per tag, a condition describing the [context](#contexts). |
-| `scheduledDateTime` | `@` | A condition: not before this time. The datetime sits on the condition's bearer, not on a BFO temporal instant designated through a CCO identifier, which would add two nodes per time. |
-| `dueDateTime` | `:` | A condition: by this time; datetime on the condition's bearer. |
+| `scheduledDateTime` | `@` | Intent, not a condition (Decision 48); its mapping is decided in `app-to-cco`. |
+| `dueDateTime` | `:` | A condition: by this time; and, when `:` is an interval, a condition: not before its lower bound. Each datetime sits on its condition's bearer, not on a BFO temporal instant designated through a CCO identifier, which would add two nodes per time. |
 | `durationMinutes` | `D` | A Measurement ICE (`cco:ont00001163`) `is about` (`cco:ont00001808`) the action; its bearer has the integer and `uses measurement unit` (`cco:ont00001863`) Minute (`cco:ont00001667`). |
 | `predecessors` | `<` | Per predecessor, a condition describing the predecessor action. |
 | `sequentialChildren` | `~` | Expanded: each child after the first gets a condition describing the child before it. The marker itself is not emitted. |
@@ -246,7 +247,7 @@ A helper node's IRI is `urn:uuid:` followed by the RFC 9562 UUIDv5 whose namespa
 | `when/context/<slug>`, `…/condition` | A context condition and its description |
 | `when/after/<uuid>`, `…/condition` | A wait on a predecessor and its description |
 | `when/waiting`, `…/condition`, `…/condition/value` | Blocked: the outside wait, its description and bearer |
-| `when/scheduled`, `…/condition`, `…/condition/value` | Not before a time |
+| `when/not-before`, `…/condition`, `…/condition/value` | Not before a time: the lower bound of `:` |
 | `when/due`, `…/condition`, `…/condition/value` | By a time |
 | `when/recurrence`, `…/condition`, `…/condition/value` | Repeating time (RRULE text) |
 | `when/due-recurrence`, `…/condition`, `…/condition/value` | Repeating deadline (RRULE text) |

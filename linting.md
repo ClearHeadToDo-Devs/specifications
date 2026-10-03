@@ -149,6 +149,22 @@ These rules detect logical inconsistencies that block core functionality. These 
 
     State is a fundamental part of the syntax and actions without state are considered invalid
 
+#### E008: Empty Window
+
+    **Fixable:** No
+
+    An Action's effective window (its own `:` intersected with every ancestor's)
+    opens at or after it closes, so the Action can never be done on time.
+
+    ```actions
+    [ ] Submit forms :2026-12-15/2026-11-01
+    [ ] Enrollment :2026-11-01/2026-12-15
+    >[ ] Submit forms :2026-10-20
+    ```
+
+    **Rationale:** a window is a constraint from the world; an empty one is a
+    contradiction, not a plan (Decision 48).
+
 ### 2. Warnings
 
     These rules check for suspicious date/time relationships.
@@ -356,6 +372,24 @@ not active conformance.
 
     **Rationale:** Decisions have one authoritative home in DECISIONS.md;
     actions track work and link to that decision rather than copying its text.
+
+#### W015: Planned Outside the Window
+
+    **Fixable:** No
+
+    The planned block, `@` plus its duration (`|`), falls outside the Action's
+    effective window: `@` before the window opens, or the block ending after it
+    closes. A bound covers its written precision, so `@2026-11-01` is inside a
+    window opening `2026-11-01`.
+
+    ```actions
+    [ ] Submit forms @2026-10-20 :2026-11-01/2026-12-15
+    [ ] Submit forms @2026-12-15T23:30 |60 :2026-11-01/2026-12-15
+    ```
+
+    **Rationale:** `@` is intent and bounds nothing, so planning outside the
+    window is allowed but probably a mistake. Work that really can happen
+    earlier, such as preparing, belongs in its own Action (Decision 48).
 
 ### 3. Style and Conventions (Info)
 
