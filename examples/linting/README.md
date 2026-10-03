@@ -15,7 +15,7 @@ The directory code and name must agree with the canonical rule heading in
 
 | Severity | Active fixture codes |
 | --- | --- |
-| Error | `E001`, `E003`, `E004`, `E005`, `E006`, `E008` |
+| Error | `E003`, `E004`, `E005`, `E006`, `E008` |
 | Warning | `W001`, `W002`, `W003`, `W005`, `W006`, `W010`, `W011`, `W012`, `W015` |
 | Information | `I001`, `I002`, `I003`, `I004`, `I006`, `I007`, `I008`, `I009`, `I010`, `I011`, `I012`, `I013`, `I014`, `I015` |
 
@@ -38,6 +38,8 @@ human-readable message.
 
 - `legacy_E002_recurrence_without_do_date/` documents the removed `R:` syntax;
   recurrence now lives in iCalendar Plans.
+- `legacy_E001_duration_without_do_date/` documents the removed `D` duration;
+  duration is now the length of the `@` block (Decision 51).
 - `legacy_W004_missing_creation_date/` documents the former requirement to
   repeat creation provenance in plaintext; sidecar/UUIDv7 provenance makes a
   missing `^` field non-diagnostic.

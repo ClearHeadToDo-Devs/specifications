@@ -25,6 +25,7 @@ consumes the semantic families behind its opt-in `spec-conformance` feature.
 | Fixture | Expectation |
 | --- | --- |
 | `parse/every_field.actions` | one action; every represented metadata field has the value written in the source; no diagnostics |
+| `parse/legacy_duration.actions` | one action whose do-date is the block `2026-10-03T09:00/2026-10-03T09:15` (fifteen minutes); formatting writes `@2026-10-03T09:00/2026-10-03T09:15` and no `D` (Decision 51) |
 | `parse/uuid_v7_derivation.actions` | the UUIDv7 identity is preserved; no retired `W004` diagnostic is emitted; workspace provenance may derive a creation instant when hydrating persisted metadata |
 | `archive/completed_tree.actions` | completed parent and child; no tree-consistency diagnostic; ready for archive |
 | `diagnostics/inconsistent_tree.actions` | closed parent with an open child → exactly one **`W002`** at the parent node |

@@ -56,13 +56,7 @@
             },
             "scheduled_at": {
               "type": "string",
-              "format": "date-time",
-              "description": "Scheduled datetime, RFC 3339 (e.g. 2026-04-01T09:00:00+00:00)."
-            },
-            "duration": {
-              "type": "integer",
-              "minimum": 1,
-              "description": "Duration in minutes."
+              "description": "The do-date, written as '@' takes it: an ISO 8601 date or date-time (the planned start), or a start/end interval (a planned block), e.g. 2026-04-01T09:00/2026-04-01T09:30. Duration is the block's length (Decision 51)."
             }
           }
         }
