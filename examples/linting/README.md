@@ -15,8 +15,8 @@ The directory code and name must agree with the canonical rule heading in
 
 | Severity | Active fixture codes |
 | --- | --- |
-| Error | `E001`, `E003`, `E004`, `E005`, `E006` |
-| Warning | `W001`, `W002`, `W003`, `W005`, `W006`, `W010`, `W011`, `W012` |
+| Error | `E001`, `E003`, `E004`, `E005`, `E006`, `E008` |
+| Warning | `W001`, `W002`, `W003`, `W005`, `W006`, `W010`, `W011`, `W012`, `W015` |
 | Information | `I001`, `I002`, `I003`, `I004`, `I006`, `I007`, `I008`, `I009`, `I010`, `I011`, `I012`, `I013`, `I014`, `I015` |
 
 Not every specified rule needs a hand-authored pair. Implementations should use

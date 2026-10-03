@@ -1,4 +1,4 @@
-# An action with its own @ has a notBefore.
+# An action with its own window lower bound has a notBefore; @ alone gives none (Decision 48).
 # expect: Window
 @prefix : <https://example.org/fixture#> .
 @prefix app: <https://clearhead.us/vocab/app/v1#> .
@@ -9,4 +9,4 @@
 
 :a a app:Action ; rdfs:label "a" ; app:state app:NotStarted ; app:partOf :root ;
     app:file "charters/next.actions" ; app:line 1 ;
-    app:start "2026-10-03"^^xsd:date .
+    app:availableFrom "2026-10-03"^^xsd:date .

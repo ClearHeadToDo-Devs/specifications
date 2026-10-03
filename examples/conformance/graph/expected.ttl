@@ -54,9 +54,9 @@
 <urn:uuid:83087f9a-4e23-5f76-ac95-08358b2a8b95> a cco:ont00000253 ; obo:BFO_0000101 <urn:uuid:bffa6615-40e2-5c68-8cc9-2d7a4cdafad3> ; cco:ont00001773 15 ; cco:ont00001863 cco:ont00001667 .
 <urn:uuid:e39242b3-7f56-56dc-99dd-c646ae6e7f0c> a cco:ont00000127 ; obo:BFO_0000178 <urn:uuid:01a0fb10-0000-7000-8000-000000000001> , <urn:uuid:c9da9a09-9ff2-5e2d-8a2d-69b3f8253b91> .
 <urn:uuid:c9da9a09-9ff2-5e2d-8a2d-69b3f8253b91> a cco:ont00000853 ; cco:ont00001982 <urn:uuid:aa0d0a8e-8a8b-5ef1-b25b-f894935d2d82> .
-<urn:uuid:994a7242-cfda-5ed3-bef3-17e0e4dfbe7c> a cco:ont00000127 ; obo:BFO_0000178 <urn:uuid:01a0fb10-0000-7000-8000-000000000001> , <urn:uuid:101f7182-b315-500b-a483-c4d56ff20b2c> .
-<urn:uuid:101f7182-b315-500b-a483-c4d56ff20b2c> a cco:ont00000853 .
-<urn:uuid:6f147bd8-89e9-5cd2-920e-d9785f1a7349> a cco:ont00000253 ; obo:BFO_0000101 <urn:uuid:101f7182-b315-500b-a483-c4d56ff20b2c> ; cco:ont00001767 "2026-10-03T09:00:00"^^xsd:dateTime .
+<urn:uuid:22d52890-87ce-5d42-8945-14263985534f> a cco:ont00000127 ; obo:BFO_0000178 <urn:uuid:01a0fb10-0000-7000-8000-000000000001> , <urn:uuid:11d21452-eaba-5305-a834-bdc1bc0a6d14> .
+<urn:uuid:11d21452-eaba-5305-a834-bdc1bc0a6d14> a cco:ont00000853 .
+<urn:uuid:7a82ddd4-0f1e-5a3e-95a1-b63e25db731d> a cco:ont00000253 ; obo:BFO_0000101 <urn:uuid:11d21452-eaba-5305-a834-bdc1bc0a6d14> ; cco:ont00001771 "2026-10-03"^^xsd:date .
 <urn:uuid:84015f7c-df40-5eaa-ab4a-c86bcd327e4b> a cco:ont00000127 ; obo:BFO_0000178 <urn:uuid:01a0fb10-0000-7000-8000-000000000001> , <urn:uuid:5979f87e-807c-59d5-ad02-1ad7c58a4e2c> .
 <urn:uuid:5979f87e-807c-59d5-ad02-1ad7c58a4e2c> a cco:ont00000853 .
 <urn:uuid:bbe58783-2db1-563f-9681-912dcb6ca50a> a cco:ont00000253 ; obo:BFO_0000101 <urn:uuid:5979f87e-807c-59d5-ad02-1ad7c58a4e2c> ; cco:ont00001771 "2026-10-04"^^xsd:date .
