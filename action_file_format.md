@@ -86,6 +86,14 @@ Supported time forms:
 
 Timezones are optional; local time is assumed when omitted. Offsets and `Z` are allowed.
 
+A time is kept as written: one without an offset is local time in the viewer's
+zone and is written back without one, and one with an offset keeps it, so a file
+never changes with the machine that formats it (Decision 52). A local time
+resolves as RFC 5545 resolves one (§3.3.5): when it occurs twice, as clocks go
+back, it is the first occurrence; when it does not occur, as clocks go forward,
+it is read with the offset in effect before the gap, so `02:30` on the night
+clocks jump from `02:00` to `03:00` is `03:30`.
+
 A date covers its whole day. A date and time is an instant, however precisely it
 is written: `T17:00` and `T17:00:00` are the same instant. A range `start/end` is
 half-open: it begins at the start's first instant and ends where the end does, a

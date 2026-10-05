@@ -1,5 +1,11 @@
 # Changelog - Actions Specifications
 
+## 2026-10-04
+
+### Changed
+
+**A time is kept as written and resolves as RFC 5545 resolves a local time** (`action_file_format.md`; platform Decision 52). A time without an offset is local to the viewer and written back without one; a written offset is kept. A local time that occurs twice is its first occurrence, and one that does not occur is read with the offset before the gap.
+
 ## 2026-10-03
 
 ### Added
