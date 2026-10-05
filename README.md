@@ -1,6 +1,6 @@
 # ClearHead Ontology
 
-**Current**: V5 (`5.0.0-draft`), on CCO v2.2 and IAO. **Legacy**: v4, still emitted by Core and the CLI.
+**Current**: V5 (`5.0.0-draft`), on CCO v2.2 and IAO. v4 was retired on 2026-10-04 (platform `retire-v4`); git history keeps it.
 
 What ClearHead's data means, stated in standard terms. V5 defines no terms of its own: objectives and plans are CCO, an action is IAO's action specification, and conditions, status, priority and records are CCO patterns. This repository holds the alignment, examples that use it, and checks that prove it answers the questions it must.
 
@@ -30,10 +30,6 @@ make -C v5 imports  # re-fetch the pinned CCO and IAO; fails if the bytes change
 ```
 
 Each answer in `v5/build/*.csv` must match `v5/queries/expected/`, so a question that answers wrong or empty fails. CI runs the same gate with ROBOT pinned by checksum.
-
-## Legacy v4
-
-`v4/`, `examples/v4/`, `queries/v4/`, `tests/` (pytest + pySHACL) and `V4_DESIGN.md` describe the v4 vocabulary (`https://clearhead.us/vocab/actions/v4#`), which minted its own terms (`actions:Action`, `actions:Charter`, `inServiceOf`). Core and the CLI still project to it, and `site/` still hosts it at clearhead.us (see [DEPLOYMENT.md](DEPLOYMENT.md)). It is kept until the implementations move to V5, then removed.
 
 ## License
 
