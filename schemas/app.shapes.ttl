@@ -68,6 +68,7 @@ shape:Action a sh:NodeShape ;
         [ sh:path dcterms:created ; sh:maxCount 1 ; sh:or ( [ sh:datatype xsd:date ] [ sh:datatype xsd:dateTime ] ) ] ,
         [ sh:path app:notBefore ; sh:maxCount 1 ; sh:datatype xsd:dateTime ] ,
         [ sh:path app:lateFrom ; sh:maxCount 1 ; sh:datatype xsd:dateTime ] ,
+        [ sh:path app:plannedFrom ; sh:maxCount 1 ; sh:datatype xsd:dateTime ] ,
         [ sh:path app:file ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ;
           sh:pattern "^[^/.][^\\\\]*$" ;
           sh:message "An action's file is a path relative to the data root (rule 3)." ] ,
@@ -85,7 +86,7 @@ shape:Action a sh:NodeShape ;
         sh:prefixes shape: ;
         sh:select """
             SELECT $this ?value WHERE {
-                $this app:notBefore|app:lateFrom ?value .
+                $this app:notBefore|app:lateFrom|app:plannedFrom ?value .
                 FILTER(TZ(?value) = "")
             }""" ] .
 
@@ -94,11 +95,15 @@ shape:Action a sh:NodeShape ;
 shape:PlannedBlock a sh:NodeShape ;
     sh:targetClass app:Action ;
     sh:sparql [
-        sh:message "A planned end has a planned start, and only a planned block has a duration (Time)." ;
+        sh:message "A planned end has a planned start, a planned start has its instant and only a planned block has a duration (Time)." ;
         sh:prefixes shape: ;
         sh:select """
             SELECT $this ?value WHERE {
                 { $this app:plannedEnd ?value FILTER NOT EXISTS { $this app:plannedStart ?s } }
+                UNION
+                { $this app:plannedStart ?value FILTER NOT EXISTS { $this app:plannedFrom ?f } }
+                UNION
+                { $this app:plannedFrom ?value FILTER NOT EXISTS { $this app:plannedStart ?s } }
                 UNION
                 { $this app:durationMinutes ?value FILTER NOT EXISTS { $this app:plannedEnd ?e } }
             }""" ] .

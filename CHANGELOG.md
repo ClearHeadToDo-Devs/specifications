@@ -4,6 +4,8 @@
 
 ### Changed
 
+**Index rows locate an action from the data root** (`schemas/index_query_result.schema.json`). `charter_root` becomes `data_root`, the workspace's absolute data root, and `source_file` is the application graph's `app:file`, relative to it (`charters/next.actions`), so a row and the graph use one path convention. Consumers join `data_root` and `source_file` as before. `scheduled_at` and `due_date` are as written (`app:plannedStart`, `app:due`): a date stays a date. The views filter and sort on the instants `app:plannedFrom` and `app:lateFrom`, the effective deadline.
+
 **A time is kept as written and resolves as RFC 5545 resolves a local time** (`action_file_format.md`; platform Decision 52). A time without an offset is local to the viewer and written back without one; a written offset is kept. A local time that occurs twice is its first occurrence, and one that does not occur is read with the offset before the gap.
 
 ## 2026-10-03

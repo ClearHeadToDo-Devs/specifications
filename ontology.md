@@ -59,7 +59,7 @@ An action is `app:Action`. Fields are those of [`actions.schema.json`](./schemas
 | `alias` | `=` | `app:alias` |
 | `externalScheduleId`, `externalOccurrenceKey` | none | Not emitted. |
 
-Derived: `app:notBefore`, `app:lateFrom`, `app:durationMinutes` ([Time](#time)) and `app:waitsOn` ([Waits](#waits)). Location: `app:file`, `app:line`.
+Derived: `app:notBefore`, `app:lateFrom`, `app:plannedFrom`, `app:durationMinutes` ([Time](#time)) and `app:waitsOn` ([Waits](#waits)). Location: `app:file`, `app:line`.
 
 ### State values
 
@@ -82,6 +82,7 @@ A child with no bound of its own therefore inherits its parent's, and one with i
 
 The planned block is `@`, never inherited, and read as the window is.
 
+- `app:plannedFrom`: the first instant of `app:plannedStart`, an `xsd:dateTime` with an offset: a date's first instant, a time itself. Queries compare it, never the written start.
 - `app:durationMinutes`: the block's length in whole minutes, rounded down, from the first instant of `app:plannedStart` to the end of `app:plannedEnd` (a date's following midnight, a time itself). Emitted only for an interval of at least a minute; a single `@` value has no duration.
 
 ### Waits
@@ -143,6 +144,7 @@ at line 1 of `charters/next.actions`, a top-level action of the root charter, pr
   app:due "2026-10-04"^^xsd:date ;
   app:notBefore "2026-10-03T00:00:00Z"^^xsd:dateTime ;
   app:lateFrom "2026-10-05T00:00:00Z"^^xsd:dateTime ;
+  app:plannedFrom "2026-10-03T09:00:00Z"^^xsd:dateTime ;
   app:durationMinutes 15 ;
   app:alias "plumber" ;
   app:partOf <urn:uuid:01a0faa2-0000-7000-8000-0000000000c0> ;   # the root charter

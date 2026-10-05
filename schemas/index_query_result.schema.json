@@ -11,6 +11,11 @@
       "description": "Canonical action identity as a urn:uuid IRI. This is the exact spelling the CLI resolver accepts, so a row id may drive show/update/complete/cancel without transformation.",
       "pattern": "^urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
     },
+    "writtenTime": {
+      "type": "string",
+      "description": "A time as the file wrote it (ontology.md, Time; Decision 52): an xsd:date, or an xsd:dateTime with seconds and an offset only if one was written.",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}(T[0-9]{2}:[0-9]{2}:[0-9]{2}(Z|[+-][0-9]{2}:[0-9]{2})?)?$"
+    },
     "indexRow": {
       "type": "object",
       "description": "One actionable item in an index view.",
@@ -20,7 +25,7 @@
         "status",
         "source_file",
         "source_line",
-        "charter_root"
+        "data_root"
       ],
       "additionalProperties": false,
       "properties": {
@@ -36,16 +41,16 @@
         },
         "source_file": {
           "type": "string",
-          "description": "Path to the .actions file containing this action, relative to charter_root."
+          "description": "Path to the .actions file containing this action, relative to data_root: the application graph's app:file (ontology.md, rule 3), such as charters/next.actions."
         },
         "source_line": {
           "type": "integer",
           "description": "1-based line number of the action within source_file.",
           "minimum": 1
         },
-        "charter_root": {
+        "data_root": {
           "type": "string",
-          "description": "Absolute path to the charter root directory of the owning workspace. Resolves source_file to an absolute path without external context."
+          "description": "Absolute path to the data root of the owning workspace (the directory holding charters/, plans/ and objectives/). The graph names no root; the producer attaches it per row, so data_root/source_file is an absolute path without external context."
         },
         "priority": {
           "type": "integer",
@@ -62,14 +67,12 @@
           "description": "Display title of the parent action (rdfs:label). Present exactly when `parent` is present."
         },
         "scheduled_at": {
-          "type": "string",
-          "format": "date-time",
-          "description": "Effective lower bound of the Action's feasible execution range as an xsd:dateTime lexical value (RFC 3339, e.g. 2026-07-01T09:00:00Z), projected by dated views (agenda, weekly). This may be locally asserted or inherited from an ancestor; omitted when no lower bound applies."
+          "$ref": "#/$defs/writtenTime",
+          "description": "The Action's planned start (@) as written: app:plannedStart. Projected by dated views (agenda, weekly), which compare its instant app:plannedFrom; omitted when the Action has no planned start. Never inherited."
         },
         "due_date": {
-          "type": "string",
-          "format": "date-time",
-          "description": "Effective upper bound of the Action's feasible execution range as an xsd:dateTime lexical value (RFC 3339, e.g. 2026-04-17T23:59:59Z), projected by dated views (agenda, weekly). This may be locally asserted or inherited from an ancestor; omitted when no upper bound applies."
+          "$ref": "#/$defs/writtenTime",
+          "description": "The Action's own deadline (:) as written: app:due. Projected by dated views (agenda, weekly), which compare the effective deadline app:lateFrom, so an Action can appear for an inherited deadline and carry no due_date of its own."
         }
       },
       "dependentRequired": {

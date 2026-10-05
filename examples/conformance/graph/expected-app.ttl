@@ -59,6 +59,7 @@
   app:due "2026-10-04"^^xsd:date ;
   app:notBefore "2026-10-03T00:00:00Z"^^xsd:dateTime ;
   app:lateFrom "2026-10-05T00:00:00Z"^^xsd:dateTime ;
+  app:plannedFrom "2026-10-03T09:00:00Z"^^xsd:dateTime ;
   app:durationMinutes 15 ;
   app:partOf <urn:uuid:01a0fb10-0000-7000-8000-0000000000c0> ;
   app:file "charters/next.actions" ; app:line 1 .
