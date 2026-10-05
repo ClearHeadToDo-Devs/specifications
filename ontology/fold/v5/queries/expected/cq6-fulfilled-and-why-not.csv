@@ -1,0 +1,27 @@
+plan,action,state,why
+groceries,buy milk,not started,
+groceries,deep-clean the fridge,not started,
+groceries,plan meals for the week,not started,
+ground the ontology,Core and CLI: project the v5 model and unify the two state machines,cancelled,the first V5 proposal was withdrawn as implementation-first
+ground the ontology,decide user-facing names after the model lands,cancelled,the first V5 proposal was withdrawn as implementation-first
+ground the ontology,file the CCO term request for Action Specification,cancelled,the human chose not to submit it
+ground the ontology,"spec: restate charters, actions and plans as kinds of plan; release v0.2.0",cancelled,the first V5 proposal was withdrawn as implementation-first
+ground the ontology,decide how a dropped action is recorded,completed,
+ground the ontology,"finish the ROBOT gate: lint, CI, and retire the Python tests",in progress,
+ground the ontology,ground the domain before aligning to CCO,in progress,
+ground the ontology,decide how the spec represents the grounded domain,not started,
+ground the ontology,move the SHACL shapes and JSON-LD context into the spec,not started,
+weekly review,be creative and courageous,not started,
+weekly review,collect loose papers and materials,not started,
+weekly review,empty your head,not started,
+weekly review,get clear,not started,
+weekly review,get creative,not started,
+weekly review,get current,not started,
+weekly review,get in to zero,not started,
+weekly review,review next actions lists,not started,
+weekly review,review previous calendar data,not started,
+weekly review,review project and larger outcome lists,not started,
+weekly review,review relevant checklists,not started,
+weekly review,review someday/maybe list,not started,
+weekly review,review upcoming calendar,not started,
+weekly review,review waiting for list,not started,

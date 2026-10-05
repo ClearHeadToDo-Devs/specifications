@@ -1,0 +1,17 @@
+# CQ1: What do I need to do to complete my weekly review?
+# Every step under the plan, at any depth, with its phase and what it waits on.
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX cco: <https://www.commoncoreontologies.org/>
+SELECT ?phase ?step ?waitsOn WHERE {
+  ?plan rdfs:label "weekly review"@en ;
+        obo:BFO_0000178+ ?s .
+  ?s a obo:IAO_0000007 ; rdfs:label ?step .
+  OPTIONAL { ?p a obo:IAO_0000007 ; obo:BFO_0000178 ?s ; rdfs:label ?phase }
+  # waits on: a Performance Specification has ?s as the action and, as its
+  # condition, a part describing another action.
+  OPTIONAL { ?c a cco:ont00000127 ; obo:BFO_0000178 ?s , ?t .
+             ?t a cco:ont00000853 ; cco:ont00001982 ?w .
+             ?w a obo:IAO_0000007 ; rdfs:label ?waitsOn }
+}
+ORDER BY ?phase ?step

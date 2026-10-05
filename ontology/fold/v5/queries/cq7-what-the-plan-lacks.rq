@@ -1,0 +1,28 @@
+# CQ7: What other details does the plan need to succeed?
+# The test (docs/domain.md): could someone else carry it out from what it holds?
+# Lists what each plan is missing. Gaps are reported, never refused.
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX cco: <https://www.commoncoreontologies.org/>
+SELECT ?plan ?missing WHERE {
+  # ?p is bound inside every branch: a FILTER only sees its own group.
+  {
+    ?p a cco:ont00000974 ; rdfs:label ?plan .
+    ?p obo:BFO_0000178 ?o . ?o a cco:ont00000476 .
+    FILTER NOT EXISTS { ?d a cco:ont00000853 ; cco:ont00001808 ?o }
+    BIND("a done-condition for its objective" AS ?missing)
+  } UNION {
+    ?p a cco:ont00000974 ; rdfs:label ?plan .
+    FILTER NOT EXISTS { ?p obo:BFO_0000178+ ?a . ?a a obo:IAO_0000007 }
+    BIND("any actions" AS ?missing)
+  } UNION {
+    ?p a cco:ont00000974 ; rdfs:label ?plan .
+    FILTER NOT EXISTS { ?r a cco:ont00000626 ; cco:ont00001808 ?p }
+    BIND("any known risks" AS ?missing)
+  } UNION {
+    ?p a cco:ont00000974 ; rdfs:label ?plan .
+    FILTER NOT EXISTS { ?m cco:ont00001808 ?p . ?mb obo:BFO_0000101 ?m ; cco:ont00001768 ?u }
+    BIND("any supporting materials" AS ?missing)
+  }
+}
+ORDER BY ?plan ?missing

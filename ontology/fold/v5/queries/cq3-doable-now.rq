@@ -1,0 +1,26 @@
+# CQ3: Which actions can I do within my current context, energy and priorities?
+# The current situation belongs to the question, not the data: here, at home
+# on low energy. An action qualifies when none of its conditions names a
+# different place or a different energy level; no conditions means anywhere.
+# Highest priority first.
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX cco: <https://www.commoncoreontologies.org/>
+SELECT ?action ?priority WHERE {
+  VALUES (?here ?energy) { ("home"@en "low energy"@en) }
+  # Scoped to one plan to keep the example readable; an action with no
+  # conditions can be done anywhere, so unscoped it would list every such action.
+  ?plan rdfs:label "groceries"@en ; obo:BFO_0000178+ ?a .
+  ?a a obo:IAO_0000007 ; rdfs:label ?action .
+  FILTER NOT EXISTS {
+    ?c a cco:ont00000127 ; obo:BFO_0000178 ?a , ?d .
+    ?d a cco:ont00000853 ; cco:ont00001982 ?x .
+    # each branch binds its own label: a FILTER only sees its own group
+    { ?x a obo:BFO_0000029 ; rdfs:label ?place . FILTER(?place != ?here) }
+    UNION
+    { ?x a obo:BFO_0000019 ; rdfs:label ?level . FILTER(?level != ?energy) }
+  }
+  OPTIONAL { ?p a cco:ont00000369 ; cco:ont00001811 ?a .
+             ?pb obo:BFO_0000101 ?p ; cco:ont00001773 ?priority }
+}
+ORDER BY ?priority

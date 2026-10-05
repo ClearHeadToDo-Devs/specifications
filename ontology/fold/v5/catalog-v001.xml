@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Resolves imports to pinned local copies; ROBOT and Protégé both read this file. -->
+<catalog prefer="public" xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+    <uri name="https://www.commoncoreontologies.org/CommonCoreOntologiesMerged" uri="imports/cco-v2.2.ttl"/>
+    <uri name="https://clearhead.us/vocab/clearhead/imports/iao" uri="imports/iao-2026-03-30-module.owl"/>
+</catalog>

@@ -1,0 +1,17 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+@prefix cco: <https://www.commoncoreontologies.org/> .
+@prefix people: <https://clearhead.us/examples/people#> .
+
+# Agents shared by the examples. Text lives on bearers, never on information.
+
+people:darrion a cco:ont00001262 ;  # Person
+    cco:ont00001879 people:darrion-name .  # designated by
+people:darrion-name a cco:ont00000003 .  # Designative Name
+people:darrion-name-bearer a cco:ont00000253 ;  # Information Bearing Entity
+    obo:BFO_0000101 people:darrion-name ;  # is carrier of
+    cco:ont00001765 "Darrion Burgess" .  # has text value
+
+# An AI agent is the machine running it (ontology Decision 3).
+people:claude a cco:ont00001017 ;  # Agent
+    rdfs:label "Claude Opus 5.5 running in Claude Code"@en .

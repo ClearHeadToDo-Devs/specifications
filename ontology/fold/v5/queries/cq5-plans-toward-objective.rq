@@ -1,0 +1,9 @@
+# CQ5: Which plans go toward a given objective?
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX cco: <https://www.commoncoreontologies.org/>
+SELECT ?objective ?plan WHERE {
+  ?p a cco:ont00000974 ; rdfs:label ?plan ; obo:BFO_0000178 ?o .
+  ?o a cco:ont00000476 ; rdfs:label ?objective .
+}
+ORDER BY ?objective ?plan

@@ -1,0 +1,80 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+@prefix cco: <https://www.commoncoreontologies.org/> .
+@prefix people: <https://clearhead.us/examples/people#> .
+@prefix : <https://clearhead.us/examples/ground-the-ontology#> .
+
+# The platform charter ground-the-ontology as of 2026-09-30: real actions,
+# real states. Commitment states (cancelled) classify the action itself;
+# progress states measure the act it prescribes (ontology Decision 4).
+
+:plan a cco:ont00000974 ;  # Plan
+    rdfs:label "ground the ontology"@en ;
+    obo:BFO_0000178 :objective , :ground-domain , :decide-representation , :move-shapes ,
+        :finish-robot-gate , :decide-dropped , :spec-v020 , :core-cli , :names , :term-request ,
+        :after-ground-domain .
+:objective a cco:ont00000476 ;  # Objective
+    rdfs:label "ClearHead's entities are grounded in BFO and CCO, and how the spec represents them is decided"@en .
+
+:ground-domain a obo:IAO_0000007 ; rdfs:label "ground the domain before aligning to CCO"@en .
+:decide-representation a obo:IAO_0000007 ; rdfs:label "decide how the spec represents the grounded domain"@en .
+:move-shapes a obo:IAO_0000007 ; rdfs:label "move the SHACL shapes and JSON-LD context into the spec"@en .
+:finish-robot-gate a obo:IAO_0000007 ; rdfs:label "finish the ROBOT gate: lint, CI, and retire the Python tests"@en .
+:decide-dropped a obo:IAO_0000007 ; rdfs:label "decide how a dropped action is recorded"@en .
+:spec-v020 a obo:IAO_0000007 ; rdfs:label "spec: restate charters, actions and plans as kinds of plan; release v0.2.0"@en .
+:core-cli a obo:IAO_0000007 ; rdfs:label "Core and CLI: project the v5 model and unify the two state machines"@en .
+:names a obo:IAO_0000007 ; rdfs:label "decide user-facing names after the model lands"@en .
+:term-request a obo:IAO_0000007 ; rdfs:label "file the CCO term request for Action Specification"@en .
+
+:after-ground-domain a cco:ont00000127 ;  # Performance Specification
+    obo:BFO_0000178 :decide-representation , :ground-domain-done .
+:ground-domain-done a cco:ont00000853 ; cco:ont00001982 :ground-domain .  # Descriptive ICE, describes
+
+# Progress: acts and their statuses.
+:grounding a cco:ont00000228 ;  # Planned Act
+    cco:ont00001833 people:darrion , people:claude ;  # has agent
+    cco:ont00001920 :ground-domain .  # prescribed by
+:grounding-status a cco:ont00000203 ; cco:ont00001868 :grounding .  # Event Status, measures the act
+:grounding-status-text a cco:ont00000253 ; obo:BFO_0000101 :grounding-status ; cco:ont00001765 "in progress" .
+
+:gating a cco:ont00000228 ; cco:ont00001833 people:claude ; cco:ont00001920 :finish-robot-gate .
+:gating-status a cco:ont00000203 ; cco:ont00001868 :gating .
+:gating-status-text a cco:ont00000253 ; obo:BFO_0000101 :gating-status ; cco:ont00001765 "in progress" .
+
+:deciding a cco:ont00000511 ; cco:ont00001833 people:darrion ; cco:ont00001920 :decide-dropped .  # Act of Planning
+:deciding-status a cco:ont00000203 ; cco:ont00001868 :deciding .
+:deciding-status-text a cco:ont00000253 ; obo:BFO_0000101 :deciding-status ; cco:ont00001765 "completed" .
+
+# Commitment: cancelled actions, each with why. A Nominal Measurement ICE
+# classifies the action; its reason is a Descriptive ICE about the
+# cancellation. Not a part of it: in CCO a descriptive whole with a
+# descriptive part is inferred to be a Performance Specification.
+:spec-v020-cancelled a cco:ont00000293 ; cco:ont00001868 :spec-v020 .
+:core-cli-cancelled a cco:ont00000293 ; cco:ont00001868 :core-cli .
+:names-cancelled a cco:ont00000293 ; cco:ont00001868 :names .
+:term-request-cancelled a cco:ont00000293 ; cco:ont00001868 :term-request .
+
+:withdrawn a cco:ont00000853 ; cco:ont00001808 :spec-v020-cancelled , :core-cli-cancelled , :names-cancelled .  # is about
+:declined a cco:ont00000853 ; cco:ont00001808 :term-request-cancelled .
+
+:cancelled-text-1 a cco:ont00000253 ; obo:BFO_0000101 :spec-v020-cancelled , :core-cli-cancelled , :names-cancelled , :term-request-cancelled ; cco:ont00001765 "cancelled" .
+:withdrawn-text a cco:ont00000253 ; obo:BFO_0000101 :withdrawn ;
+    cco:ont00001765 "the first V5 proposal was withdrawn as implementation-first" .
+:declined-text a cco:ont00000253 ; obo:BFO_0000101 :declined ;
+    cco:ont00001765 "the human chose not to submit it" .
+
+# How done is defined, what threatens it, what supports it.
+:done-when a cco:ont00000853 ; cco:ont00001808 :objective .  # Descriptive ICE, is about
+:done-when-text a cco:ont00000253 ; obo:BFO_0000101 :done-when ;
+    cco:ont00001765 "the domain note answers the competency questions and is distilled into decisions; the domain is aligned with BFO and CCO; how the spec represents it is decided" .
+
+:cco-3-risk a cco:ont00000626 ; cco:ont00001808 :plan .  # Predictive ICE ("an uncertain future event"), is about
+:cco-3-risk-text a cco:ont00000253 ; obo:BFO_0000101 :cco-3-risk ;
+    cco:ont00001765 "CCO 3.0 (due 2026-12-31) may restructure information terms the alignment relies on" .
+
+:design-note a cco:ont00000853 ; cco:ont00001808 :plan .
+:design-note-file a cco:ont00000253 ; obo:BFO_0000101 :design-note ;
+    cco:ont00001768 "https://github.com/ClearHeadToDo-Devs/ontology/blob/main/docs/domain.md"^^<http://www.w3.org/2001/XMLSchema#anyURI> .  # has URI value
+:decisions a cco:ont00000853 ; cco:ont00001808 :plan .
+:decisions-file a cco:ont00000253 ; obo:BFO_0000101 :decisions ;
+    cco:ont00001768 "https://github.com/ClearHeadToDo-Devs/ontology/blob/main/docs/DECISIONS.md"^^<http://www.w3.org/2001/XMLSchema#anyURI> .

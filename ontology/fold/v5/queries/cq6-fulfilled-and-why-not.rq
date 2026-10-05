@@ -1,0 +1,22 @@
+# CQ6: Did we fulfil those plans? If not, why not?
+# Each action's state: cancelled (classifies the action, with why), else the
+# status of its act, else not started (no record at all).
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX cco: <https://www.commoncoreontologies.org/>
+SELECT ?plan ?action ?state ?why WHERE {
+  ?p a cco:ont00000974 ; rdfs:label ?plan ; obo:BFO_0000178+ ?a .
+  ?a a obo:IAO_0000007 ; rdfs:label ?action .
+  OPTIONAL {
+    ?c a cco:ont00000293 ; cco:ont00001868 ?a .
+    ?cb obo:BFO_0000101 ?c ; cco:ont00001765 ?commitment .
+    OPTIONAL { ?r cco:ont00001808 ?c ; a cco:ont00000853 . ?rb obo:BFO_0000101 ?r ; cco:ont00001765 ?why }
+  }
+  OPTIONAL {
+    ?act cco:ont00001920 ?a .
+    ?s a cco:ont00000203 ; cco:ont00001868 ?act .
+    ?sb obo:BFO_0000101 ?s ; cco:ont00001765 ?progress .
+  }
+  BIND(COALESCE(?commitment, ?progress, "not started") AS ?state)
+}
+ORDER BY ?plan ?state ?action

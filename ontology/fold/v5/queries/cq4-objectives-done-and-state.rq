@@ -1,0 +1,17 @@
+# CQ4: How do I define done for my objectives, and how do I keep track?
+# Each objective's done-condition, its state (an agent's confirmation,
+# Decision 5), and any measurement offered as evidence.
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX cco: <https://www.commoncoreontologies.org/>
+SELECT ?objective ?doneWhen ?state ?evidence WHERE {
+  ?o a cco:ont00000476 ; rdfs:label ?objective .
+  OPTIONAL { ?d a cco:ont00000853 ; cco:ont00001808 ?o .
+             ?db obo:BFO_0000101 ?d ; cco:ont00001765 ?doneWhen }
+  OPTIONAL { ?s a cco:ont00000293 ; cco:ont00001868 ?o .
+             ?sb obo:BFO_0000101 ?s ; cco:ont00001765 ?confirmed }
+  OPTIONAL { ?m a/rdfs:subClassOf* cco:ont00001163 ; cco:ont00001808 ?o .  # any kind of measurement
+             ?mb obo:BFO_0000101 ?m ; cco:ont00001765 ?evidence }
+  BIND(COALESCE(?confirmed, "not confirmed") AS ?state)
+}
+ORDER BY ?objective

@@ -1,0 +1,18 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+# ClearHead's extension of the Common Core Ontologies.
+# Only new terms live here; nothing is asserted about CCO, IAO or BFO terms.
+# It has none yet: everything is CCO v2.2 or IAO.
+# The domain and its standard terms are in ../docs/domain.md.
+
+<https://clearhead.us/vocab/clearhead> a owl:Ontology ;
+    owl:versionIRI <https://clearhead.us/vocab/clearhead/5.0.0-draft> ;
+    owl:imports <https://www.commoncoreontologies.org/CommonCoreOntologiesMerged> ,
+        <https://clearhead.us/vocab/clearhead/imports/iao> ;  # IAO terms we use, with their parents
+    rdfs:label "ClearHead"@en ;
+    dcterms:title "ClearHead"@en ;
+    dcterms:license <https://opensource.org/licenses/MIT> ;
+    dcterms:description "ClearHead's use of CCO v2.2 and IAO: imports, examples and checks; no terms of its own."@en .
+

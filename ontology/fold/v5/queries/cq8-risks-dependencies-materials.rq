@@ -1,0 +1,25 @@
+# CQ8: What are the risks, dependencies and supporting materials for this objective?
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX cco: <https://www.commoncoreontologies.org/>
+SELECT ?objective ?kind ?item WHERE {
+  ?p a cco:ont00000974 ; obo:BFO_0000178 ?o .
+  ?o a cco:ont00000476 ; rdfs:label ?objective .
+  {
+    ?r a cco:ont00000626 ; cco:ont00001808 ?p .
+    ?rb obo:BFO_0000101 ?r ; cco:ont00001765 ?item .
+    BIND("risk" AS ?kind)
+  } UNION {
+    ?c a cco:ont00000127 ; obo:BFO_0000178 ?a , ?t .
+    ?p obo:BFO_0000178+ ?c .
+    ?a a obo:IAO_0000007 ; rdfs:label ?al .
+    ?t a cco:ont00000853 ; cco:ont00001982 ?w . ?w a obo:IAO_0000007 ; rdfs:label ?wl .
+    BIND(CONCAT(?al, " waits on ", ?wl) AS ?item)
+    BIND("dependency" AS ?kind)
+  } UNION {
+    ?m cco:ont00001808 ?p . ?mb obo:BFO_0000101 ?m ; cco:ont00001768 ?u .
+    BIND(STR(?u) AS ?item)
+    BIND("material" AS ?kind)
+  }
+}
+ORDER BY ?objective ?kind ?item

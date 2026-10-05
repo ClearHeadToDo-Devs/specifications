@@ -1,0 +1,8 @@
+# Must return nothing: every plan names its objective as a part.
+# The reasoner cannot catch this: under the open world it assumes an unnamed one.
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX cco: <https://www.commoncoreontologies.org/>
+SELECT ?plan WHERE {
+  ?plan a cco:ont00000974 .
+  FILTER NOT EXISTS { ?plan obo:BFO_0000178 ?o . ?o a cco:ont00000476 }
+}

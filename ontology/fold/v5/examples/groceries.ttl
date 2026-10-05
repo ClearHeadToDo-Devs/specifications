@@ -1,0 +1,51 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+@prefix cco: <https://www.commoncoreontologies.org/> .
+@prefix : <https://clearhead.us/examples/groceries#> .
+
+# An area of focus is a plan with a maintained objective (Decision 2), from
+# the human's own example: "buy milk" is done in the errands context *for*
+# "keep food in the house". Context and energy are conditions: each action
+# sits in Performance Specifications, one per condition, whose other part
+# describes it.
+
+:plan a cco:ont00000974 ;  # Plan
+    rdfs:label "groceries"@en ;
+    obo:BFO_0000178 :objective ,
+        :buy-milk-at , :buy-milk-energy , :plan-meals-at , :plan-meals-energy ,
+        :clean-fridge-at , :clean-fridge-energy .
+:objective a cco:ont00000476 ; rdfs:label "keep food in the house"@en .  # Objective
+
+:buy-milk a obo:IAO_0000007 ; rdfs:label "buy milk"@en .
+:plan-meals a obo:IAO_0000007 ; rdfs:label "plan meals for the week"@en .
+:clean-fridge a obo:IAO_0000007 ; rdfs:label "deep-clean the fridge"@en .
+
+# Contexts are places an act can happen; energy levels are what the act asks
+# of whoever does it. Both are what a condition describes.
+:errands a obo:BFO_0000029 ; rdfs:label "errands"@en .  # site
+:home a obo:BFO_0000029 ; rdfs:label "home"@en .
+:low-energy a obo:BFO_0000019 ; rdfs:label "low energy"@en .  # quality
+:high-energy a obo:BFO_0000019 ; rdfs:label "high energy"@en .
+
+# One condition per Performance Specification (specification convention 7).
+:buy-milk-at a cco:ont00000127 ; obo:BFO_0000178 :buy-milk , :at-errands .  # Performance Specification
+:buy-milk-energy a cco:ont00000127 ; obo:BFO_0000178 :buy-milk , :on-low-energy .
+:plan-meals-at a cco:ont00000127 ; obo:BFO_0000178 :plan-meals , :at-home .
+:plan-meals-energy a cco:ont00000127 ; obo:BFO_0000178 :plan-meals , :on-low-energy-2 .
+:clean-fridge-at a cco:ont00000127 ; obo:BFO_0000178 :clean-fridge , :at-home-2 .
+:clean-fridge-energy a cco:ont00000127 ; obo:BFO_0000178 :clean-fridge , :on-high-energy .
+
+:at-errands a cco:ont00000853 ; cco:ont00001982 :errands .  # Descriptive ICE, describes
+:at-home a cco:ont00000853 ; cco:ont00001982 :home .
+:at-home-2 a cco:ont00000853 ; cco:ont00001982 :home .
+:on-low-energy a cco:ont00000853 ; cco:ont00001982 :low-energy .
+:on-low-energy-2 a cco:ont00000853 ; cco:ont00001982 :low-energy .
+:on-high-energy a cco:ont00000853 ; cco:ont00001982 :high-energy .
+
+# Priorities: an ordinal measurement of each action, 1 first.
+:buy-milk-priority a cco:ont00000369 ; cco:ont00001811 :buy-milk .  # Priority Measurement, is an ordinal measurement of
+:plan-meals-priority a cco:ont00000369 ; cco:ont00001811 :plan-meals .
+:clean-fridge-priority a cco:ont00000369 ; cco:ont00001811 :clean-fridge .
+:buy-milk-priority-value a cco:ont00000253 ; obo:BFO_0000101 :buy-milk-priority ; cco:ont00001773 2 .  # bearer, has integer value
+:plan-meals-priority-value a cco:ont00000253 ; obo:BFO_0000101 :plan-meals-priority ; cco:ont00001773 1 .
+:clean-fridge-priority-value a cco:ont00000253 ; obo:BFO_0000101 :clean-fridge-priority ; cco:ont00001773 3 .

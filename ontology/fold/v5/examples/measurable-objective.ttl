@@ -1,0 +1,17 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+@prefix cco: <https://www.commoncoreontologies.org/> .
+@prefix : <https://clearhead.us/examples/measurable-objective#> .
+
+# The human's example of a measurable objective (Decision 5). The 87% is
+# ILLUSTRATIVE, not real data. A measure is evidence; "achieved" is still an
+# agent's confirmation, recorded as the objective's state, and there is none yet.
+
+:objective a cco:ont00000476 ;  # Objective
+    rdfs:label "increase on-time task completion"@en .
+:done-when a cco:ont00000853 ; cco:ont00001808 :objective .
+:done-when-text a cco:ont00000253 ; obo:BFO_0000101 :done-when ;
+    cco:ont00001765 "over 90% on-time on average across a three-month period" .
+
+:latest a cco:ont00000845 ; cco:ont00001808 :objective .  # Proportional Ratio Measurement, offered as evidence
+:latest-value a cco:ont00000253 ; obo:BFO_0000101 :latest ; cco:ont00001765 "87% on-time, last three months (illustrative)" .

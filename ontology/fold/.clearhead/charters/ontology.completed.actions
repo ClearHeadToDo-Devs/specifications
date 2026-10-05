@@ -1,0 +1,28 @@
+[x] Build out the examples $added ics-linked-schedule.ttl (ICS-derived actions with hasExternalScheduleId/hasExternalOccurrenceKey), ad-hoc-actions.ttl (Charter-scoped actions without a Plan), and parameterised SHACL tests covering all valid/ and invalid/ examples$ +examples %2026-05-16T00:00 #019cfa3e-309e-7050-aa49-c709f4f5a8e7
+[x] build out some SPARQL queries $11 queries across basic/ planning/ productivity/ validation/; all migrated to actions:Action class, plan optional for ad-hoc, ICS schedule_id surfaced; new schedule-series.sparql for external series grouping$ +sparql %2026-05-16T00:00 #019cfa3e-8bc7-7932-aae4-f5a64ad283c4
+[x] fix INBOX_CHARTER_NS vs CHARTER_NS mismatch in graph.rs $graph.rs uses INBOX_CHARTER_NS to derive parent charter UUIDs when writing hasSubCharter triples, but charter.rs uses CHARTER_NS — different namespaces, so triples always point to wrong URIs and recursive SPARQL queries silently return nothing$ %2026-03-18T00:08 #019cffb8-94e5-76e1-8e48-c6f5dbe4bb78
+[x] sync v4 terminology and property domains with upstream CCO and platform usage $all sub-tasks complete; OWL property domains widened to match what core actually emits (hasUUID, hasCreatedDateTime, hasSequentialChildren, hasExternalScheduleId all now target Prescriptive ICE); ghost hasExternalId property retired$ +ontology %2026-05-16T00:00 #4eb85cef-89eb-46e8-8f84-2b9799e7f2c5
+    >[x] update v4 docs and comments from Directive ICE to Prescriptive ICE %2026-04-10T00:18 #5d741a1c-af3e-481e-b951-c6eaa7ceeb6b
+    >[x] review and widen local metadata property domains where needed %2026-04-10T00:18 #0adf9015-b54c-4a03-9de2-b0e6500d0fd9
+    >[x] narrow hasDurationMinutes to PlannedAct semantics %2026-04-10T00:36 #4e70379d-e2ba-430f-b5c6-48fb96d991bd
+    >[x] retire stale root-level v3 test harness %2026-04-10T00:44 #8b93c0c2-3fb7-4f41-9243-1b5f35cd0ab0
+    >[x] reconcile ontology-out contract with canonical v4 semantics %2026-04-12T00:00 #7e648c3d-8506-4292-a8b8-ee77a1dc3da3
+    >[x] add v4.3.0 predicates to OWL and context file %2026-04-12T00:00 #a1b2c3d4-4300-0000-0000-000000000001
+    >[x] write canonical home-life-domain example %2026-04-12T00:00 #a1b2c3d4-4300-0000-0000-000000000002
+    >[x] update SHACL shapes to v4.3.0 %2026-04-12T00:00 #a1b2c3d4-4300-0000-0000-000000000003
+    >[x] update existing SPARQL queries for predicate rename %2026-04-12T00:00 #a1b2c3d4-4300-0000-0000-000000000004
+    >[x] write agenda SPARQL query %2026-04-12T00:00 #a1b2c3d4-4300-0000-0000-000000000005
+    >[x] document the canonical ontology-out JSON-LD shape %2026-04-12T00:00 #93a0c2a2-b817-4f11-9c1e-a9ec9c642415
+    >[x] make context first-class explicit in the ontology-out contract %2026-04-12T00:00 #bf1c6227-25b3-40cf-8bbe-a7900be855d8
+    >[x] widen hasUUID, hasCreatedDateTime, hasSequentialChildren, hasExternalScheduleId domains to Prescriptive ICE $OWL now truthfully reflects Charter/Plan/Action all carrying UUIDs; Action carrying created dates; Action carrying sequential flag; Plan carrying external schedule IDs$ %2026-05-16T00:00 #019df000-0001-7000-0000-000000000001
+    >[x] retire ghost hasExternalId property $Plan.external_id now emits actions:hasExternalScheduleId (same property as Action), no more undefined predicate in the graph$ %2026-05-16T00:00 #019df000-0002-7000-0000-000000000001
+    >[x] add ActionPriorityShape, ActionAliasShape, CharterUUIDShape, ActionUUIDShape to SHACL $shapes now cover all entity types that actually carry these properties$ %2026-05-16T00:00 #019df000-0003-7000-0000-000000000001
+[x] continue expanding canonical ontology-out examples for conformance testing %2026-05-16T00:00 #2f5f0f2f-862d-41bd-b8e2-a3a804f32458
+[x] add neutral external schedule linkage properties for schedule-derived acts %2026-04-20T13:00 #019db300-0001-7000-0000-000000000001
+    >[x] add actions %2026-04-20T13:00 #019db300-0002-7000-0000-000000000001
+    >[x] add SHACL shape for optional external identity fields %2026-04-20T13:00 #019db300-0003-7000-0000-000000000001
+    >[x] update JSON-LD context and schema with externalScheduleId/externalOccurrenceKey keys %2026-04-20T13:00 #019db300-0004-7000-0000-000000000001
+[x] update SPARQL queries for ICS-based recurrence model %2026-05-16T00:00 #019db300-0005-7000-0000-000000000001
+[x] add ICS-linked example to ontology conformance fixtures %2026-05-16T00:00 #019db300-0006-7000-0000-000000000001
+[x] clean up stale root-level planning artifacts $modeling_functionality_plan.md and semantic_contract_plan.md are historical pre-design notes, no longer current truth; either archive to docs/archive/ or delete$ +docs %2026-07-12T11:31 #019df000-0006-7000-0000-000000000001
+[x] rewrite CLAUDE.md to reflect v4.4.0 state $structure diagram references files that no longer exist (v3/, BFO_CCO_ALIGNMENT.md, SCHEMA_ORG_ALIGNMENT.md), version numbers say v4.1.0 throughout, pitfall section has wrong CCO class name$ +docs %2026-07-12T11:34 #019df000-0005-7000-0000-000000000001

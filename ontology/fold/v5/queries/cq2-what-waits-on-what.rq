@@ -1,0 +1,17 @@
+# CQ2: Which actions depend on other actions for my objective to come to fruition?
+# For each plan's objective, every wait among its actions. A condition is a
+# wait only when it describes another action; places and energy are context.
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX cco: <https://www.commoncoreontologies.org/>
+SELECT ?objective ?action ?waitsOn WHERE {
+  ?plan a cco:ont00000974 ;
+        obo:BFO_0000178 ?o ;
+        obo:BFO_0000178+ ?c .
+  ?o a cco:ont00000476 ; rdfs:label ?objective .
+  ?c a cco:ont00000127 ; obo:BFO_0000178 ?a , ?t .
+  ?a a obo:IAO_0000007 ; rdfs:label ?action .
+  ?t a cco:ont00000853 ; cco:ont00001982 ?w .
+  ?w a obo:IAO_0000007 ; rdfs:label ?waitsOn .
+}
+ORDER BY ?objective ?action

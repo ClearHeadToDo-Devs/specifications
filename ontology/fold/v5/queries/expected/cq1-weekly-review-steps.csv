@@ -1,0 +1,15 @@
+phase,step,waitsOn
+,get clear,
+,get creative,get current
+,get current,get clear
+get clear,collect loose papers and materials,
+get clear,empty your head,get in to zero
+get clear,get in to zero,collect loose papers and materials
+get creative,be creative and courageous,
+get creative,review someday/maybe list,
+get current,review next actions lists,
+get current,review previous calendar data,
+get current,review project and larger outcome lists,
+get current,review relevant checklists,
+get current,review upcoming calendar,
+get current,review waiting for list,
