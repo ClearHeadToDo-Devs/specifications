@@ -1,7 +1,7 @@
 objective,kind,item
 "ClearHead's entities are grounded in BFO and CCO, and how the spec represents them is decided",dependency,decide how the spec represents the grounded domain waits on ground the domain before aligning to CCO
-"ClearHead's entities are grounded in BFO and CCO, and how the spec represents them is decided",material,https://github.com/ClearHeadToDo-Devs/ontology/blob/main/docs/DECISIONS.md
-"ClearHead's entities are grounded in BFO and CCO, and how the spec represents them is decided",material,https://github.com/ClearHeadToDo-Devs/ontology/blob/main/docs/domain.md
+"ClearHead's entities are grounded in BFO and CCO, and how the spec represents them is decided",material,https://github.com/ClearHeadToDo-Devs/specifications/blob/main/ontology/DECISIONS.md
+"ClearHead's entities are grounded in BFO and CCO, and how the spec represents them is decided",material,https://github.com/ClearHeadToDo-Devs/specifications/blob/main/ontology/domain.md
 "ClearHead's entities are grounded in BFO and CCO, and how the spec represents them is decided",risk,CCO 3.0 (due 2026-12-31) may restructure information terms the alignment relies on
 maintain planning habits to minimize the amount of unplanned planning one must do throughout the week,dependency,empty your head waits on get in to zero
 maintain planning habits to minimize the amount of unplanned planning one must do throughout the week,dependency,get creative waits on get current

@@ -8,7 +8,7 @@ The system holds only information: plans, objectives, and records of what happen
 
 ## Competency questions
 
-The model must answer these, from the human's own words. Each is a `robot query` in [`v5/queries/`](../v5/queries/), run by `make -C v5 test` over the examples.
+The model must answer these, from the human's own words. Each is a `robot query` in [`queries/`](queries/), run by `make -C ontology test` over the examples.
 
 1. What do I need to do to complete my weekly review?
 2. Which steps depend on other steps for my objective to come to fruition?

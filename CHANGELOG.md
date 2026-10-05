@@ -4,6 +4,8 @@
 
 ### Changed
 
+**The ontology lives here** (`ontology/`; platform Decision 50). The former `ontology` repository's V5 content (the header, imports, examples, competency queries and verify rules), its `domain.md`, `DECISIONS.md` and license are folded in with their history, beside the mapping. `make -C ontology test` is its ROBOT gate, run by the platform's pinned gate; the specification stays inert data.
+
 **`app:plannedFrom`, the planned start's instant** (`ontology.md`, `schemas/app.shapes.ttl`, `ontology/unmapped.ttl`, the graph fixture; platform Decision 53). A derived `xsd:dateTime` in the viewer's zone, so queries compare `@` as they compare the window, never the written start. Every action with `app:plannedStart` has it. Its meaning is `app:plannedStart`'s, so the mapping lists it as unmapped.
 
 **Index rows locate an action from the data root** (`schemas/index_query_result.schema.json`; platform Decision 53). `charter_root` becomes `data_root`, the workspace's absolute data root, and `source_file` is the application graph's `app:file`, relative to it (`charters/next.actions`), so a row and the graph use one path convention. Consumers join `data_root` and `source_file` as before. `scheduled_at` and `due_date` are as written (`app:plannedStart`, `app:due`): a date stays a date. The views filter and sort on the instants `app:plannedFrom` and `app:lateFrom`, the effective deadline.

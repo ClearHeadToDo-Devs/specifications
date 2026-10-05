@@ -1,6 +1,6 @@
 # Ontology decisions
 
-Decisions that only this repository must honor. Decisions that span repositories live in the platform's `docs/DECISIONS.md`. Each entry states the choice, the alternatives rejected, and the trade-off accepted. The domain they shape, and its standard terms, is in [domain.md](domain.md).
+Decisions about the ontology's meaning (the former `ontology` repository's log, folded in with Decision 50). Decisions that span repositories live in the platform's `docs/DECISIONS.md`. Each entry states the choice, the alternatives rejected, and the trade-off accepted. The domain they shape, and its standard terms, is in [domain.md](domain.md).
 
 ---
 

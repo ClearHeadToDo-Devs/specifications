@@ -1,2 +1,5 @@
 # Runtime workspace write-lock (holds a live PID); never versioned.
 **/.clearhead.lock
+
+# ROBOT build output
+ontology/build/

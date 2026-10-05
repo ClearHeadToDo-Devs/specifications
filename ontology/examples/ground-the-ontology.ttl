@@ -74,7 +74,7 @@
 
 :design-note a cco:ont00000853 ; cco:ont00001808 :plan .
 :design-note-file a cco:ont00000253 ; obo:BFO_0000101 :design-note ;
-    cco:ont00001768 "https://github.com/ClearHeadToDo-Devs/ontology/blob/main/docs/domain.md"^^<http://www.w3.org/2001/XMLSchema#anyURI> .  # has URI value
+    cco:ont00001768 "https://github.com/ClearHeadToDo-Devs/specifications/blob/main/ontology/domain.md"^^<http://www.w3.org/2001/XMLSchema#anyURI> .  # has URI value
 :decisions a cco:ont00000853 ; cco:ont00001808 :plan .
 :decisions-file a cco:ont00000253 ; obo:BFO_0000101 :decisions ;
-    cco:ont00001768 "https://github.com/ClearHeadToDo-Devs/ontology/blob/main/docs/DECISIONS.md"^^<http://www.w3.org/2001/XMLSchema#anyURI> .
+    cco:ont00001768 "https://github.com/ClearHeadToDo-Devs/specifications/blob/main/ontology/DECISIONS.md"^^<http://www.w3.org/2001/XMLSchema#anyURI> .

@@ -2,7 +2,7 @@
 
 > **Draft** (platform Decisions 45 to 53, charter emit-the-ontology). Implementations publish the application graph defined here; v4 is retired.
 
-A conforming implementation publishes a workspace as the **application graph**: RDF in ClearHead's application vocabulary, `app:`, defined here. It is what queries read and what an export writes. What each `app:` term *means* is defined by its mapping to CCO v2.2 and IAO terms, the [ClearHead ontology](https://github.com/ClearHeadToDo-Devs/ontology) (see its [domain reference](https://github.com/ClearHeadToDo-Devs/ontology/blob/main/docs/domain.md)); an `app:` term asserts nothing its mapping does not, and every term has one. The [CCO graph](#meaning-the-cco-graph) below is that meaning, written out for the conformance fixture. The SHACL shapes in [`schemas/`](./schemas/) test both graphs (Decision 42).
+A conforming implementation publishes a workspace as the **application graph**: RDF in ClearHead's application vocabulary, `app:`, defined here. It is what queries read and what an export writes. What each `app:` term *means* is defined by its mapping to CCO v2.2 and IAO terms, the [ClearHead ontology](./ontology/) (see its [domain reference](./ontology/domain.md)); an `app:` term asserts nothing its mapping does not, and every term has one. The [CCO graph](#meaning-the-cco-graph) below is that meaning, written out for the conformance fixture. The SHACL shapes in [`schemas/`](./schemas/) test both graphs (Decision 42).
 
 ## Canonical RDF Dataset
 
