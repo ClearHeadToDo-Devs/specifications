@@ -1,0 +1,11 @@
+# clearhead.dev resolves ClearHead's names (platform Decision 49). Data never
+# holds a hosting URL; these rules send each name to where it is documented.
+# A version path is a release: v1 is the latest v1 release, served here from
+# the release branch; v1/<x.y.z> and /schemas/<tag>/ are that release exactly.
+/vocab/app/v1                  /ontology#application-graph  302
+/vocab/app/v1/:version         https://github.com/ClearHeadToDo-Devs/specifications/blob/v:version/ontology.md#application-graph  302
+/schemas/:tag/:name            https://raw.githubusercontent.com/ClearHeadToDo-Devs/specifications/:tag/schemas/:name  302
+/specifications/app-shapes     /schemas/app.shapes.ttl  302
+/specifications/graph-shapes   /schemas/graph.shapes.ttl  302
+/vocab/clearhead               /ontology/clearhead.ttl  302
+/vocab/clearhead/imports/iao   /ontology/imports/iao-2026-03-30-module.owl  302

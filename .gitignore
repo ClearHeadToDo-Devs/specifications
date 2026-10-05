@@ -3,3 +3,7 @@
 
 # ROBOT build output
 ontology/build/
+
+# mdbook output (the site is built by Cloudflare Pages from the release branch)
+book/
+.bin/

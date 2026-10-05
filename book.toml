@@ -1,0 +1,12 @@
+[book]
+title = "ClearHead Specifications"
+authors = ["ClearHeadToDo-Devs"]
+language = "en"
+src = "."
+
+[build]
+build-dir = "book"
+create-missing = false
+
+[output.html]
+git-repository-url = "https://github.com/ClearHeadToDo-Devs/specifications"

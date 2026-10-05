@@ -1,0 +1,30 @@
+#!/bin/sh
+# Build the clearhead.dev site (platform Decision 49): the specification as an
+# mdbook, with its schemas, shapes and ontology files served as written.
+# Cloudflare Pages runs this on the release branch; it runs the same locally.
+set -eu
+
+cd "$(dirname "$0")"
+
+MDBOOK_VERSION=0.5.4
+MDBOOK_SHA256=3f28de05dafca9d0f2eab99c662116b0e37b89b1d96a08f8f430b9eeae958cd7
+
+if command -v mdbook >/dev/null 2>&1; then
+    mdbook=mdbook
+else
+    mkdir -p .bin
+    curl -sSfL -o .bin/mdbook.tgz \
+        "https://github.com/rust-lang/mdBook/releases/download/v$MDBOOK_VERSION/mdbook-v$MDBOOK_VERSION-x86_64-unknown-linux-gnu.tar.gz"
+    echo "$MDBOOK_SHA256  .bin/mdbook.tgz" | sha256sum -c -
+    tar -xzf .bin/mdbook.tgz -C .bin
+    mdbook=.bin/mdbook
+fi
+
+rm -rf book
+"$mdbook" build
+
+# mdbook copies every non-Markdown file under the source root. Publish only
+# the specification: no top-level hidden files (.git, the spec's own
+# .clearhead), no build output, no archive, no build tooling.
+find book -mindepth 1 -maxdepth 1 -name '.*' ! -name .nojekyll -exec rm -rf {} +
+rm -rf book/Archive book/ontology/build book/book.toml book/build-site
