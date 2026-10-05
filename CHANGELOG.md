@@ -1,5 +1,9 @@
 # Changelog - Actions Specifications
 
+## v0.2.0 — 2026-10-04
+
+The second release: the specifications as of this entry, including every dated entry below down to v0.1.0. It is the first published at `clearhead.dev` (platform Decision 49): schema `$id`s are `https://clearhead.dev/schemas/v0.2.0/<name>.schema.json`, and the application vocabulary is `https://clearhead.dev/vocab/app/v1#`.
+
 ## 2026-10-04
 
 ### Changed

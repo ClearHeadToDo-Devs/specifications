@@ -21,8 +21,10 @@ The specifications are released together under one [semantic version](https://se
 An implementation conforms to a release, never to a branch. Every schema's `$id` names the release it belongs to:
 
 ```text
-https://raw.githubusercontent.com/ClearHeadToDo-Devs/specifications/<tag>/schemas/<name>.schema.json
+https://clearhead.dev/schemas/<tag>/<name>.schema.json
 ```
+
+`clearhead.dev` is this specification as a site, published from the `release` branch (platform Decision 49): a release is tagged on `main`, `release` is fast-forwarded to it, and the site, the application vocabulary (`https://clearhead.dev/vocab/app/v1#`) and the schemas update together. Releases before v0.2.0 named their schemas by their `raw.githubusercontent.com` URL, which still resolves.
 
 and a document declares the schema it follows with that URL as its `$schema`. A release is one commit that moves every `$id` to the new tag and gives the changelog's pending entries that version; the tag points at that commit.
 

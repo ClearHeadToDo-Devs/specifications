@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/ClearHeadToDo-Devs/specifications/v0.1.0/schemas/actions.schema.json",
+  "$id": "https://clearhead.dev/schemas/v0.2.0/actions.schema.json",
   "title": "Actions File Serialization Format",
   "description": "JSON Schema for the canonical serialization of .actions files. ontology.md's action terms map each field to its DSL token and its application-graph terms.",
   "type": "object",

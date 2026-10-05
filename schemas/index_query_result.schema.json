@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/ClearHeadToDo-Devs/specifications/v0.1.0/schemas/index_query_result.schema.json",
+  "$id": "https://clearhead.dev/schemas/v0.2.0/index_query_result.schema.json",
   "title": "ClearHead Index Query Result",
   "description": "The JSON array emitted by the CLI's in-process index query family (default, unscheduled, agenda, weekly, chain) under `--format json`. Every row is one actionable item carrying a canonical id, display fields, status, priority, and source-locator fields. This schema pins the producer contract without adding an envelope or reshaping the payload. Array order is the view's SPARQL ORDER BY and is significant. Row membership is owned by each view; this schema constrains row SHAPE, not which rows appear.",
   "type": "array",
