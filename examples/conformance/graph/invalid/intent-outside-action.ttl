@@ -3,7 +3,6 @@
 @prefix obo: <http://purl.obolibrary.org/obo/> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix actions: <https://clearhead.us/vocab/actions/v4#> .
 
 # An intent (@) is part of exactly one action (Decision 48).
 # expect: Intent

@@ -1,18 +1,16 @@
 # Ontology & Linked Data
 
-> **Draft** (platform Decisions 45 to 47, charter emit-the-ontology). Until implementations move, they still emit v4; the sections marked *unchanged* already hold.
+> **Draft** (platform Decisions 45 to 53, charter emit-the-ontology). Implementations publish the application graph defined here; v4 is retired.
 
 A conforming implementation publishes a workspace as the **application graph**: RDF in ClearHead's application vocabulary, `app:`, defined here. It is what queries read and what an export writes. What each `app:` term *means* is defined by its mapping to CCO v2.2 and IAO terms, the [ClearHead ontology](https://github.com/ClearHeadToDo-Devs/ontology) (see its [domain reference](https://github.com/ClearHeadToDo-Devs/ontology/blob/main/docs/domain.md)); an `app:` term asserts nothing its mapping does not, and every term has one. The [CCO graph](#meaning-the-cco-graph) below is that meaning, written out for the conformance fixture. The SHACL shapes in [`schemas/`](./schemas/) test both graphs (Decision 42).
 
 ## Canonical RDF Dataset
 
-*Unchanged.* This is the normative, **engine-neutral** contract for the RDF that ClearHead publishes. A conforming implementation produces this dataset from a validated workspace whether or not any SPARQL engine is present.
+This is the normative, **engine-neutral** contract for the RDF that ClearHead publishes. A conforming implementation produces this dataset from a validated workspace whether or not any SPARQL engine is present.
 
 The single projection is authoritative for every ClearHead RDF statement. JSON-LD is a serialization of this same dataset, never a second export path, and it MUST preserve the same facts and graph identity.
 
 ### Publication Boundary
-
-*Unchanged.*
 
 - The plaintext workspace is the only canonical write model. RDF is a deterministic, replaceable **snapshot** of it.
 - The read path is one-way: `plaintext workspace -> validated domain model -> RDF dataset`.
@@ -22,7 +20,7 @@ The single projection is authoritative for every ClearHead RDF statement. JSON-L
 
 ### Named Graph Identity
 
-*Unchanged.* Every workspace occupies exactly one named graph, `urn:clearhead:workspace:<uuid>`, where `<uuid>` is the stable `workspace_id` from `<data_root>/workspace.json` (see [Workspace — Named Graph Isolation][workspace-graphs]). TriG and N-Quads preserve it; Turtle and compact JSON-LD carry one graph and lose it.
+Every workspace occupies exactly one named graph, `urn:clearhead:workspace:<uuid>`, where `<uuid>` is the stable `workspace_id` from `<data_root>/workspace.json` (see [Workspace — Named Graph Isolation][workspace-graphs]). TriG and N-Quads preserve it; Turtle and compact JSON-LD carry one graph and lose it.
 
 ## Application Graph
 
@@ -303,7 +301,7 @@ For a given workspace and viewer's zone, a given serialization is byte-determini
 
 ## Optional Local SPARQL Evaluation
 
-*Unchanged.* This section is **non-normative to the dataset**: running SPARQL locally over exactly the dataset defined above, as an optional convenience. The evaluator loads only ClearHead's generated dataset into an ephemeral in-memory store, runs one query, and exits. Saved queries are ordinary `.sparql` files that MUST also run unchanged in independent SPARQL tooling.
+This section is **non-normative to the dataset**: running SPARQL locally over exactly the dataset defined above, as an optional convenience. The evaluator loads only ClearHead's generated dataset into an ephemeral in-memory store, runs one query, and exits. Saved queries are ordinary `.sparql` files that MUST also run unchanged in independent SPARQL tooling.
 
 ### Union Default Graph
 
@@ -311,7 +309,7 @@ The evaluator uses a **union default graph**: triple patterns without a `GRAPH` 
 
 ## Source Boundary: Ontology vs Integration Profiles
 
-*Unchanged.* The ontology stays source-agnostic; integration profiles such as `.ics` carry source-specific semantics. When actions are generated from an external schedule, implementations preserve the link through two optional fields, mapped in the ICS profile as:
+The ontology stays source-agnostic; integration profiles such as `.ics` carry source-specific semantics. When actions are generated from an external schedule, implementations preserve the link through two optional fields, mapped in the ICS profile as:
 
 - `externalScheduleId <- recurring VTODO.UID`
 - `externalOccurrenceKey <- RECURRENCE-ID` (or the canonicalized occurrence datetime when it is absent)
