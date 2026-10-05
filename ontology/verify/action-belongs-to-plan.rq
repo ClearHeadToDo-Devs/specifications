@@ -2,7 +2,7 @@
 # other steps. The reasoner assumes an unnamed plan, so it cannot catch this.
 PREFIX obo: <http://purl.obolibrary.org/obo/>
 PREFIX cco: <https://www.commoncoreontologies.org/>
-PREFIX ch: <https://clearhead.us/vocab/clearhead#>
+PREFIX ch: <https://clearhead.dev/vocab/clearhead#>
 SELECT ?action WHERE {
   ?action a obo:IAO_0000007 .
   FILTER NOT EXISTS { ?plan a cco:ont00000974 ; obo:BFO_0000178+ ?action }

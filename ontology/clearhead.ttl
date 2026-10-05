@@ -7,10 +7,10 @@
 # It has none yet: everything is CCO v2.2 or IAO.
 # The domain and its standard terms are in ../docs/domain.md.
 
-<https://clearhead.us/vocab/clearhead> a owl:Ontology ;
-    owl:versionIRI <https://clearhead.us/vocab/clearhead/5.0.0-draft> ;
+<https://clearhead.dev/vocab/clearhead> a owl:Ontology ;
+    owl:versionIRI <https://clearhead.dev/vocab/clearhead/5.0.0-draft> ;
     owl:imports <https://www.commoncoreontologies.org/CommonCoreOntologiesMerged> ,
-        <https://clearhead.us/vocab/clearhead/imports/iao> ;  # IAO terms we use, with their parents
+        <https://clearhead.dev/vocab/clearhead/imports/iao> ;  # IAO terms we use, with their parents
     rdfs:label "ClearHead"@en ;
     dcterms:title "ClearHead"@en ;
     dcterms:license <https://opensource.org/licenses/MIT> ;

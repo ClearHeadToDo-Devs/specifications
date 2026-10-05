@@ -8,11 +8,11 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
-@prefix app: <https://clearhead.us/vocab/app/v1#> .
-@prefix shape: <https://clearhead.us/specifications/app-shapes#> .
+@prefix app: <https://clearhead.dev/vocab/app/v1#> .
+@prefix shape: <https://clearhead.dev/specifications/app-shapes#> .
 
 shape: sh:declare
-    [ sh:prefix "app" ; sh:namespace "https://clearhead.us/vocab/app/v1#"^^xsd:anyURI ] ,
+    [ sh:prefix "app" ; sh:namespace "https://clearhead.dev/vocab/app/v1#"^^xsd:anyURI ] ,
     [ sh:prefix "rdf" ; sh:namespace "http://www.w3.org/1999/02/22-rdf-syntax-ns#"^^xsd:anyURI ] .
 
 # --- The whole graph ---------------------------------------------------------
@@ -33,7 +33,7 @@ shape:Graph a sh:NodeShape ;
             SELECT $this ?value WHERE {
                 { ?s ?value ?o } UNION { ?s rdf:type ?value }
                 FILTER(?value != rdf:type)
-                FILTER(!STRSTARTS(STR(?value), "https://clearhead.us/vocab/app/v1#")
+                FILTER(!STRSTARTS(STR(?value), "https://clearhead.dev/vocab/app/v1#")
                     && !STRSTARTS(STR(?value), "http://www.w3.org/2000/01/rdf-schema#")
                     && !STRSTARTS(STR(?value), "http://purl.org/dc/terms/")
                     && !STRSTARTS(STR(?value), "http://www.w3.org/2004/02/skos/core#"))

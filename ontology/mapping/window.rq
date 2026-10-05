@@ -1,7 +1,7 @@
 # The effective window (Decision 48): a condition per bound, its instant on the
 # bearer with the text saying which bound it is. From app:notBefore and
 # app:lateFrom, so an inherited bound is true of the child.
-PREFIX app: <https://clearhead.us/vocab/app/v1#>
+PREFIX app: <https://clearhead.dev/vocab/app/v1#>
 PREFIX cco: <https://www.commoncoreontologies.org/>
 PREFIX obo: <http://purl.obolibrary.org/obo/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>

@@ -24,7 +24,7 @@ Every workspace occupies exactly one named graph, `urn:clearhead:workspace:<uuid
 
 ## Application Graph
 
-Namespace `https://clearhead.us/vocab/app/v1#`, prefix `app:`. Also used: `rdfs:` `http://www.w3.org/2000/01/rdf-schema#`, `dcterms:` `http://purl.org/dc/terms/`, `skos:` `http://www.w3.org/2004/02/skos/core#`, `xsd:` `http://www.w3.org/2001/XMLSchema#`.
+Namespace `https://clearhead.dev/vocab/app/v1#`, prefix `app:`. Also used: `rdfs:` `http://www.w3.org/2000/01/rdf-schema#`, `dcterms:` `http://purl.org/dc/terms/`, `skos:` `http://www.w3.org/2004/02/skos/core#`, `xsd:` `http://www.w3.org/2001/XMLSchema#`.
 
 ### Rules
 
@@ -114,7 +114,7 @@ An objective (an [objective file](./objectives.md)) is `app:Objective`.
 
 ### Context terms
 
-A plus-tag names a context: where, with what or by whom an action can be done (Decision 43). The set is open. Each tag is one `app:Context`, `urn:uuid:<UUIDv5(context namespace, slug)>`, with `rdfs:label` the slug (leading `+` stripped, trimmed, lowercased, spaces to `-`). The context namespace is `0d8937ce-eb24-52d2-9532-39ea299f888b`, itself the UUIDv5 of `https://clearhead.us/context` under the RFC 9562 URL namespace. Hierarchies from workspace configuration are `skos:broader`, child to parent; a context named only as a parent is emitted too.
+A plus-tag names a context: where, with what or by whom an action can be done (Decision 43). The set is open. Each tag is one `app:Context`, `urn:uuid:<UUIDv5(context namespace, slug)>`, with `rdfs:label` the slug (leading `+` stripped, trimmed, lowercased, spaces to `-`). The context namespace is the constant `0d8937ce-eb24-52d2-9532-39ea299f888b`. It was minted as the UUIDv5 of `https://clearhead.us/context` under the RFC 9562 URL namespace, while names lived at that domain, and does not move with it: changing it would rename every context node. Hierarchies from workspace configuration are `skos:broader`, child to parent; a context named only as a parent is emitted too.
 
 ### Recurrence
 
@@ -245,7 +245,7 @@ Each materialized occurrence is its own action specification, a part of the recu
 
 Every node that is not an action, charter, objective, metric or context is a blank node (convention 6). A query reaches it from its owner through the pattern its row gives, never by name.
 
-A context node keeps an IRI of its own: the UUIDv5 of its slug under the context namespace `0d8937ce-eb24-52d2-9532-39ea299f888b` (itself UUIDv5 of `https://clearhead.us/context` under the RFC 9562 URL namespace).
+A context node keeps an IRI of its own: the UUIDv5 of its slug under the context namespace `0d8937ce-eb24-52d2-9532-39ea299f888b` (a constant; see [Context terms](#context-terms)).
 
 ### Worked example
 

@@ -1,7 +1,7 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix obo: <http://purl.obolibrary.org/obo/> .
 @prefix cco: <https://www.commoncoreontologies.org/> .
-@prefix : <https://clearhead.us/examples/measurable-objective#> .
+@prefix : <https://clearhead.dev/examples/measurable-objective#> .
 
 # The human's example of a measurable objective (Decision 5). The 87% is
 # ILLUSTRATIVE, not real data. A measure is evidence; "achieved" is still an

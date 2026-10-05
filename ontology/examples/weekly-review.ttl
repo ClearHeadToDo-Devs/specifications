@@ -1,8 +1,8 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix obo: <http://purl.obolibrary.org/obo/> .
 @prefix cco: <https://www.commoncoreontologies.org/> .
-@prefix : <https://clearhead.us/examples/weekly-review#> .
-@prefix people: <https://clearhead.us/examples/people#> .
+@prefix : <https://clearhead.dev/examples/weekly-review#> .
+@prefix people: <https://clearhead.dev/examples/people#> .
 
 # Darrion's weekly review (GTD: get clear, get current, get creative),
 # and one week's review actually done. Labels carry the human's words.

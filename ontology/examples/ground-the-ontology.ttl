@@ -1,8 +1,8 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix obo: <http://purl.obolibrary.org/obo/> .
 @prefix cco: <https://www.commoncoreontologies.org/> .
-@prefix people: <https://clearhead.us/examples/people#> .
-@prefix : <https://clearhead.us/examples/ground-the-ontology#> .
+@prefix people: <https://clearhead.dev/examples/people#> .
+@prefix : <https://clearhead.dev/examples/ground-the-ontology#> .
 
 # The platform charter ground-the-ontology as of 2026-09-30: real actions,
 # real states. Commitment states (cancelled) classify the action itself;

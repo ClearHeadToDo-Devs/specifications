@@ -4,6 +4,8 @@
 
 ### Changed
 
+**Identifiers move to `clearhead.dev`** (platform Decision 49). `app:` is `https://clearhead.dev/vocab/app/v1#`; the shapes, the ontology's own IRIs and the example data follow. The context namespace UUID is unchanged: it is a constant, and moving it would rename every context node. The CCO graph's vocabulary rule rejects terms from either domain, with a new invalid example for an `app:` term.
+
 **The ontology lives here** (`ontology/`; platform Decision 50). The former `ontology` repository's V5 content (the header, imports, examples, competency queries and verify rules), its `domain.md`, `DECISIONS.md` and license are folded in with their history, beside the mapping. `make -C ontology test` is its ROBOT gate, run by the platform's pinned gate; the specification stays inert data.
 
 **`app:plannedFrom`, the planned start's instant** (`ontology.md`, `schemas/app.shapes.ttl`, `ontology/unmapped.ttl`, the graph fixture; platform Decision 53). A derived `xsd:dateTime` in the viewer's zone, so queries compare `@` as they compare the window, never the written start. Every action with `app:plannedStart` has it. Its meaning is `app:plannedStart`'s, so the mapping lists it as unmapped.

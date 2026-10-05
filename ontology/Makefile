@@ -52,7 +52,7 @@ imports:
 	echo "$(IAO_SHA256)  $(BUILD)/iao.owl" | sha256sum -c -
 	robot extract --method MIREOT --input $(BUILD)/iao.owl \
 	    $(foreach t,$(IAO_TERMS),--lower-term http://purl.obolibrary.org/obo/$(t)) --annotate-with-source true \
-	    --output-iri https://clearhead.us/vocab/clearhead/imports/iao --output $(IAO_MODULE)
+	    --output-iri https://clearhead.dev/vocab/clearhead/imports/iao --output $(IAO_MODULE)
 
 clean:
 	rm -rf $(BUILD)
