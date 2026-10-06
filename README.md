@@ -129,3 +129,7 @@ Here is the index of specifications and their purpose within the whole:
 1. [Charter JSON Schema](./schemas/charters.schema.json) - The canonical JSON projection shape for charter documents, following the same projection rules as actions. It carries charter facts only; Actions and Plans join back through their charter reference.
 1. [Ontology & Linked Data](./ontology.md) - How a workspace is published as RDF: the application graph (`app:`) queries read, field by field, and its meaning in the ClearHead ontology's standard terms (CCO and IAO); graph identity, conformance and determinism.
     1. This specification ensures that while tools typically interact with simple JSON, the data remains semantically rigorous and interoperable with the broader Semantic Web (RDF/JSON-LD).
+
+## License
+
+Released under the [MIT License](LICENSE): use it, implement it, build on it, commercially or not. The ontology imports keep their own licenses: `ontology/imports/cco-v2.2.ttl` is the [Common Core Ontologies](https://github.com/CommonCoreOntology/CommonCoreOntologies), BSD 3-Clause, © CUBRC, Inc.; `ontology/imports/iao-2026-03-30-module.owl` is a module of the [Information Artifact Ontology](https://github.com/information-artifact-ontology/IAO), CC BY 4.0.

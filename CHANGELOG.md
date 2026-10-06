@@ -1,5 +1,11 @@
 # Changelog - Actions Specifications
 
+## 2026-10-06
+
+### Changed
+
+**The whole specification is MIT-licensed** (`LICENSE`, `README.md`). Until now only the folded-in ontology carried a license; its MIT license moves to the root and covers everything, prose, schemas, shapes and examples alike, so anyone may implement or build on it, commercially or not. The ontology imports keep their own licenses, credited in the README: CCO, BSD 3-Clause; IAO, CC BY 4.0.
+
 ## v0.2.0 — 2026-10-04
 
 The second release: the specifications as of this entry, including every dated entry below down to v0.1.0. It is the first published at `clearhead.dev` (platform Decision 49): schema `$id`s are `https://clearhead.dev/schemas/v0.2.0/<name>.schema.json`, and the application vocabulary is `https://clearhead.dev/vocab/app/v1#`.

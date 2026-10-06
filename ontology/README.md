@@ -33,4 +33,4 @@ Each answer in `build/*.csv` must match `queries/expected/`, so a question that 
 
 ## License
 
-See [LICENSE](./LICENSE).
+MIT, as the whole specification: see [its license section](../README.md#license), which also credits the imports' own licenses.
