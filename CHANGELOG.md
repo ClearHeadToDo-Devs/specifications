@@ -1,5 +1,9 @@
 # Changelog - Actions Specifications
 
+## v0.2.1 — 2026-10-06
+
+A patch release: the specification is MIT-licensed. Its contract is unchanged from v0.2.0; schema `$id`s are `https://clearhead.dev/schemas/v0.2.1/<name>.schema.json`.
+
 ## 2026-10-06
 
 ### Changed

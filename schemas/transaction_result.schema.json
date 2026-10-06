@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://clearhead.dev/schemas/v0.2.0/transaction_result.schema.json",
+  "$id": "https://clearhead.dev/schemas/v0.2.1/transaction_result.schema.json",
   "title": "ClearHead Transaction Result",
   "description": "The single receipt a transaction emits: a committed batch, a dry-run preview, or a typed rejection that wrote nothing. Discriminated on `kind`. Per-operation outcomes reuse the same VerbOutcome shapes the single mutation verbs already emit, and a rejection reuses the VerbError taxonomy, so the read side, the single verbs, and the batch surface all speak one spelling. Compare-and-swap / conflict outcomes are intentionally not modeled in v1 (no stale-update token exists yet).",
   "oneOf": [

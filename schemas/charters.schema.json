@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://clearhead.dev/schemas/v0.2.0/charters.schema.json",
+  "$id": "https://clearhead.dev/schemas/v0.2.1/charters.schema.json",
   "title": "Charters Serialization Format",
   "description": "JSON Schema for the canonical serialization of charter documents (see charters.md). Describes charter facts only: Actions and Plans have their own projections and join back through their charter reference, so they are never embedded here. Field names follow the charter frontmatter; each description names the v4 actions ontology property it projects.",
   "type": "object",
