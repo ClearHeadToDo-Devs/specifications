@@ -77,6 +77,14 @@ With this platform, my goal is to create a system with a few core values:
 
   These values are some of the big reasons i have not used one of the leading task frameworks as i didnt feel that any of them held to all of these values even if they stuck to one or two.
 
+### Design principles
+
+Three rules that kept deciding designs (the agent sandbox, Decisions 36, 55 and the template binding) before anyone wrote them down:
+
+- **Standards at the boundary, our model at the core.** Adopt a standard inside the core when it models the same concept the domain does (RFC 5545's reading of local time, ISO 8601 intervals). When it models a neighbouring concept (VTODO's assignable task beside an action's intent), project the subset it can carry and say what is lost; never let it share authority over the model.
+- **Ownership is not storage.** Who may change a fact and where its bytes live are separate questions. A fact ClearHead owns can travel inside another format (an `X-CLEARHEAD-*` property) when that keeps it with the thing it describes.
+- **Proposals are evidence; only the human's act makes them authority.** An inference, a planner's output, a title that matches a template or a change made on another device may be surfaced for acceptance. None becomes durable intent until a person accepts it.
+
 ### Philisophical Inspirations
 
 This has been a topic of research of mine for many years and it would be rude of me not to credit many of these authors for guiding and shaping my thinking on the topic:
