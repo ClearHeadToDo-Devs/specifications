@@ -377,6 +377,7 @@ Implementations SHOULD:
 - **Invalid JSON**: Provide clear error with line number
 - **Unknown fields**: Warn but don't fail (forward compatibility)
 - **Missing directories**: Create automatically with appropriate permissions
+- **Missing additional workspace**: Skip an `additional_workspaces` entry that does not exist, in every verb, with a warning naming the entry; `doctor` reports it. Never create it: the entry is stale config, not a directory to initialize, and one stale entry must not break work in the others
 - **Invalid values**: Use defaults and warn
 
 **Example error message:**

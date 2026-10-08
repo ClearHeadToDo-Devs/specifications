@@ -1,5 +1,11 @@
 # Changelog - Actions Specifications
 
+## 2026-10-08
+
+### Added
+
+**A missing additional workspace is skipped, never created** (`configuration.md`, Error Handling). An `additional_workspaces` entry that does not exist is skipped by every verb with a warning naming it, and `doctor` reports it. Until now the general "missing directories: create automatically" rule would have recreated a stale path, and implementations differed by verb: reads skipped it silently while `delete action` failed.
+
 ## v0.2.1 — 2026-10-06
 
 A patch release: the specification is MIT-licensed. Its contract is unchanged from v0.2.0; schema `$id`s are `https://clearhead.dev/schemas/v0.2.1/<name>.schema.json`.
