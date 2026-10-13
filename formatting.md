@@ -4,7 +4,7 @@ description: Canonical formatting rules for .actions files
 author: primary_desktop
 categories: Reference
 created: 2026-01-01
-version: 3.1.0
+version: 3.2.0
 ---
 
 # Actions File Formatting Specification
@@ -83,7 +83,19 @@ Parsing, formatting, and mutation must round-trip the description above as
 `"first paragraph.\n\nsecond paragraph."`; silently deleting or replacing its
 newlines is data loss.
 
+### Line endings
+
+The formatter writes LF line endings. Formatting makes a file regular, so a
+CRLF file comes back as LF; this is a change of form, not data loss. Anyone who
+wants to keep CRLF can turn formatting off. Edits that do not reformat a file,
+such as stamping a charter ID, keep the file's existing line endings.
+
 ## Version History
+
+### 3.2.0 (2026-10-13)
+
+- Line endings: the formatter writes LF; edits that do not reformat a file keep
+  its existing line endings.
 
 ### 3.1.2 (2026-09-22)
 
