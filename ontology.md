@@ -329,7 +329,9 @@ This section is **non-normative to the dataset**: running SPARQL locally over ex
 
 ### Union Default Graph
 
-The evaluator uses a **union default graph**: triple patterns without a `GRAPH` clause match across all named graphs, so the same query works over one workspace or several. Use `GRAPH ?g` only when a query must expose or constrain the source workspace. A test that loads into the default graph and then queries via SPARQL tests a configuration that never occurs in production.
+When a query declares no dataset of its own (no `FROM` or `FROM NAMED`), the evaluator's default graph is the **union of all named graphs**: triple patterns without a `GRAPH` clause match across every workspace, so the same query works over one workspace or several. Use `GRAPH ?g` only when a query must expose or constrain the source workspace.
+
+The union is a set, as SPARQL defines a graph: a triple asserted in several workspace graphs, such as the label of a context node they share, matches once. A store's built-in union mode may instead match it once per graph, so the default implementation copies every quad into the default graph when it builds the store. A test should build its store the way the evaluator does.
 
 ## Source Boundary: Ontology vs Integration Profiles
 

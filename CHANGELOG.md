@@ -1,5 +1,11 @@
 # Changelog - Actions Specifications
 
+## 2026-10-13
+
+### Changed
+
+**The union default graph is a set** (`ontology.md`, Union Default Graph). A triple asserted in several workspace graphs, such as a shared context's label, matches once in a query without a `GRAPH` clause. Until now the section said only "union", and the reference evaluator, using its store's union mode, returned each cross-workspace row once per workspace that shared a node. The default implementation copies every quad into the default graph when it builds the store.
+
 ## 2026-10-08
 
 ### Added
