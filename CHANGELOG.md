@@ -1,8 +1,18 @@
 # Changelog - Actions Specifications
 
+## v0.3.0 — 2026-10-13
+
+A minor release: the specifications as of this entry, including every dated entry below down to v0.2.1. It adds Habits to the application graph as a draft (platform Decision 56), specifying the recurring plans v0.2.x left open. Schema `$id`s are `https://clearhead.dev/schemas/v0.3.0/<name>.schema.json`.
+
 ## 2026-10-13
 
+### Added
+
+**Habits in the application graph** (`ontology.md`, draft; platform Decision 56). A charter's recurring VEVENT is published as an `app:Habit` with its rule, template and first slot; each occurrence points to its Habit with `app:occurrenceOf` and names its slot with `app:slot`. The CCO graph reads a Habit as an action specification with continuant-part occurrences. This replaces the unspecified Recurrence and Recurring plans sections. Fixture coverage is still pending.
+
 ### Changed
+
+**The formatter writes LF line endings** (`formatting.md` 3.2.0). Formatting makes a file regular, so a CRLF file comes back as LF; edits that do not reformat a file, such as stamping a charter ID, keep its line endings. Anyone who wants CRLF can turn formatting off.
 
 **The union default graph is a set** (`ontology.md`, Union Default Graph). A triple asserted in several workspace graphs, such as a shared context's label, matches once in a query without a `GRAPH` clause. Until now the section said only "union", and the reference evaluator, using its store's union mode, returned each cross-workspace row once per workspace that shared a node. The default implementation copies every quad into the default graph when it builds the store.
 
