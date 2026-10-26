@@ -50,16 +50,16 @@
                                    },
                                    "occurrence": {
                                           "type": "object",
-                                          "description": "Frozen lineage for an archived materialized recurring occurrence. Live occurrence lineage is hydrated from the plans sync store; completed archives snapshot the fact so future plan edits/deletion do not rewrite history.",
+                                          "description": "Durable native occurrence lineage for live and archived Actions; independent of the machine-local projection store. Archive snapshots preserve history through Habit edits and deletion.",
                                           "properties": {
-                                                 "plan_id": {
+                                                 "habit_id": {
                                                         "type": "string",
                                                         "format": "uuid",
-                                                        "description": "UUID of the recurring Plan this occurrence realized"
+                                                        "description": "Native UUID from the Habit line, never derived from transport UID"
                                                  },
                                                  "plan_uid": {
                                                         "type": "string",
-                                                        "description": "iCalendar UID of the recurring VTODO master at crystallization time"
+                                                        "description": "Transport VEVENT UID at crystallization time, not native identity"
                                                  },
                                                  "occurrence_key": {
                                                         "type": "string",
@@ -75,16 +75,31 @@
                                                  },
                                                  "rrule": {
                                                         "type": "string",
-                                                        "description": "RRULE text from the recurring VTODO master at crystallization time"
+                                                        "description": "RRULE text from the native Habit at crystallization time"
                                                  },
                                                  "template": {
                                                         "type": "string",
                                                         "description": "Template name attached to the recurring Plan at crystallization time"
                                                  }
                                           },
-                                          "required": ["plan_id", "occurrence_key", "plan_title"],
+                                          "required": ["habit_id", "occurrence_key", "plan_title"],
                                           "additionalProperties": true
                                    }
+                            },
+                            "additionalProperties": true
+                     }
+              },
+              "habits": {
+                     "type": "object",
+                     "description": "Durable calendar-only facts keyed by native Habit UUID. Preserve RFC properties and parameters losslessly; never use transport UID as the key.",
+                     "additionalProperties": {
+                            "type": "object",
+                            "properties": {
+                                   "uid": {"type": "string"},
+                                   "rdate": {"type": "array", "items": {"type": "string"}},
+                                   "exdate": {"type": "array", "items": {"type": "string"}},
+                                   "frame": {"type": "string", "description": "DATE, floating, UTC, or IANA TZID"},
+                                   "pending_overrides": {"type": "object", "description": "Lossless ICS overrides keyed by canonical original slot", "additionalProperties": {"type": "string"}}
                             },
                             "additionalProperties": true
                      }

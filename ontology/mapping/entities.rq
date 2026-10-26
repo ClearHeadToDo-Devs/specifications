@@ -12,6 +12,7 @@ CONSTRUCT {
 } WHERE {
   VALUES (?appClass ?class) {
     (app:Action obo:IAO_0000007)       # action specification
+    (app:Habit obo:IAO_0000007)        # recurring action specification
     (app:Charter cco:ont00000974)      # Plan
     (app:Objective cco:ont00000476)    # Objective
   }

@@ -31,9 +31,9 @@ Namespace `https://clearhead.dev/vocab/app/v1#`, prefix `app:`. Also used: `rdfs
 1. **Standard terms where they fit.** A name is `rdfs:label`, a description `dcterms:description`, a creation time `dcterms:created`, a context hierarchy `skos:broader`. `app:` names only what ClearHead adds.
 2. **Written and derived terms.** A written term carries a value as the file states it. A derived term is computed from the files and the viewer's context (the zone in [Time](#time)), so queries need not recompute it; it is never written back, and it is mapped to CCO like any other term. Each derived term below says how it is computed.
 3. **Where an entity is kept.** `app:file` is the path of the file holding it, relative to the data root (the directory holding `charters/`, `plans/` and `objectives/`), with `/` separators and no leading `./`. `app:line` is the 1-based line where an action starts. The graph names no root; a client resolves paths against the data root it already knows. If another backend has no files, these are absent.
-4. **IRIs.** An entity from a file is `urn:uuid:<id>`. A context is `urn:uuid:<UUIDv5(context namespace, slug)>` (see [Context terms](#context-terms)). A metric is `urn:uuid:<UUIDv5(objective id, "metric/<slug>")>`, its slug made as a context's is. A Habit is `urn:uuid:<UUIDv5(habit namespace, UID)>` (see [Habit terms](#habit-terms)). No blank nodes.
+4. **IRIs.** An entity from a file is `urn:uuid:<id>`. A context is `urn:uuid:<UUIDv5(context namespace, slug)>` (see [Context terms](#context-terms)). A metric is `urn:uuid:<UUIDv5(objective id, "metric/<slug>")>`, its slug made as a context's is. A Habit uses its persisted line UUID, just as an Action does (see [Habit terms](#habit-terms)). No blank nodes.
 5. **Containment points up.** A part `app:partOf` its whole: a child action its parent action, a top-level action its charter, a Habit its charter, a charter its parent charter, an objective its parent objective. Each has at most one.
-6. **Every action, charter and objective has exactly one `app:state`** whose value is one of the IRIs in [State values](#state-values). Absent fields emit nothing.
+6. **Every action, Habit, charter and objective has exactly one `app:state`** whose value is one of the IRIs in [State values](#state-values). Absent fields emit nothing.
 
 ### Action terms
 
@@ -55,8 +55,8 @@ An action is `app:Action`. Fields are those of [`actions.schema.json`](./schemas
 | `sequentialChildren` | `~` | `app:sequential true` |
 | `parentId`, `charter` | `>`, the file | `app:partOf` (rule 5) |
 | `alias` | `=` | `app:alias` |
-| `externalScheduleId` | none | `app:occurrenceOf`, the Habit whose event the occurrence realizes; see [Habit terms](#habit-terms) |
-| `externalOccurrenceKey` | none | `app:slot`, the slot the occurrence fills: its canonical `RECURRENCE-ID`, a UTC `xsd:dateTime` ([ICS schedule specification](./ics_schedule_spec.md)) |
+| sidecar `occurrence.habit_id` | none | `app:occurrenceOf`, the native Habit whose occurrence this is; transport UID is not the Habit id |
+| sidecar `occurrence.occurrence_key` | none | `app:slot`, the canonical slot key as `xsd:string`: `D:` date, `F:` floating or `U:` UTC instant ([ICS schedule specification](./ics_schedule_spec.md#canonical-slot-keys-slot-key-zone)) |
 
 Derived: `app:notBefore`, `app:lateFrom`, `app:plannedFrom`, `app:durationMinutes` ([Time](#time)) and `app:waitsOn` ([Waits](#waits)). Location: `app:file`, `app:line`.
 
@@ -64,6 +64,7 @@ Derived: `app:notBefore`, `app:lateFrom`, `app:plannedFrom`, `app:durationMinute
 
 | Entity | `app:state` values |
 | --- | --- |
+| Habit | `app:Active` `[ ]`, `app:Completed` `[x]` |
 | Action | `app:NotStarted` `[ ]`, `app:InProgress` `[-]`, `app:Blocked` `[=]`, `app:Completed` `[x]`, `app:Cancelled` `[_]` |
 | Charter | `app:New`, `app:Active`, `app:Blocked`, `app:Closed`, `app:Cancelled`, from its `state` (`app:New` when unset) |
 | Objective | Not yet defined ([objectives](./objectives.md) gives objectives a state without naming its values); none is emitted. |
@@ -119,27 +120,27 @@ A plus-tag names a context: where, with what or by whom an action can be done (D
 
 ### Habit terms
 
-A Habit is anything done regularly (Decision 56): a recurring event in its charter's `plans/` collection, kept as the [ICS schedule specification](./ics_schedule_spec.md) says. It is `app:Habit`.
+A Habit is anything done regularly: a root with recurrence in `<charter>.habits.actions` (Decision 57). It is `app:Habit`, not an executable `app:Action`. JSON uses the action fields plus `recurrenceRule`; inline children are template data, not live Action nodes.
 
-| Event | Terms |
+| Native source | Terms |
 | --- | --- |
-| `UID` | The IRI, `urn:uuid:<UUIDv5(habit namespace, UID)>`. |
-| `SUMMARY` | `rdfs:label` |
-| `DESCRIPTION` | `dcterms:description` |
-| `RRULE` | `app:rule`, the rule's text as written. This specification owns its semantics; the graph does not take it apart. |
-| `DTSTART` | `app:plannedStart`, written: the first slot's start, as in [Time](#time). A time with a `TZID` is written with that zone's offset at that instant. |
-| `DTEND`, or `DTSTART` plus `DURATION` | `app:plannedEnd`, written: the first slot's end, as `app:plannedStart` is. |
-| its template | `app:template`, the template's name as text. |
-| its charter | `app:partOf` (rule 5) |
-| its file | `app:file`: the `.ics` file |
+| `#uuid` | The IRI, `urn:uuid:<uuid>`. |
+| name | `rdfs:label` |
+| description | `dcterms:description` |
+| `R:` | `app:rule`, RRULE text; the graph does not take it apart |
+| `@` | `app:plannedStart`, `app:plannedEnd`, as for an Action |
+| `[ ]` / `[x]` | `app:state app:Active` / `app:Completed` |
+| named template directive | `app:template`, name as text; omitted when inline children win |
+| charter | `app:partOf` (rule 5) |
+| source location | `app:file`: the `.habits.actions` path; `app:line`: 1-based root line |
 
 Derived: `app:plannedFrom` and `app:durationMinutes`, as for an action's block ([Time](#time)).
 
-A Habit has no `app:state`. Whether it has ended is its rule's business (`UNTIL`, `COUNT`), which the graph does not take apart.
+A Habit's own state governs the whole Habit: `app:Active` generates arrived occurrences; `app:Completed` generates none. Rule exhaustion is not an implicit state write. The Habit state does not close its occurrences. Other Habit states, including pausing, are not defined.
 
 Each occurrence is an ordinary action, `app:partOf` its charter, with `app:occurrenceOf` its Habit and `app:slot` the slot it fills ([Action terms](#action-terms)). `app:occurrenceOf` is not containment: the Habit does not hold its occurrences (Decision 56), and "a Habit's occurrences" is the pattern `?occurrence app:occurrenceOf ?habit`.
 
-The habit namespace is the constant `30ea14ac-0b3f-5454-b6fb-a9c628b659aa`, the UUIDv5 of `https://clearhead.dev/habit` under the RFC 9562 URL namespace. Like the context namespace, it never changes, though no Habit id is stored: every device derives the same one from the event.
+The old event-derived Habit namespace is retired. Native occurrence and stable template-step UUID derivation follow [canonical slots](./ics_schedule_spec.md#canonical-slot-keys-slot-key-zone), independent of transport UIDs or viewer zones.
 
 ### Example
 
@@ -211,7 +212,7 @@ An action (one line of a [`.actions` file](./action_file_format.md)) is an IAO a
 | `alias` | `=` | A Designative Name (`cco:ont00000003`) that `designates` (`cco:ont00001916`) the action; text on its bearer. |
 | `createdDateTime` | `^` | `dcterms:created` (convention 2). |
 | `completedDateTime` | `%` | The time on the bearer of the record that closed the action: the act's completed status, or the cancelled measurement (below). |
-| `externalScheduleId` | none | Read through `app:occurrenceOf`: the [Habit](#habits) `has continuant part` the occurrence. |
+| sidecar `occurrence.habit_id` | none | Read through `app:occurrenceOf`: the [Habit](#habits) `has continuant part` the occurrence. |
 | `externalOccurrenceKey` | none | Not emitted (convention 3). |
 
 #### Action state
@@ -259,7 +260,7 @@ A plus-tag names a context: where, with what or by whom an action can be done (D
 
 ### Habits
 
-A Habit (a recurring [`.ics` event](./ics_schedule_spec.md), Decision 56) is an action specification that prescribes many acts (ontology Decision 6), a part of its charter. Its recurrence is a time condition like any other (convention 7), one that repeats: the condition's description carries the RFC 5545 `RRULE` (`app:rule`) as text on its bearer. This specification owns the rule's semantics; the graph does not take it apart. No BFO-family ontology structures a recurrence rule (searched CCO v2.2, IAO and the OBO library, 2026-10-01); the structured alternatives, schema.org `Schedule` and the W3C RDF Calendar `ical:rrule`, sit outside it. Cost: a query cannot tell a recurring condition from a one-off one except by its text. Revisit if a question ever needs to reason inside a rule.
+A Habit (a root in `.habits.actions`, projected as a recurring [VEVENT](./ics_schedule_spec.md), Decision 57) is an action specification that prescribes many acts (ontology Decision 6), a part of its charter. Its recurrence is a time condition like any other (convention 7), one that repeats: the condition's description carries the RFC 5545 `RRULE` (`app:rule`) as text on its bearer. This specification owns the rule's semantics; the graph does not take it apart. No BFO-family ontology structures a recurrence rule (searched CCO v2.2, IAO and the OBO library, 2026-10-01); the structured alternatives, schema.org `Schedule` and the W3C RDF Calendar `ical:rrule`, sit outside it. Cost: a query cannot tell a recurring condition from a one-off one except by its text. Revisit if a question ever needs to reason inside a rule.
 
 Its first slot's start (`app:plannedStart`) is an intent and its length a duration, as for an action. Its template (`app:template`) is not read: it says how ClearHead realizes an occurrence, not what the Habit prescribes.
 
@@ -317,7 +318,7 @@ A window bound is the effective instant from the application graph: `has datetim
 - **Application graph.** A conforming implementation, projecting in the UTC zone, produces a graph isomorphic to `expected-app.ttl`. [`schemas/app.shapes.ttl`](./schemas/app.shapes.ttl) holds its SHACL shapes, including that the derived terms agree with the written ones; `invalid-app/` holds a graph per rule that must fail on exactly the shape it names.
 - **CCO graph.** `expected.ttl` is the same workspace's meaning. [`schemas/graph.shapes.ttl`](./schemas/graph.shapes.ttl) holds its SHACL shapes, validated without inference; `invalid/` holds graphs that must each fail on one named shape and `warning/` one that must pass with only a warning. Merged with the ontology, it must reason consistent.
 
-Not yet covered by the fixture: Habits and objective states.
+Habit identity, state and slot examples are in `examples/conformance/habits/`; objective states remain uncovered. The Habit fixture includes application-to-CCO mapping checks.
 
 ## Determinism
 
@@ -337,7 +338,7 @@ The union is a set, as SPARQL defines a graph: a triple asserted in several work
 
 The ontology stays source-agnostic; integration profiles such as `.ics` carry source-specific semantics. When actions are generated from an external schedule, implementations preserve the link through two optional fields, mapped in the ICS profile as:
 
-- `externalScheduleId <- the Habit's VEVENT UID`, published as `app:occurrenceOf` the Habit's IRI
-- `externalOccurrenceKey <- RECURRENCE-ID` (or the canonicalized occurrence datetime when it is absent), published as `app:slot`
+- `occurrence.habit_id <- the native Habit's line UUID`, published as `app:occurrenceOf` the Habit's IRI
+- `occurrence.occurrence_key <- the canonical original slot`, published as `app:slot` (`xsd:string`); transport UID and frames stay in sidecars
 
 [workspace-graphs]: ./workspace.md#named-graph-isolation

@@ -130,11 +130,11 @@ Note: we use the hidden file convention here to indicate that this is a sidecar 
 
 #### Plans
 
-A workspace's `<data_root>/plans/` directory is a charter-scoped iCalendar vdir containing Plan resources. A Plan is the scheduling relationship for an Action: one-off when no RRULE is present and recurring when RRULE is present. Unscheduled Actions have no Plan resource.
+A workspace's `<data_root>/plans/` directory stays a charter-scoped iCalendar vdir (Decision 31). A one-off Plan projects an Action's `@` block; a recurring Plan projects a Habit held in a habits file. Unscheduled Actions have no Plan resource.
 
 Every constructed charter owns one calculated collection path even when its directory does not exist. This relative path is derived from the charter's canonical workspace anchor and is not written into charter Markdown or sidecars. The vdir's location is part of the workspace layout, not configuration, and it belongs to exactly one workspace; transport tooling points at it where it is. Calendar resources attach to charters by exact collection ownership, never by mutable alias or title matching.
 
-Each `.ics` file contains a single `VCALENDAR` with one primary Plan component plus any same-UID recurrence overrides. The configured `plan_component` chooses VEVENT (the default calendar integration) or VTODO (the task-client integration). Both encode the same Plan semantics; RRULE distinguishes recurring from one-off Plans rather than distinguishing Plans from Actions. ClearHead-created files use the component UID as filename, while readers identify resources by UID because transport tooling may choose another filename.
+Each `.ics` file contains one `VCALENDAR` with a VEVENT master and same-UID recurrence overrides. VTODO sync and `plan_component` are retired (Decision 55); the transition is specified in the ICS schedule specification. ClearHead-created filenames use UID, but readers identify resources by UID because transport may rename files.
 
 This one-component-per-file vdir layout is directly compatible with tools such as vdirsyncer and does not assume a particular CalDAV server or any transport at all.
 
@@ -168,17 +168,19 @@ Per the [Ontology][ontology] specification, actions are the actual executable wo
 
 Actions are stored in the `.actions` files within the workspace and represent the lowest atomic unit of work within the system.
 
-`.actions` files do not define recurrence rules. Recurrence and schedule timing are represented in `.ics` files and materialized into actions through expansion workflows.
+Ordinary `.actions` files hold occurrences and one-offs, not recurrence. A charter's `<charter>.habits.actions` holds Habit roots, their `R:` rules and optional template children. Directory-form charters and the root use `next.habits.actions`, beside `next.actions`, sharing `.next.json`. Habits and their template children must never be lowered as live executable Actions or inferred as extra charters.
 
 All paths are relative to `charters/`:
 
-- `charters/<charter>.actions` — active acts for that charter (capped at `expansion_primary_instances` per schedule)
-- `charters/<charter>.upcoming.actions` — future generated instances beyond the primary cap, not yet in the active set
+- `charters/<charter>.actions` — live Actions, including every arrived Habit occurrence
+- `charters/<charter>.habits.actions` — Habit definitions and their template children
 - `charters/next.actions` — root charter acts (project or user workspace root)
 - `charters/<charter>.completed.actions` — completed and cancelled acts for that charter
 - `charters/<charter>/next.actions` — root acts for a folder-form charter
 
-When a charter is archived, its known files (`charters/<charter>.actions`, `.completed.actions`, `.upcoming.actions`, the charter `.md`, and its `.json` sidecar) and every other charter-local supporting file in a directory-form charter (notes, inventories, and future formats) are moved verbatim into the `archive/` region, at the path they held under `charters/`. Nothing is serialized: the archived form is the same plaintext, just relocated out of the default read set.
+When a charter is archived, its known files (`charters/<charter>.actions`, `.completed.actions`, `.habits.actions`, the charter `.md`, and its `.json` sidecar) and every other charter-local supporting file in a directory-form charter (notes, inventories, and future formats) are moved verbatim into the `archive/` region, at the path they held under `charters/`. Nothing is serialized: the archived form is the same plaintext, just relocated out of the default read set.
+
+Readers classify `.habits.actions` and `.completed.actions` before the general `.actions` suffix, removing the entire known suffix to find the charter stem. Discovery, parsing, lowering, mutation, archive, lint/doctor, RDF publication and editor navigation must all use that classification. The same files must neither be discovered twice nor leak template children or archived occurrences into the live Action index. Test root, flat and directory charters, archive moves and unrelated supporting files. Archive-aware duplicate suppression still reads terminal occurrence lineage.
 
 Charter stem derivation follows the same rules as plan name inference: `next.actions` in a directory-form charter uses that directory's name; `charters/next.actions` is the root's reserved anchor and takes its name from `charters/README.md` (see [The Root Charter](#the-root-charter)); all other `.actions` files use the file stem.
 
@@ -196,7 +198,8 @@ They differ only in *where* the identity is persisted:
 |-----------|----------------------------------------------------|--------------|
 | Workspace | `workspace_id` in `<data_root>/workspace.json`     | [Workspace Identity](#workspace-identity) |
 | Charter   | frontmatter `id`, mirrored in the sidecar          | [Charters] |
-| Plan      | configured VEVENT/VTODO `UID` (canonical `.ics` filename) | [ICS Schedule Spec] |
+| Plan      | transport VEVENT `UID`, linked to native identity in sidecars | [ICS Schedule Spec] |
+| Habit     | inline `#uuid` in the habits file, retained on kind moves | [Action File Format], [ICS Schedule Spec] |
 | Action    | inline id; its sidecar records the UID of any realized Plan | [Action File Format], [ICS Schedule Spec] |
 
 Three rules keep this honest:
@@ -265,7 +268,7 @@ Now, its one thing to speak on the concrete file formats for each record type bu
 
 Templates are a list of actions in the form of `<name>.actions` files that are stored in a `templates/` directory at the root of the workspace. these are meant to be used as templates for generating actions either through schedules or on demand.
 
-it is assumed that the filename will be the reference for the template, so if we have a `weekly-review.actions` file in the `templates/` directory, then the reference for that template will be `weekly-review` and this is what will be used in the recurring VTODO DESCRIPTION field as `template: weekly-review` (first line of the task notes in a compatible calendar app)
+it is assumed that the filename will be the reference for the template, so if we have a `weekly-review.actions` file in the `templates/` directory, then the reference for that template will be `weekly-review` and this is used in a Habit's description as `template: weekly-review`, projected to the recurring VEVENT DESCRIPTION (first line of calendar notes)
 
 this will also allow for on demand generation of actions either as a side-effect to charter creation or through a command like `apply template` which will allow users to generate actions from templates on demand without needing to wait for the schedule to trigger them
 
@@ -275,10 +278,10 @@ One concept that is very important to the workspace format is the process of "ar
 
 1. At the lowest level, we have the actions that are implementations of their optional parent plans.
 1. at first, these are all open, then as the user is closing the actions, they move from `<charter>.actions` to `<charter>.completed.actions` in order to remove clutter and make the process of tracking closed actions easier for both humans and databases to comprehend, this way open act queries can be fast, but full history searches are still possible
-1. If we move a level up, we have the plans in `plans/<charter-name>/`, again, all plans start open but schedules simply "are no longer scheduled" they have no state explicitly however they are still logged as an example of a schedule
+1. Habits have their own state: completing the Habit ends generation without closing its open occurrences. Their definitions move with the charter's known files; calendar projections have no independent work lifecycle.
 1. Finally, like plans, the charters themselves at `charters/<charter>.md` can be archived after they are closed. Archival is a **move, not a translation**: the archived form is data, not a projection, so no Turtle or JSON-LD is written. Any RDF view of archived data is regenerated from the loaded domain model by Core's publication adapter, exactly like live data.
 1. archiving a parent charter archives its whole subtree as one unit; the open-actions precondition is recursive too — it refuses if *any* descendant still holds open actions
-1. the subtree's known files (`.actions`, `.completed.actions`, `.upcoming.actions`, the charter `.md`, and its `.json` sidecar) plus all supporting files owned by directory-form charters are moved into the `archive/` region together, preserving their path under `charters/` so the subtree's internal structure survives. The sidecar moves *with* the files rather than folding its `created_at` / `external_schedule_id` into the lines. An implementation must make the move safe to interrupt and retry: a file may transiently exist in both `charters/` and `archive/`, but it is never removed from `charters/` without already existing in `archive/` — redundant, never an orphaned or lost record
+1. the subtree's known files (`.actions`, `.completed.actions`, `.habits.actions`, the charter `.md`, and its `.json` sidecar) plus all supporting files owned by directory-form charters are moved into the `archive/` region together, preserving their path under `charters/` so the subtree's internal structure survives. The sidecar moves *with* the files rather than folding its `created_at` / `external_schedule_id` into the lines. An implementation must make the move safe to interrupt and retry: a file may transiently exist in both `charters/` and `archive/`, but it is never removed from `charters/` without already existing in `archive/` — redundant, never an orphaned or lost record
 1. any charter subdirectory left empty by the move is collapsed
 
 Because `archive/` is a sibling of `charters/`, the moved files leave the default read set automatically, but reference resolution can still look into them: an archived `<` target resolves to one of three states — **satisfied** (target Completed), **abandoned** (target Cancelled), or **dangling** (resolves nowhere). Keeping archives as readable plaintext is the whole reason that three-way signal is possible.
@@ -294,7 +297,7 @@ this is how we maintain a format that is able to evolve gracefully
 - [Action File Format] — DSL syntax
 - [Charters] — Charter structure and frontmatter
 - [Configuration] — XDG paths and config settings
-- [ICS Schedule Spec] — VTODO projection, synchronization, and schedule semantics
+- [ICS Schedule Spec] — VEVENT projection, synchronization, and schedule semantics
 - [Ontology] — Domain model and RDF contract
 - [Process] — Workflow including recurring action behavior
 - [Reference Syntax] — Sub-charter and sub-plan references

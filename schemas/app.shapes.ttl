@@ -90,6 +90,26 @@ shape:Action a sh:NodeShape ;
                 FILTER(TZ(?value) = "")
             }""" ] .
 
+# --- Habits and occurrence lineage (Decision 57) -----------------------------
+
+shape:Habit a sh:NodeShape ;
+    sh:targetClass app:Habit ;
+    sh:property
+        [ sh:path rdfs:label ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ,
+        [ sh:path app:rule ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] ,
+        [ sh:path app:state ; sh:minCount 1 ; sh:maxCount 1 ; sh:in ( app:Active app:Completed ) ] ,
+        [ sh:path app:partOf ; sh:minCount 1 ; sh:maxCount 1 ; sh:class app:Charter ] ,
+        [ sh:path app:plannedStart ; sh:minCount 1 ; sh:maxCount 1 ; sh:or ( [ sh:datatype xsd:date ] [ sh:datatype xsd:dateTime ] ) ] ,
+        [ sh:path app:file ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^[^/.].*\\.habits\\.actions$" ] ,
+        [ sh:path app:line ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:integer ; sh:minInclusive 1 ] .
+
+shape:Occurrence a sh:NodeShape ;
+    sh:targetSubjectsOf app:occurrenceOf ;
+    sh:class app:Action ;
+    sh:property
+        [ sh:path app:occurrenceOf ; sh:minCount 1 ; sh:maxCount 1 ; sh:class app:Habit ] ,
+        [ sh:path app:slot ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^(D:[0-9]{4}-[0-9]{2}-[0-9]{2}|[FU]:[0-9]{4}-[0-9]{2}-[0-9]{2}T.*)$" ] .
+
 # --- Planned block (Time) ----------------------------------------------------
 
 shape:PlannedBlock a sh:NodeShape ;

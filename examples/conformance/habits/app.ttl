@@ -1,0 +1,17 @@
+@prefix app: <https://clearhead.dev/vocab/app/v1#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix ex: <urn:uuid:> .
+
+ex:01951111-cfa6-718d-b303-d7107f4005b3 a app:Charter ;
+    rdfs:label "Review" ; app:state app:Active ; app:file "charters/review.md" .
+ex:01951111-cfa6-718d-b303-d7107f4005b4 a app:Habit ;
+    rdfs:label "Daily review" ; app:state app:Active ; app:rule "FREQ=DAILY" ;
+    app:partOf ex:01951111-cfa6-718d-b303-d7107f4005b3 ;
+    app:plannedStart "2026-10-26"^^xsd:date ;
+    app:file "charters/review.habits.actions" ; app:line 1 .
+ex:8e337bcd-ad84-5158-baec-ac9b81c5ab0f a app:Action ;
+    rdfs:label "Daily review" ; app:state app:NotStarted ;
+    app:partOf ex:01951111-cfa6-718d-b303-d7107f4005b3 ;
+    app:occurrenceOf ex:01951111-cfa6-718d-b303-d7107f4005b4 ;
+    app:slot "D:2026-10-26" ; app:file "charters/review.actions" ; app:line 1 .

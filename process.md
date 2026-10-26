@@ -74,7 +74,7 @@ As we move through the inbox, we either complete actions, or move them to the ap
 
     This is also usually where we start setting due/do dates on the calendar (yes, we have both).
 
-    And for any recurring actions, we should define them in `.ics` schedules so calendar timing stays canonical and expansion into `.actions` remains deterministic
+    Recurring work is defined as Habits in `.habits.actions`; `.ics` is the editable calendar projection, and deterministic occurrences live in ordinary `.actions`.
 
     This is also where priorities can be assigned on the RFC 5545-aligned 1-9 scale (1 highest, 9 lowest); urgency and importance remain separate planning judgments rather than encoded quadrants.
 
@@ -189,10 +189,7 @@ user deliberately requests cascading mutations.
 
 ## Plans
 
-Plans are schedule definitions represented by the configured iCalendar component
-in `.ics` resources. `VEVENT` is the default codec and `VTODO` is an alternative;
-the choice changes the calendar integration surface, not the domain meaning.
-Plans own scheduling while `.actions` owns executable work and lifecycle state.
+Plans are VEVENT calendar projections of Action blocks and Habits. Native text owns the work; calendar edits reconcile back field by field. VTODO task reconciliation is retired (Decision 55).
 
 An unscheduled Action has no Plan. Assigning a schedule creates a one-off Plan;
 clearing it removes that Plan without closing the Action. A calendar-created Plan
@@ -200,42 +197,31 @@ creates a scheduled, not-started Action in its owning Charter. The durable
 relationship is recorded in the Action sidecar so an arbitrary calendar UID is
 never mistaken for Action identity.
 
-### Recurring Actions
+### Habits
 
-A Plan carrying `RRULE` prescribes recurring occurrences regardless of whether
-its configured component is `VEVENT` or `VTODO`. The active occurrence is
-identified by the Plan UID plus its canonical recurrence key.
+A Habit is a top-level line with `R:` in its charter's `.habits.actions`. `[ ]` is active; `[x]` completes the whole Habit and stops generation. Completing the Habit does not close any occurrence. Pausing remains unspecified.
 
-ClearHead materializes at most one current actionable occurrence in `.actions`.
-It never writes a window of future instances into `.actions` or an
-`.upcoming.actions` file. A write-path calendar synchronization/tick stamps the
-current occurrence; reads remain pure and do not create work. Resolving that
-occurrence advances the token to the first recurrence slot after the resolved
-slot that is not earlier than now, so missed unstamped periods do not become a
-backlog.
+A write-path tick/sync adds an Action for **every arrived slot**, whether earlier occurrences are done or not. Missed occurrences stay open until individually completed or cancelled. Reads stay pure. Future slots are read-only projections, never editable Action rows.
 
-Future occurrences are read-only planning projections and must not enter an
-index-shaped query whose rows claim an editable source location. Past terminal
-occurrences crystallize into the Action archive. For complex recurring work, a
-Plan may name a template through the leading `template: <name>` DESCRIPTION
-directive; the current occurrence is then stamped as the Plan-derived root with
-the template step forest grafted beneath it.
+Catch-up is bounded per transaction and resumable: record progress only after durable writes, retry safely after interruption, and report remaining backlog rather than skipping it. Scan active and archived occurrence identities before stamping. A budget limits transaction size, not the number of missed slots preserved. Progress is not the mutable last-open token.
+
+Each occurrence's id derives from (native Habit id, original slot); step ids additionally derive from stable template-step ids. The canonical encoding is in the ICS specification. Children win over a `template: <name>` directive, with a warning; otherwise the named template forest is grafted below the occurrence. Require persisted step UUIDs before stamping. Repeated stamping, step rename and reorder do not duplicate steps. Template edits affect later stamps, never overwrite existing occurrence trees.
+
+The `:` window keeps its offset from the Habit's block per the actions specification. Rule edits change subsequent expansion, preserving all existing active and archived occurrence facts and ids. Re-evaluate the edited rule for arrived slots and suppress duplicates against both stores; a checkpoint from the previous rule cannot hide newly introduced slots. Exclusions do not silently delete materialized work. A completed Habit makes no further occurrences, including catch-up.
+
+Migration rewrites old vdir-owned Habits into habits files once, with no retention of the old event-derived occurrence ids. Preview and make the rewrite restart-safe. No ongoing dual source of truth remains.
 
 ### Plans vs Actions
 
 Plans and Actions are distinct, linked concerns:
 
-- Plans live in `.ics` resources and own start, end/duration, recurrence, and
-  occurrence schedule deviations.
+- Plans live in `.ics` as projections; native Habits and sidecars hold recurrence and occurrence deviations.
 - Actions live durably in `.actions`; hierarchy, dependencies, and unmapped
   ClearHead workflow semantics remain local there.
 - Not every Action has a Plan; ad-hoc and intentionally unscheduled Actions are
   valid.
-- Selecting VEVENT provides schedule-only calendar reconciliation.
-- Selecting VTODO provides full task-client reconciliation for all supported
-  interoperable fields, including state, completion, title, description,
-  priority, and contexts. Each field reconciles independently; no peer silently
-  wins a conflict by global authority.
+- VEVENT reconciles blocks, names, human descriptions, recurrence and exceptions field by field. State, completion, priority and contexts stay local; no peer silently wins conflicts.
+- Kind changes are proposed with accept/revert/defer. Native UUID retention and explicit confirmation after UID replacement follow the ICS specification; unresolved relationships remain held, not adopted.
 
 Editing a Plan changes future recurrence and schedule behavior. It does not
 rewrite archived occurrence facts. Rescheduling a live recurring occurrence updates the matching `RECURRENCE-ID`
@@ -285,14 +271,7 @@ Closure and archival are separate transitions. Completing or cancelling an
 Action changes that concrete Action's lifecycle state; archival then moves the
 terminal record into durable history.
 
-A one-off Plan is not a second lifecycle object. Under VEVENT, Action completion
-remains local. Under VTODO, the linked component is the task-client projection:
-peer and local state/completion edits reconcile bidirectionally while `.actions`
-and its archive remain the durable history. Resolving a materialized recurring
-occurrence records or preserves the deviation required by the selected profile,
-snapshots its Plan UID and recurrence key into archived metadata, and advances
-the single live token. Future read-only projections are not Actions and are
-never archived.
+A one-off Plan is not a second lifecycle object. Action completion remains local. Archiving an occurrence snapshots its native Habit id, transport link and canonical slot into durable metadata. Closure does not advance a single live token: every arrived slot is independent. Future read-only projections are not Actions and are never archived.
 
 ### On Child Actions
 

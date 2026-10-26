@@ -1,185 +1,78 @@
 ---
 title: iCalendar Plan projection specification
-description: VEVENT/VTODO Plan codecs, Action realization, recurrence, and vdir synchronization semantics
-author: primary_desktop
+description: VEVENT projections of Actions and Habits, recurrence identity, and vdir reconciliation
 categories: Reference
-created: 2026-04-20T00:00:00-0800
-updated: 2026-08-31T00:00:00-0800
-version: 1.3.1
 ---
 
 # iCalendar Plan projection specification
 
-This specification defines ClearHead's RFC 5545 Plan projection in each workspace's `<data_root>/plans/` vdir. The vdir is the complete integration boundary: CalDAV, vdirsyncer, Syncthing, Git, a mounted filesystem, or no transport may sit behind it. ClearHead does not depend on server accounts, hrefs, ETags, or vendor metadata.
+This specification defines RFC 5545 projections in each workspace's `<data_root>/plans/` vdir. The vdir stays at that location (Decision 31) and is the complete integration boundary. CalDAV, vdirsyncer, Syncthing, Git, a mounted filesystem, or no transport may sit behind it. ClearHead does not depend on server accounts, hrefs, ETags or vendor metadata.
 
-The core separation is:
-
-- calendar resources represent **Plans**, meaning the scheduling relationship for executable work;
-- `.actions` files represent **Actions**, including lifecycle state and ClearHead workflow structure;
-- an Action with no scheduled time has no Plan resource and is intentionally unplanned;
-- a Plan may be one-off or recurring; `RRULE` changes cardinality, not domain type.
-
-See [action_file_format.md](./action_file_format.md) for Action syntax.
+Actions are native work in ordinary `.actions` files. Habits are native recurring prescriptions in `<charter>.habits.actions` (Decision 57). A one-off Plan is not another domain entity: it projects an Action's `@` block. A recurring Plan projects a Habit. An unscheduled Action has no Plan. See [Action syntax](./action_file_format.md), [workspace layout](./workspace.md) and [process](./process.md).
 
 ## File location and discovery
 
-Each resource is one `.ics` file under a charter-scoped vdir directory:
+Each resource is one `VCALENDAR` in `plans/<charter-scope>/<resource>.ics`, containing a VEVENT master and any same-UID `RECURRENCE-ID` overrides. ClearHead emits `<uid>.ics`; readers identify the resource by UID, not filename. Transport-selected filenames are preserved. Duplicate master identities, including mixed component kinds, are errors, never traversal-order winners.
 
-```text
-plans/<charter-scope>/<resource>.ics
-```
+Collection ownership comes from each charter's canonical workspace anchor even if no directory exists. Loading attaches resources by exact collection path, never by alias, title or an arbitrary `next.actions` basename. An unowned collection is quarantined (`unowned-plans-collection`); doctor may explicitly remove it after warning that transport can propagate deletion. It never creates an implicit charter.
 
-ClearHead emits canonical files named `<uid>.ics`, but readers identify a resource by its RFC 5545 `UID`, not by its filename. Transport tooling may choose another filename. Duplicate Plan identities are errors; traversal order must never pick a winner.
+## VEVENT-only integration (Decision 55)
 
-Collection ownership is constructed from each charter's canonical workspace anchor whether or not the directory or any resource exists. Calendar loading attaches resources by exact collection path; aliases, titles, and arbitrary `next.actions` basenames are not collection identity.
+Plans use VEVENT only. `plan_component` is retired; a legacy `vtodo` setting warns. For one transition release, sync converts linked VTODO Plans and all same-UID overrides atomically to VEVENT, keeping UID, time frames, alarms, unknown properties and paths wherever representable. Unsupported/lossy conversion leaves the resource unchanged and reports why. Unlinked VTODOs are not adopted; doctor reports them. One-way `clearhead export plans` may still write VTODO and reads nothing back.
 
-## Configured Plan codec
+A component has UID, SUMMARY and DTSTART; optional DTEND (or imported DURATION), DESCRIPTION, RRULE, RDATE, EXDATE and occurrence overrides. Missing required fields and duplicate identities are actionable errors local to the resource; unrelated files continue.
 
-`plan_component` selects the component used to encode Plans:
+The calendar shows the `@` block only. It is half-open: a DATE DTEND is the day after the last included date written in `@`; a time end is the written instant. `:` windows, lifecycle state, priority, contexts, hierarchy and dependencies stay local. Children are template steps, not independently recurring components.
 
-| Value | Component | Intended integration |
-| --- | --- | --- |
-| `vevent` | `VEVENT` | ordinary calendar scheduling; **default** |
-| `vtodo` | `VTODO` | task-oriented calendar/mobile clients |
-
-The configured component selects an integration profile, not merely an equivalent wire encoding. A workspace writes new resources using its configured profile. Implementations may read the alternate component during explicit migration or compatibility handling, but a mixed duplicate UID must be diagnosed rather than silently selected.
-
-- `VEVENT` is the schedule-only profile. Calendar peers reconcile scheduling fields; Action lifecycle and task metadata remain local.
-- `VTODO` is the full task-integration profile. Calendar peers reconcile every existing interoperable field independently: `DTSTART`, `DURATION`, `STATUS`, `COMPLETED`, `SUMMARY`, `DESCRIPTION`, `PRIORITY`, and `CATEGORIES`, plus supported standards-backed relationships. `X-CLEARHEAD-STATUS:blocked` preserves ClearHead's blocked state beside the interoperable `STATUS:NEEDS-ACTION` fallback.
-
-Both profiles preserve alarms, unknown properties, vendor extensions, UID, and transport-selected paths. ClearHead-only fields remain local unless an explicit standard or `X-CLEARHEAD-*` mapping exists.
-
-### Compatibility and codec migration
-
-Normal Plan discovery accepts either component so a workspace can change codecs
-without making existing resources unreadable. The configured value controls new
-resources and deliberate rewrites; it is not a license to select one of two
-same-UID masters. A resource containing duplicate master components for one UID,
-whether same-kind or mixed `VEVENT`/`VTODO`, is invalid and must be diagnosed
-with its path, UID, and observed component kinds.
-
-A calendar synchronization after changing the configured codec previews and
-converts one logical Plan atomically: its master and every same-UID
-`RECURRENCE-ID` override move to the selected component kind in the same write.
-Unresolved field conflicts defer conversion so VTODO-only peer edits are not
-lost before reconciliation. Conversion must not leave old-kind overrides beside the new
-master. Calendar-level metadata, alarms, unknown properties, the UID, recurrence
-keys, and the transport-selected resource path remain preserved wherever the
-target component permits them. A failed or lossy conversion leaves the original
-resource unchanged and reports the unsupported property rather than silently
-discarding it.
-
-The retired standalone-Action VTODO projection is migration input, not a second
-normal classification. A non-override VTODO without `RRULE` is a one-off Plan.
-During migration, a UUID UID matching an existing unlinked Action links that
-Action instead of creating a duplicate. An arbitrary UID may reuse an existing
-Action only when durable sidecar or prior projection-store evidence proves the
-old mirror relationship; otherwise ClearHead mints a native Action UUID and
-records the foreign Plan UID in its sidecar. After adoption, normal Plan/Action
-reconciliation applies and the compatibility evidence may be discarded.
-
-## Plan components
-
-A Plan component has:
-
-- `UID` (required): stable interoperable Plan identity;
-- `SUMMARY` (required): display label, sourced from the realized Action for ClearHead-authored one-off Plans;
-- `DTSTART` (required): one-off scheduled time or recurrence anchor;
-- `RRULE` (optional): recurring Plan semantics;
-- `RDATE`/`EXDATE` (optional): recurrence additions and exclusions;
-- `RECURRENCE-ID` components (optional): sparse occurrence rescheduling or cancellation;
-- `DESCRIPTION` (optional): Plan directives followed by human-readable notes;
-- `DTEND` for VEVENT, or `DURATION` for VTODO (optional): the end of the planned block, the `@` range's end (Decision 51).
-
-A Plan carries the `@` block and nothing else of the Action's time. The block and
-`DTSTART` with its end mean the same interval: both are half-open, a `DATE` end
-is exclusive (the day after the last date written in `@`), and a time end is the
-instant written. VTODO writes the end as a `DURATION` because RFC 5545 forbids
-`DURATION` beside `DUE`, and ClearHead writes no `DUE`. On import, a VEVENT
-`DURATION` is read as the `DTEND` it implies; a VTODO `DUE` written by another
-client is a deadline, not a block end, so it is preserved and not read.
-
-The Action's window (`:`) is not synchronized: a calendar component holds one
-interval, and the Plan's is the block. Deadlines are seen in ClearHead.
-
-ClearHead MUST preserve the original time value type and frame when possible: UTC, floating local time, all-day DATE, and IANA `TZID` values are valid. Unknown/custom time zones must not be silently interpreted as the machine's local zone.
+Time frames (UTC, floating, all-day DATE and IANA TZID) are preserved. Unknown/custom zones are not interpreted as the machine's local zone. RDATE, EXDATE, time frames and overrides awaiting materialization belong in the Habit's durable semantic sidecar (or its charter's sidecar), not solely in the reconstructible projection store. Regeneration must not discard them.
 
 ### Description directives
 
-Leading `key: value` lines are directives until a blank or non-directive line. The remaining text is the Plan description.
+Leading `key: value` lines are directives until a blank or non-directive line. `template: <name>` binds a named template. Directives are excluded from the human description's three-way merge; calendar editors must not cause a directive to be silently treated as ordinary prose. Inline Habit children win over a named binding, with a warning.
 
-| Directive | Type | Description |
-|---|---|---|
-| `template` | string | Template used when realizing a recurring occurrence |
+## One-off Plans
 
-Clients that do not understand these directives may display them as notes.
+A scheduled, non-recurring Action realizes exactly one Plan. ClearHead-authored resources use the native Action UUID as UID. A genuinely new calendar-authored one-off keeps its arbitrary external UID and gets an independent native UUID, with the link in the Action sidecar. Transport identity is never native identity.
 
-## Plan and Action realization
+Assigning or changing `@` creates or patches the resource; a calendar schedule edit updates `@`. Clearing `@` removes the Plan without closing the Action. Deleting an established Plan unschedules the Action without deleting or cancelling it. Resource absence is interpreted through the merge base, not guessed from an untracked snapshot. A new unrelated VEVENT in an owned collection seeds a not-started scheduled Action using SUMMARY and human DESCRIPTION.
 
-### One-off Plans
+## Habits and occurrence identity
 
-A scheduled, non-recurring Action realizes exactly one Plan. For ClearHead-authored resources the Action UUID is used as the component UID and canonical filename. For a calendar-authored resource, ClearHead retains the arbitrary external UID, mints an independent native Action UUID, and records the relationship in the Action sidecar; it never rewrites the external UID or derives durable Action identity from transport-owned identity.
+A Habit's native id is its line's `#uuid`; it is not derived from UID. Each Habit projects to one recurring VEVENT. Series time/rule edits reconcile to its line; RDATE/EXDATE/frame edits reconcile to its sidecar. Single-occurrence edits reconcile to the occurrence Action, or wait durably in the sidecar until it exists. Moving an occurrence changes DTSTART, never the original slot in RECURRENCE-ID.
 
-The lifecycle is bidirectional:
+### Canonical slot keys (`slot-key-zone`)
 
-- assigning `scheduled_at` to an unplanned Action creates its Plan resource;
-- changing the Action schedule patches the Plan;
-- changing the Plan schedule updates the Action;
-- clearing the Action schedule removes the Plan without deleting or cancelling the Action;
-- deleting the Plan resource from the calendar unschedules the Action without deleting or cancelling it;
-- creating a Plan resource in an owned collection creates a not-started scheduled Action in that charter.
+Keys are ASCII strings, independent of the viewer or device zone. Seconds are always present. Equivalent lexical precision normalizes to seconds; nonzero fractional seconds retain their value without trailing zeroes. The prefix distinguishes value types:
 
-Resource absence is interpreted through the projection merge base. An Action that has never had a Plan is merely unplanned; an established Plan that disappears is a calendar-side unschedule. Implementations must not guess between these states from a single untracked snapshot.
-
-### Recurring Plans
-
-A Plan carrying `RRULE` prescribes recurring Action occurrences. The Plan master has one UID. Each executable occurrence has a deterministic Action UUIDv5 derived from the Plan UID and a canonical recurrence key.
-
-The canonical occurrence address is:
-
-```text
-(Plan UID, canonical RECURRENCE-ID)
-```
-
-Calendar-side occurrence rescheduling updates the corresponding materialized Action when one exists. Action-side rescheduling writes or updates the matching `RECURRENCE-ID` component. The projection store stamps the materialized occurrence's initial schedule and profile-field merge bases when the token is created, so later edits use ordinary three-way reconciliation. Moving an occurrence never changes its identity: the recurrence key names the original slot while `DTSTART` carries the moved time.
-
-An `EXDATE` or explicitly cancelled occurrence skips the slot. In the VEVENT profile, completing an Action writes no synthetic calendar completion status. In the VTODO profile, same-UID occurrence overrides participate in the same bidirectional task-field reconciliation as one-off resources: a peer may complete or cancel the materialized root, and ClearHead projects local root-state changes back to `STATUS`/`COMPLETED`. Durable completed history still belongs to the Action archive rather than depending on a peer retaining old overrides.
-
-## Field authority
-
-The relationship deliberately has split authority:
-
-| Meaning | Authority | Calendar representation |
+| Frame | Original slot | Canonical key |
 | --- | --- | --- |
-| planned start (`@`) | Plan/calendar, bidirectionally reconciled | `DTSTART` |
-| planned end (`@` range end) | Plan/calendar, bidirectionally reconciled | VEVENT `DTEND`; VTODO `DURATION` |
-| window (`:`) | Action-local | none |
-| recurrence and exceptions | Plan/calendar | `RRULE`, `RDATE`, `EXDATE`, `RECURRENCE-ID` |
-| Action name and description | VEVENT: Action display projection; VTODO: bidirectional | `SUMMARY`, `DESCRIPTION` |
-| lifecycle state and completion | VEVENT: Action-local; VTODO: bidirectional | `STATUS`, `COMPLETED`, `X-CLEARHEAD-STATUS` |
-| priority and contexts | VEVENT: Action-local; VTODO: bidirectional | `PRIORITY`, `CATEGORIES` |
-| hierarchy, dependencies, other workflow metadata | Action/ClearHead unless explicitly mapped | standards-backed relationship or `X-CLEARHEAD-*` extension |
+| DATE | `20261026` | `D:2026-10-26` |
+| Floating | `20261026T090000` | `F:2026-10-26T09:00:00` |
+| UTC/offset | `2026-10-26T09:00:00-07:00` | `U:2026-10-26T16:00:00Z` |
+| TZID | `TZID=America/Los_Angeles:20261026T090000` | `U:2026-10-26T16:00:00Z` |
 
-A calendar-created VEVENT uses its `SUMMARY` and optional description only to seed the new Action. After adoption they remain display projections. A calendar-created VTODO imports every supported task field and then reconciles each field independently through the same three-way merge discipline as scheduling.
+For TZID slots, resolve in the series zone using RFC 5545 §3.3.5 (first occurrence in a fold, pre-gap offset for a nonexistent local time), not the host's zone. Preserve the frame separately for future expansion. In Los Angeles the fold slot `2026-11-01T01:30:00` keys as `U:2026-11-01T08:30:00Z`; the gap slot `2026-03-08T02:30:00` keys as `U:2026-03-08T10:30:00Z`. Devices in UTC, Los Angeles and Tokyo compute all these same keys. DATE and floating keys are never converted to UTC. This corrects the old UTC-only slot wording.
 
-## Reconciliation
+The native occurrence id is `UUIDv5(Habit UUID, "occurrence/" + key)`. A stamped step id is `UUIDv5(occurrence UUID, "step/" + template-step UUID)`, with lowercase hyphenated step UUID text. Template-step UUIDs are persisted before stamping: renaming or reordering a step never changes its id; a deliberately new step gets a new UUID. Derived ids are persisted on the generated lines. `app:slot` is the canonical key as `xsd:string`, not a viewer-resolved `xsd:dateTime`.
 
-Each synchronized schedule field has an independent three-way merge base in the machine-local plans projection store. A conflict in one field must not block safe changes in another. First sync converges agreeing values and surfaces differing values as conflicts rather than guessing by timestamps.
+Transport occurrence addresses remain `(UID, RECURRENCE-ID)`. The durable native link is `(Habit UUID, canonical slot)`, including for history after a transport UID replacement. These are different addresses of the same occurrence, not interchangeable identity inputs.
 
-The Action sidecar stores the durable semantic Plan link: the interoperable Plan UID and, for a recurring instance, its canonical recurrence key. This committed relationship survives projection-store loss, Plan path changes, and arbitrary calendar-created UIDs. The machine-local projection store retains only merge bases and other reconstructible reconciliation state.
+## Reconciliation and kind changes
 
-When updating an existing component, ClearHead changes only fields it owns. It must preserve alarms, unrecognized properties, vendor extensions, calendar-level metadata, the original UID, and the transport-selected resource path.
+Name, human description, planned start/end, recurrence and exceptions use independent field-wise three-way merge bases. Safe changes in one field continue while another conflicts. First sync converges agreeing values and presents differing values, not timestamp winners. Series edits target the Habit; an occurrence rename targets only its Action. Action/Habit state, completion, priority and contexts are never calendar-authoritative.
 
-## Error handling
+The committed semantic sidecar holds native/transport links and recurrence-only facts. The machine-local projection store holds merge bases and reconstructible state. Loss of that store must not lose occurrence identity, frame, exceptions or pending overrides. Updates preserve alarms, unrecognized properties, extensions, calendar metadata, original UID and transport-selected path.
 
-Invalid resources are non-fatal to unrelated files. Implementations should continue processing other resources and emit actionable diagnostics including file and component context. Missing UID, SUMMARY, or DTSTART components cannot be adopted as Plans. Duplicate derived identities and mixed same-UID component representations are errors.
+A recurrence kind change is detected against the merge base and proposed, never silently applied (Decisions 56/57). Accept, revert (restore the last synchronized kind), and defer (ask again next sync) are explicit operations. `--accept-all` accepts kind proposals for scripted runs; a noninteractive run otherwise defers. It never substitutes for an explicit native-identity link confirmation.
 
-A calendar collection with no constructed charter owner is quarantined as an `unowned-plans-collection` violation; it never creates an implicit charter. `clearhead doctor --fix` may explicitly remove that local collection after warning that transport tooling can propagate the deletion.
+- Accepted one-off → recurring moves the Action to the habits file, retaining its native UUID as the Habit id; no duplicate old Action remains. The first occurrence has its own derived id. The proposal exposes effects on children, dependencies, state, priority and contexts before acceptance.
+- Accepted recurring → one-off ends the Habit. The newest open occurrence keeps its id and becomes the one-off Action; older open occurrences remain open for manual completion/cancellation. The proposal shows the resulting block, including clients that return to the original series start. If there is no open occurrence, the proposal requires explicit resolution rather than inventing an identity.
+- A text kind change moves the line between files, adding/removing `R:` and retaining its UUID. It is not adopting that line as a generated occurrence.
 
-## Contract boundaries
+UID replacement and `this and following` series splits are separate from same-UID kind proposals. Sync presents a link for user confirmation at arrival; native identity is retained only through an explicitly confirmed link, never automatic matching. Ambiguous links defer and recur next sync. Suspected replacements with no candidate stay held until a user supplies a link by hand; no new entity is adopted for the held event. Doctor reports held relationships read-only; `--fix` invokes the same explicit link operation, never merges native identities. Candidate detection must not be sold as proof of identity.
 
-- Domain meaning remains source-agnostic.
-- RFC 5545 and vdir behavior belong to the projection layer.
-- Transport and server implementation details remain outside ClearHead.
-- `.actions` remains the canonical stateful work interface.
-- Calendar resources exist only for planned work; absence of a schedule is a valid Action state, not malformed data.
+## Generation and history
+
+See [Habit workflow](./process.md#habits). Every arrived slot is materialized, even while older ones remain open. Generation is bounded per write transaction and resumable without dropping slots. Active and archived occurrence ids both suppress duplicates. Rule edits do not rewrite or delete existing occurrence history. Future slots remain computed projections, not editable Action rows. Calendar-only exclusions skip unmaterialized excluded slots, not erase existing work silently.
+
+The transition is a clean break: existing vdir-owned recurring prescriptions are rewritten once into habits files. Their old event-derived occurrence ids are not carried forward. Migration is explicit, previewable and restart-safe; published specification and grammar releases precede Core adoption (Decision 54).
