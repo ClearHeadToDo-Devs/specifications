@@ -235,7 +235,7 @@ Work that can happen outside an Action's window, such as preparing before it
 opens, belongs in its own Action with its own window, related by `<` where
 order matters.
 
-## Recurrence (habits files only)
+## Recurrence
 
 A top-level line in `<charter>.habits.actions` is a Habit. `R:` followed by an RFC 5545 §3.3.10 RRULE value follows the complete `@` block it repeats. The block's start supplies `DTSTART`. For example:
 
