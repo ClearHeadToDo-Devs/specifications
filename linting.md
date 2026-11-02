@@ -209,9 +209,6 @@ These rules detect logical inconsistencies that block core functionality. These 
     [ ] Parent
     >[x] Child 1
     >[_] Child 2
-    [x] Parent
-    >[x] Child 1
-    >[_] Child 2
     ```
 
     **Rationale:** Serves as a nudge to the user to wrap up the parent action once all its sub-tasks are finished.
