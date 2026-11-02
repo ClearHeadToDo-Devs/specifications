@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://clearhead.dev/schemas/v0.3.0/transaction_request.schema.json",
   "title": "ClearHead Transaction Request",
-  "description": "A batch of semantic action operations that must validate together and commit together through one PendingBatch. Operations are applied in array order against trusted workspace state loaded under the workspace lock; any invalid operation rejects the whole batch before a write. This is NOT a JSON Patch or a desired-state document: each operation names an intent (update / complete / cancel) whose side effects (in-place field edits vs. cascade-close + date-stamp + file move) core owns. Single-item work should use the ordinary verbs; a transaction exists only for edits that must be atomic together. Dry-run is an invocation flag (`clearhead transact --dry-run`), not part of this document.",
+  "description": "A batch of semantic action operations that must validate together and commit together through one PendingBatch. Operations are applied in array order against trusted workspace state loaded under the workspace lock; any invalid operation rejects the whole batch before a write. This is NOT a JSON Patch or a desired-state document: each operation names an intent (update / complete / cancel / reopen) whose in-place field and date changes core owns. Complete, cancel, and reopen affect only the named action: no cascade, no parent-link detachment, and no file move. Single-item work should use the ordinary verbs; a transaction exists only for edits that must be atomic together. Dry-run is an invocation flag (`clearhead transact --dry-run`), not part of this document.",
   "type": "object",
   "required": ["operations"],
   "additionalProperties": false,
@@ -15,7 +15,8 @@
         "oneOf": [
           { "$ref": "#/$defs/updateAction" },
           { "$ref": "#/$defs/completeAction" },
-          { "$ref": "#/$defs/cancelAction" }
+          { "$ref": "#/$defs/cancelAction" },
+          { "$ref": "#/$defs/reopenAction" }
         ]
       }
     }
@@ -28,7 +29,7 @@
     },
     "updateAction": {
       "type": "object",
-      "description": "Edit an action's attributes in place (single file). No cascade, no move. State may be set to a NON-terminal value here; terminal transitions (completed / cancelled) are rejected by core in favor of the complete-action / cancel-action operations, which carry the cascade + date-stamp + file-move semantics a field write cannot.",
+      "description": "Edit an action's attributes in place (single file). No cascade, no move. State may be set to a NON-terminal value here on an open action; terminal transitions (completed / cancelled) are rejected by core in favor of complete-action / cancel-action, which stamp state and completed_at together. Use reopen-action to reopen a closed action and clear its completed_at.",
       "required": ["op", "target", "set"],
       "additionalProperties": false,
       "properties": {
@@ -51,7 +52,7 @@
             "alias": { "type": "string", "minLength": 1 },
             "state": {
               "type": "string",
-              "description": "Action state, serialized as core ActionState does (snake_case; BlockedOrAwaiting => 'blocked'). Terminal values 'completed'/'cancelled' are accepted structurally but rejected by core's in-place terminal-state guard — use complete-action / cancel-action instead.",
+              "description": "Action state, serialized as core ActionState does (snake_case; BlockedOrAwaiting => 'blocked'). Terminal values 'completed'/'cancelled' are accepted structurally but rejected by core's terminal-state guard — use complete-action / cancel-action instead. To reopen a closed action, use reopen-action rather than a field update.",
               "enum": ["not_started", "in_progress", "blocked", "completed", "cancelled"]
             },
             "scheduled_at": {
@@ -64,7 +65,7 @@
     },
     "completeAction": {
       "type": "object",
-      "description": "Close an action and its full open subtree as Completed: stamp completed_at, detach the closed root from any external parent, and move the subtree from the active file to the .completed.actions file. Runs core's close_subtree; not expressible as an update.",
+      "description": "Close only the named action in place: set state to completed and stamp completed_at. No cascade, no parent-link detachment, and no file move. Descendants and the action's parent link are unchanged; closed lines remain ordinary records in the active file. Archival is a separate whole-root-tree operation.",
       "required": ["op", "target"],
       "additionalProperties": false,
       "properties": {
@@ -74,11 +75,21 @@
     },
     "cancelAction": {
       "type": "object",
-      "description": "Close an action and its full open subtree as Cancelled, via the same close_subtree machinery as complete-action.",
+      "description": "Cancel only the named action in place: set state to cancelled and stamp completed_at. No cascade, no parent-link detachment, and no file move. Descendants and the action's parent link are unchanged; archival is a separate whole-root-tree operation.",
       "required": ["op", "target"],
       "additionalProperties": false,
       "properties": {
         "op": { "const": "cancel-action" },
+        "target": { "$ref": "#/$defs/canonicalId" }
+      }
+    },
+    "reopenAction": {
+      "type": "object",
+      "description": "Reopen only the named closed action in place: set state to not_started and clear completed_at. Allowed only in the active file; refused if archived (unarchive its root tree first). No cascade, no parent-link detachment, and no file move. Descendants and the action's parent link are unchanged.",
+      "required": ["op", "target"],
+      "additionalProperties": false,
+      "properties": {
+        "op": { "const": "reopen-action" },
         "target": { "$ref": "#/$defs/canonicalId" }
       }
     }

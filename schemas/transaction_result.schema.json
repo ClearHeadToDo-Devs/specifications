@@ -15,7 +15,7 @@
     },
     "verbOutcome": {
       "type": "object",
-      "description": "One applied (or, in a dry-run, would-be-applied) operation outcome. Mirrors clearhead-cli VerbOutcome in full, independent of which kinds `transact` itself can currently request — the taxonomy lives in core so every producer speaks one spelling. `children` is the cascade fan-out count for complete/cancel/reopen/delete; `added`/`updated` carry no children.",
+      "description": "One applied (or, in a dry-run, would-be-applied) operation outcome. Mirrors clearhead-cli VerbOutcome in full, independent of which kinds `transact` itself can currently request — the taxonomy lives in core so every producer speaks one spelling. `children` is the number of descendants also affected: it is 0 for complete/cancel/reopen, which affect only the named action, and reports descendant effects for delete. `added`/`updated` carry no children.",
       "required": ["kind", "id"],
       "additionalProperties": false,
       "properties": {
@@ -24,7 +24,7 @@
         "children": {
           "type": "integer",
           "minimum": 0,
-          "description": "Number of descendant actions also affected by this operation. Present for completed/cancelled/reopened/deleted."
+          "description": "Number of descendant actions also affected by this operation. Present for completed/cancelled/reopened/deleted; 0 for completed/cancelled/reopened, which are single-action state changes."
         }
       },
       "allOf": [

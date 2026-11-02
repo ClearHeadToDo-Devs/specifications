@@ -68,11 +68,34 @@ under the native lock and delivers the complete batch durably.
 
 The initial transaction surface remains deliberately small:
 
-- operations are `update`, `complete`, and `cancel`;
-- terminal state transitions use `complete` or `cancel`, preserving subtree and
-  archival policy;
+- operations are `update-action`, `complete-action`, `cancel-action`, and
+  `reopen-action`;
+- `complete-action` and `cancel-action` set only the named action's state to
+  `completed` or `cancelled` and stamp `completed_at` in place. They do not
+  cascade, detach parent links, or move lines to another file;
+- `reopen-action` sets only the named closed action to `not_started` and clears
+  `completed_at` in place. It is allowed only in the active file and is refused
+  for an archived action; unarchive its root tree first;
 - all operations target one selected workspace;
 - a failed operation rejects the entire batch.
+
+Closed lines in the active file are ordinary records. Closing a parent does not
+close its children; W002 (closed parent with an open child) and W003 (open parent
+with all children closed) remain warnings, not mutation guards.
+
+Only archive and unarchive transfer action lines between the active and completed
+files, always as a whole root tree (a root and everything below it). Archive
+requires a closed root whose entire tree is closed. Unarchive takes a root in
+the completed file and returns its whole tree without changing states. Either
+operation refuses a child target and names its root. Parent links inside an
+archived tree are retained; closing does not detach them.
+
+For example, [`valid_reopen.json`](../examples/transactions/request/valid_reopen.json)
+reopens one closed action in the active file. Its descendants are unchanged, its
+completion date is cleared, and only the active file is written. The
+[committed receipt](../examples/transactions/result/committed.json) and
+[dry-run preview](../examples/transactions/result/dry_run.json) likewise show
+single-action closes: `children` is `0`, and no completed file is written.
 
 Single-item work should use the ordinary verbs. A transaction exists for edits
 that must succeed or fail together.
