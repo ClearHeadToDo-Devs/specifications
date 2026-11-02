@@ -1,0 +1,21 @@
+# review 20261102-024334/2: land after fixes by claude-opus-5-5
+workspace.md:178: should-fix: 2#1 The file-layout list still says <charter>.completed.actions holds 'completed and cancelled acts' (line 175 calls .actions 'active acts'), which implies closing moves a line. — Contradicts the new Archival item 2 and the action's 'closed lines in the active file are ordinary'; the completed file now holds only archived whole root trees. The keyword grep misses this line, so the old model stays in the spec.
+schemas/transaction_request.schema.json:32: nit: 2#2 update-action now limits non-terminal state writes to 'an open action', so setting state on a closed action through update-action becomes a refused operation. — This is a new contract rule the action didn't ask for; it fits reopen-action clearing completed_at, but it should be a deliberate decision and maybe noted in the changelog so Core implements it on purpose.
+# fix 20261102-024334/3 by gpt-6.1-sol, answering review 2
+fixed: 2#1
+# review 20261102-024334/4: land after fixes by claude-opus-5-5
+tests/test_workspace_layout.py:1: should-fix: 4#1 Adds a new Python test harness that asserts exact prose substrings in workspace.md; outside the specification-text-only scope and not run by the gate or any runner — Scope creep in a spec-only action; the test is dead weight that breaks on harmless rewording without checking any contract
+# fix 20261102-024334/5 by gpt-6.1-sol, answering review 4
+fixed: 4#1
+# review 20261102-024334/6: land by claude-opus-5-5
+schemas/transaction_request.schema.json:32: nit: 6#1 updateAction description now limits non-terminal state edits to an open action, which adds a new guard Core must enforce — the action did not ask for this rule; it is sensible (update would otherwise reopen without clearing completed_at) but it is not stated in workspace.md or the changelog, so Core may miss it
+tests/test_workspace_layout.py:1: nit: 6#2 branch adds and then removes this test file in separate commits (net zero) — noisy history; squash when landing
+# fix 20261102-024334/7 by gpt-6.1-sol, answering review 6
+# review 20261102-024334/8: land after fixes by claude-opus-5-5
+tests/test_transaction_results.py:9: should-fix: 8#1 Adds a new Python test directory with an undeclared jsonschema dependency; the repo had no test setup before and .sandbox/gate does not run it — The action is specification text only and names .sandbox/gate as the gate. In this environment python -m unittest discover -s tests fails with ModuleNotFoundError for jsonschema, so the file is unrequested, unmaintained setup. The branch already removed a sibling test as out of scope, and this one should go too unless a human adopts a test setup on purpose
+examples/transactions/result/committed.json:5: nit: 8#2 Every completed/cancelled example has open_children: [], so none shows the non-empty case — open_children exists so a close can report descendants left open; an example with one canonical id would show readers and Core the intended shape
+schemas/transaction_result.schema.json:99: nit: 8#3 verbError has no kind for reopen refused because the target is archived (only not-found, ambiguous, already-closed, already-open) — reopen-action is specified as refused when archived, but the rejection a producer should emit is unspecified, so Core may pick an ad-hoc spelling
+# fix 20261102-024334/9 by gpt-6.1-sol, answering review 8
+fixed: 8#1
+# review 20261102-024334/10: land by claude-opus-5-5
+examples/transactions/result/rejected_archived.json:1: nit: 10#1 The archived rejection treats urn:uuid:...a0cf as archived under root ...b160 and uses operation index 1, but committed.json shows ...a0cf completed with an open child (so its tree can't be archived) and ...b160 updated to in_progress (an open active root), and valid_reopen.json has one operation at index 0. — Readers comparing the examples may be confused; using ids and an operation index that fit an archived tree would make the example read as a real reopen-of-archived case.
