@@ -1,5 +1,9 @@
 # Changelog - Actions Specifications
 
+## v0.4.0 — 2026-11-02
+
+A minor release: the specifications as of this entry, including the dated entry below down to v0.3.0. Closing an action becomes a state change in place, archive and unarchive move whole root trees, and transactions gain `reopen-action` (platform Decisions 58 and 59). Schema `$id`s are `https://clearhead.dev/schemas/v0.4.0/<name>.schema.json`.
+
 ## 2026-11-02
 
 ### Added
