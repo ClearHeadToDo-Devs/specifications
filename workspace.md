@@ -172,10 +172,10 @@ Actions are stored in the `.actions` files within the workspace and represent th
 
 All paths are relative to `charters/`:
 
-- `charters/<charter>.actions` — active acts for that charter (capped at `expansion_primary_instances` per schedule)
+- `charters/<charter>.actions` — unarchived acts for that charter, including closed lines (primary scheduled instances capped at `expansion_primary_instances` per schedule)
 - `charters/<charter>.upcoming.actions` — future generated instances beyond the primary cap, not yet in the active set
 - `charters/next.actions` — root charter acts (project or user workspace root)
-- `charters/<charter>.completed.actions` — completed and cancelled acts for that charter
+- `charters/<charter>.completed.actions` — archived whole root trees for that charter; closed lines are not moved here merely by closing (see [Archival](#archival))
 - `charters/<charter>/next.actions` — root acts for a folder-form charter
 
 When a charter is archived, its known files (`charters/<charter>.actions`, `.completed.actions`, `.upcoming.actions`, the charter `.md`, and its `.json` sidecar) and every other charter-local supporting file in a directory-form charter (notes, inventories, and future formats) are moved verbatim into the `archive/` region, at the path they held under `charters/`. Nothing is serialized: the archived form is the same plaintext, just relocated out of the default read set.
