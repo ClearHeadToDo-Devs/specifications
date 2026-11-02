@@ -185,19 +185,18 @@ These rules detect logical inconsistencies that block core functionality. These 
 
     **Fixable:** No
 
-    A parent action cannot be marked as closed if it has children that are still active.
+    Reports the contradiction of a closed parent with an open child.
     Here, "closed" means either completed (`[x]`) or cancelled (`[_]`).
+    This is a warning, not a prohibition on closing an individual action.
 
     ```actions
     [x] Parent
     >[ ] Open child
     [_] Parent
     >[ ] Open child
-    [x] Parent
-    >[_] Cancelled child
     ```
 
-    **Rationale:** Archiving and completion logic typically operates on trees. A closed parent with active child work is semantically inconsistent.
+    **Rationale:** Closing changes only the named action, so a closed parent can still have open child work. This warning surfaces that inconsistency; archive separately requires a wholly closed root tree.
 
 #### W003: Open Parent with All Children Closed
 

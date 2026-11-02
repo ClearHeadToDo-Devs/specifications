@@ -1,5 +1,15 @@
 # Changelog - Actions Specifications
 
+## 2026-11-02
+
+### Added
+
+**Reopen one action in place** (`schemas/transaction_request.schema.json`, `examples/transactions/`, `explanations/data_workflows.md`; platform Decisions 58 and 59). `reopen-action` sets the named closed action to `not_started` and clears `completed_at`. It is active-file only: an archived action must first be unarchived as part of its root tree. The `archived` refusal carries the target `id`, the `root` to unarchive, and the original `query`; the archived rejection example illustrates it.
+
+### Changed
+
+**Closing is a state change; archival is a separate root-tree operation** (`workspace.md`, `linting.md`, transaction schemas and examples, `explanations/data_workflows.md`; platform Decisions 58 and 59, approved 2026-11-02). Complete and cancel stamp only the named action's state and completion date in place, without closing descendants, detaching parent links, or moving lines. Closed lines in the active file are ordinary records. Only archive and unarchive transfer action lines between active and completed files, always a whole root tree; archive requires every line to be closed, and either operation refuses a child target and names its root. Parent links inside archived trees are kept. W002 reports a closed parent with an open child rather than forbidding closure; its cancelled-child example is removed because it has no open child. W002 and W003 remain warnings. Complete and cancel receipts replace `children` with required `open_children`, the canonical ids left open beneath the named action (empty when none). Reopen receipts carry neither field; only delete retains the descendant `children` count. `update-action` refuses a closed target altogether, including non-state edits, and continues to reject terminal state values. This specifies the contract for a later release; Core adoption follows separately.
+
 ## v0.3.0 — 2026-10-13
 
 A minor release: the specifications as of this entry, including every dated entry below down to v0.2.1. It adds Habits to the application graph as a draft (platform Decision 56), specifying the recurring plans v0.2.x left open. Schema `$id`s are `https://clearhead.dev/schemas/v0.3.0/<name>.schema.json`.

@@ -172,10 +172,10 @@ Actions are stored in the `.actions` files within the workspace and represent th
 
 All paths are relative to `charters/`:
 
-- `charters/<charter>.actions` — active acts for that charter (capped at `expansion_primary_instances` per schedule)
+- `charters/<charter>.actions` — unarchived acts for that charter, including closed lines (primary scheduled instances capped at `expansion_primary_instances` per schedule)
 - `charters/<charter>.upcoming.actions` — future generated instances beyond the primary cap, not yet in the active set
 - `charters/next.actions` — root charter acts (project or user workspace root)
-- `charters/<charter>.completed.actions` — completed and cancelled acts for that charter
+- `charters/<charter>.completed.actions` — archived whole root trees for that charter; closed lines are not moved here merely by closing (see [Archival](#archival))
 - `charters/<charter>/next.actions` — root acts for a folder-form charter
 
 When a charter is archived, its known files (`charters/<charter>.actions`, `.completed.actions`, `.upcoming.actions`, the charter `.md`, and its `.json` sidecar) and every other charter-local supporting file in a directory-form charter (notes, inventories, and future formats) are moved verbatim into the `archive/` region, at the path they held under `charters/`. Nothing is serialized: the archived form is the same plaintext, just relocated out of the default read set.
@@ -274,7 +274,7 @@ this will also allow for on demand generation of actions either as a side-effect
 One concept that is very important to the workspace format is the process of "archiving" things. weve covered the names above but its working from a reference point lets go from the beginning
 
 1. At the lowest level, we have the actions that are implementations of their optional parent plans.
-1. at first, these are all open, then as the user is closing the actions, they move from `<charter>.actions` to `<charter>.completed.actions` in order to remove clutter and make the process of tracking closed actions easier for both humans and databases to comprehend, this way open act queries can be fast, but full history searches are still possible
+1. Closing an action changes only that line's state and stamps its completion date in place; it does not close descendants, detach a parent link, or move the line. Closed lines in `<charter>.actions` are ordinary active-file records. Only archive and unarchive move action lines between `<charter>.actions` and `<charter>.completed.actions`, always as a whole root tree (a root and everything below it). Archive accepts a closed root only when its whole tree is closed, and transfers that tree to the completed file. Unarchive accepts a root in the completed file and returns its whole tree to the active file without changing states. Both operations refuse a child target and name its root instead. Parent links within an archived tree are kept. Reopening is a separate in-place state change: it sets only the named action to `not_started` and clears its completion date. Reopen is allowed only in the active file; an archived action must be unarchived first.
 1. If we move a level up, we have the plans in `plans/<charter-name>/`, again, all plans start open but schedules simply "are no longer scheduled" they have no state explicitly however they are still logged as an example of a schedule
 1. Finally, like plans, the charters themselves at `charters/<charter>.md` can be archived after they are closed. Archival is a **move, not a translation**: the archived form is data, not a projection, so no Turtle or JSON-LD is written. Any RDF view of archived data is regenerated from the loaded domain model by Core's publication adapter, exactly like live data.
 1. archiving a parent charter archives its whole subtree as one unit; the open-actions precondition is recursive too — it refuses if *any* descendant still holds open actions

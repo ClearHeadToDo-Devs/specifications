@@ -1,7 +1,7 @@
 {
   "kind": "dry-run",
   "operations": [
-    { "kind": "completed", "id": "urn:uuid:019fdffc-b18d-7d81-8dca-fb88f818a0cf", "children": 2 }
+    { "kind": "completed", "id": "urn:uuid:019fdffc-b18d-7d81-8dca-fb88f818a0cf", "open_children": [] }
   ],
-  "files": [ "/home/dab/Products/platform/.clearhead/charters/data-workflows.completed.actions" ]
+  "files": [ "/home/dab/Products/platform/.clearhead/charters/data-workflows.actions" ]
 }

@@ -15,7 +15,7 @@
     },
     "verbOutcome": {
       "type": "object",
-      "description": "One applied (or, in a dry-run, would-be-applied) operation outcome. Mirrors clearhead-cli VerbOutcome in full, independent of which kinds `transact` itself can currently request — the taxonomy lives in core so every producer speaks one spelling. `children` is the cascade fan-out count for complete/cancel/reopen/delete; `added`/`updated` carry no children.",
+      "description": "One applied (or, in a dry-run, would-be-applied) operation outcome. Mirrors clearhead-cli VerbOutcome in full, independent of which kinds `transact` itself can currently request — the taxonomy lives in core so every producer speaks one spelling. `completed`/`cancelled` carry `open_children`, the ids left open beneath the named action (empty when none), and no `children` count. Only `deleted` carries `children`, the number of descendants also deleted. `reopened` affects one action and carries neither field, as do `added`/`updated`.",
       "required": ["kind", "id"],
       "additionalProperties": false,
       "properties": {
@@ -24,17 +24,27 @@
         "children": {
           "type": "integer",
           "minimum": 0,
-          "description": "Number of descendant actions also affected by this operation. Present for completed/cancelled/reopened/deleted."
+          "description": "Number of descendant actions also deleted. Present only for deleted."
+        },
+        "open_children": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/canonicalId" },
+          "description": "Ids of actions left open beneath the named action. Required for completed/cancelled, empty when none; absent for all other outcomes."
         }
       },
       "allOf": [
         {
-          "if": { "properties": { "kind": { "enum": ["completed", "cancelled", "reopened", "deleted"] } } },
+          "if": { "properties": { "kind": { "const": "deleted" } } },
           "then": { "required": ["children"] }
         },
         {
-          "if": { "properties": { "kind": { "enum": ["updated", "added"] } } },
+          "if": { "properties": { "kind": { "enum": ["completed", "cancelled", "reopened", "updated", "added"] } } },
           "then": { "not": { "required": ["children"] } }
+        },
+        {
+          "if": { "properties": { "kind": { "enum": ["completed", "cancelled"] } } },
+          "then": { "required": ["open_children"] },
+          "else": { "not": { "required": ["open_children"] } }
         }
       ]
     },
@@ -131,6 +141,20 @@
             "query": { "type": "string" }
           },
           "required": ["kind", "id", "state", "query"]
+        },
+        {
+          "additionalProperties": false,
+          "description": "A reopen refused because the target is archived; unarchive the named root first.",
+          "properties": {
+            "kind": { "const": "archived" },
+            "id": { "$ref": "#/$defs/canonicalId" },
+            "root": {
+              "$ref": "#/$defs/canonicalId",
+              "description": "Canonical id of the root to unarchive."
+            },
+            "query": { "type": "string" }
+          },
+          "required": ["kind", "id", "root", "query"]
         }
       ]
     }
