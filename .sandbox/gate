@@ -1,0 +1,4 @@
+#!/bin/sh
+# This repo's landing gate: every JSON schema and example parses. agent-land runs it on a candidate merge.
+set -eu
+find schemas examples -name '*.json' -exec jq empty {} +
