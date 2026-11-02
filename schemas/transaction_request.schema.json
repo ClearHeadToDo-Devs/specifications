@@ -29,7 +29,7 @@
     },
     "updateAction": {
       "type": "object",
-      "description": "Edit an action's attributes in place (single file). No cascade, no move. State may be set to a NON-terminal value here on an open action; terminal transitions (completed / cancelled) are rejected by core in favor of complete-action / cancel-action, which stamp state and completed_at together. Use reopen-action to reopen a closed action and clear its completed_at.",
+      "description": "Edit an open action's attributes in place (single file). Core refuses a closed target altogether, even when no state edit is requested. No cascade, no move. State may be set to a NON-terminal value here; terminal transitions (completed / cancelled) are rejected by core in favor of complete-action / cancel-action, which stamp state and completed_at together. Use reopen-action to reopen a closed action and clear its completed_at.",
       "required": ["op", "target", "set"],
       "additionalProperties": false,
       "properties": {

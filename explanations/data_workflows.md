@@ -76,6 +76,8 @@ The initial transaction surface remains deliberately small:
 - `reopen-action` sets only the named closed action to `not_started` and clears
   `completed_at` in place. It is allowed only in the active file and is refused
   for an archived action; unarchive its root tree first;
+- `update-action` refuses a closed target altogether, even for non-state edits,
+  and refuses terminal state values; use the close or reopen operations instead;
 - all operations target one selected workspace;
 - a failed operation rejects the entire batch.
 
@@ -95,7 +97,10 @@ reopens one closed action in the active file. Its descendants are unchanged, its
 completion date is cleared, and only the active file is written. The
 [committed receipt](../examples/transactions/result/committed.json) and
 [dry-run preview](../examples/transactions/result/dry_run.json) likewise show
-single-action closes: `children` is `0`, and no completed file is written.
+single-action closes: `open_children` lists the ids left open beneath the action
+(empty in these examples), and no completed file is written. Complete and cancel
+receipts have no `children` count. Reopen receipts carry neither `children` nor
+`open_children`; only delete receipts retain the descendant `children` count.
 
 Single-item work should use the ordinary verbs. A transaction exists for edits
 that must succeed or fail together.
