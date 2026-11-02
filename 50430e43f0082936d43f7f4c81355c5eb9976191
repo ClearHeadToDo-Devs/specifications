@@ -1,0 +1,2 @@
+# verdict: facilitator agrees with the review (2026-11-02T03:02:07+00:00)
+note: Specifications v0.4.0 is released: closing an action now only changes its state in place, archive and unarchive move whole root trees, and transactions can reopen an action. Core doesn't follow it yet; that is the next step, =ci-core. Nothing needs you.
