@@ -141,6 +141,20 @@
             "query": { "type": "string" }
           },
           "required": ["kind", "id", "state", "query"]
+        },
+        {
+          "additionalProperties": false,
+          "description": "A reopen refused because the target is archived; unarchive the named root first.",
+          "properties": {
+            "kind": { "const": "archived" },
+            "id": { "$ref": "#/$defs/canonicalId" },
+            "root": {
+              "$ref": "#/$defs/canonicalId",
+              "description": "Canonical id of the root to unarchive."
+            },
+            "query": { "type": "string" }
+          },
+          "required": ["kind", "id", "root", "query"]
         }
       ]
     }

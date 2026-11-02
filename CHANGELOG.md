@@ -4,7 +4,7 @@
 
 ### Added
 
-**Reopen one action in place** (`schemas/transaction_request.schema.json`, `examples/transactions/`, `explanations/data_workflows.md`; platform Decisions 58 and 59). `reopen-action` sets the named closed action to `not_started` and clears `completed_at`. It is active-file only: an archived action must first be unarchived as part of its root tree.
+**Reopen one action in place** (`schemas/transaction_request.schema.json`, `examples/transactions/`, `explanations/data_workflows.md`; platform Decisions 58 and 59). `reopen-action` sets the named closed action to `not_started` and clears `completed_at`. It is active-file only: an archived action must first be unarchived as part of its root tree. The `archived` refusal carries the target `id`, the `root` to unarchive, and the original `query`; the archived rejection example illustrates it.
 
 ### Changed
 

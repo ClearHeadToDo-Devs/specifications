@@ -75,7 +75,9 @@ The initial transaction surface remains deliberately small:
   cascade, detach parent links, or move lines to another file;
 - `reopen-action` sets only the named closed action to `not_started` and clears
   `completed_at` in place. It is allowed only in the active file and is refused
-  for an archived action; unarchive its root tree first;
+  for an archived action with an `archived` error naming the target `id`, the
+  `root` to unarchive first, and the original `query` (see the
+  [archived rejection](../examples/transactions/result/rejected_archived.json));
 - `update-action` refuses a closed target altogether, even for non-state edits,
   and refuses terminal state values; use the close or reopen operations instead;
 - all operations target one selected workspace;
@@ -98,7 +100,8 @@ completion date is cleared, and only the active file is written. The
 [committed receipt](../examples/transactions/result/committed.json) and
 [dry-run preview](../examples/transactions/result/dry_run.json) likewise show
 single-action closes: `open_children` lists the ids left open beneath the action
-(empty in these examples), and no completed file is written. Complete and cancel
+(one remains open in the committed example; none in the dry-run example), and no
+completed file is written. Complete and cancel
 receipts have no `children` count. Reopen receipts carry neither `children` nor
 `open_children`; only delete receipts retain the descendant `children` count.
 
