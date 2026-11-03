@@ -16,7 +16,7 @@ This specification defines observability conventions for ClearHead tooling. It c
 **Observability is NOT for:**
 
 - Current state (that's the domain data)
-- Action instances (that's `.recurring.actions` files)
+- Habit occurrences (authoritative Actions in `.actions` and `.completed.actions`; definitions in `.habits.actions`)
 - Sync coordination (that's git)
 
 ## Relationship to Other Concerns
@@ -96,15 +96,20 @@ All events include:
 | `context_added` | Context tag added | `context` |
 | `context_removed` | Context tag removed | `context` |
 
-### Recurring Action Events
+### Habit Events
 
 | Event | When Emitted | Additional Fields |
 |-------|--------------|-------------------|
-| `instance_generated` | New Action created | `template_uuid`, `occurrence_date` |
-| `instance_completed` | Recurring instance completed | `template_uuid`, `scheduled_date`, `completed_date` |
-| `instance_skipped` | User skips occurrence | `template_uuid`, `occurrence_date`, `reason` |
-| `template_edited` | Recurring template modified | `template_uuid`, `fields_changed` |
-| `template_archived` | Recurring template + instances archived | `template_uuid`, `instance_count`, `archive_file` |
+| `instance_generated` | Arrived slot durably stamped | `habit_uuid`, `slot`, `action_uuid` |
+| `instance_completed` | Occurrence completed | `habit_uuid`, `slot`, `action_uuid`, `completed_date` |
+| `instance_skipped` | User cancels an occurrence or an explicit exclusion skips an unstamped slot | `habit_uuid`, `slot`, `reason` |
+| `habit_edited` | Native Habit modified | `habit_uuid`, `fields_changed` |
+| `habit_completed` | Whole Habit completed | `habit_uuid` |
+| `converted_to_habit` | Kind-change proposal accepted | `habit_uuid`, `converted_from` (same native UUID) |
+| `habit_catchup_pending` | Bounded generation has remaining arrived slots | `habit_uuid`, `resume_after` |
+| `calendar_link_held` | Replacement relationship awaits explicit confirmation | `uid`, `reason` |
+
+A missed slot is not a skip. Retry/no-op stamping emits no second generation event. Native Habit identity and canonical slot survive transport UID changes. Instance history belongs to Actions and archives, not telemetry.
 
 ### Sync Events
 

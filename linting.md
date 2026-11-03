@@ -64,15 +64,15 @@ These rules detect logical inconsistencies that block core functionality. These 
     Duration is no longer written; it is the length of the `@` block, so a
     duration cannot exist without a do-date.
 
-#### E002: Recurrence Without Do-Date (Retired)
+#### E002: Invalid Habit Recurrence (restored under Decision 57)
 
-    **Fixable:** No
+**Fixable:** No
 
-    This rule is retired as of Decision 21.
+A Habit root in `.habits.actions` requires `R:` with a valid RFC 5545 RRULE and an `@` recurrence anchor. A missing rule/start, invalid rule, or recurrence on a child is a violation. Validate FREQ, rule-part values and COUNT/UNTIL exclusion using RFC 5545. Preserve malformed source for diagnostics; do not guess a rule or a date. All open Habit states (`[ ]`, `[-]`, `[=]`) generate; only `[x]` completed and `[_]` cancelled stop generation. No state pauses a Habit. Both closed states require `%`, and open states must not carry a closed date, as with Actions (I001/I002).
 
-    Recurrence is no longer represented in `.actions` lines, so `R:`-based linting
-    checks are not part of the active rule set. Recurrence/schedule semantics now
-    live in `.ics` schedule files.
+#### Habit scope and template warnings
+
+`R:` in ordinary `.actions`, including named templates, is a semantic warning: move the intended Habit to the charter's `.habits.actions` rather than stripping recurrence silently. A habits root with both children and a `template: <name>` directive warns; children win. Missing persisted Habit or template-step ids block deterministic stamping and are reported for explicit identity minting. Unresolved transport-identity relationships must remain visible and must not silently merge native identities.
 
 #### E003: Empty Context Tag
 

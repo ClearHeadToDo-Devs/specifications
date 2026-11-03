@@ -5,6 +5,8 @@
 @prefix app: <https://clearhead.dev/vocab/app/v1#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 
+app:slot rdfs:comment "Canonical occurrence address, not a condition on the prescribed act (convention 3)." .
+app:template rdfs:comment "Stamping mechanism, not what the Habit prescribes." .
 app:file rdfs:comment "Where the entity is stored, not the work (Decision 44)." .
 app:line rdfs:comment "Where the entity is stored, not the work (Decision 44)." .
 app:after rdfs:comment "As written; its meaning is carried by app:waitsOn, which includes it (one fact, one condition)." .

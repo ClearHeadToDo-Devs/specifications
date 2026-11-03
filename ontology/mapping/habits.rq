@@ -1,0 +1,14 @@
+# A recurring time condition; native occurrences are continuant parts of the
+# prescription. Slot addresses and template bindings are application mechanics.
+PREFIX app: <https://clearhead.dev/vocab/app/v1#>
+PREFIX cco: <https://www.commoncoreontologies.org/>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+CONSTRUCT {
+  _:condition a cco:ont00000127 ; obo:BFO_0000178 ?habit , _:description .
+  _:description a cco:ont00000853 .
+  _:bearer a cco:ont00000253 ; obo:BFO_0000101 _:description ; cco:ont00001765 ?rule .
+  ?habit obo:BFO_0000178 ?occurrence .
+} WHERE {
+  ?habit a app:Habit ; app:rule ?rule .
+  OPTIONAL { ?occurrence app:occurrenceOf ?habit }
+}

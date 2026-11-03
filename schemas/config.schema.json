@@ -85,7 +85,7 @@
       "type": "string",
       "enum": ["vevent", "vtodo"],
       "default": "vevent",
-      "description": "iCalendar component used to encode Plans. VEVENT is the interoperable calendar default; VTODO is available for task-oriented calendar clients. Action state remains authoritative in .actions for either choice."
+      "description": "Retired (Decision 55). Accepted for transition diagnostics only; vtodo warns and linked VTODO resources convert for one release. All new Plans use VEVENT. Never enables task-field reconciliation."
     }
   },
   "additionalProperties": true,

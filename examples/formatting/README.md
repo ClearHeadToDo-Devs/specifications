@@ -7,6 +7,8 @@ repositories.
 
 ## Covered rules
 
+- `habits/` — approved daily child-template and weekly range/independent-window recurrence pairs (Decision 57);
+
 - `newlines/` — every action begins on its own line;
 - `indentation/` — child depth is represented by two-space indentation while
   explicit `>` depth markers remain present;

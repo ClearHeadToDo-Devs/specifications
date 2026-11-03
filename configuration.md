@@ -141,8 +141,8 @@ All implementations MUST recognize these core settings:
 | `tag_hierarchies` | object | `{}` | Tag parent-child relationships for implicit inheritance |
 | `default_to_user_scope` | boolean | `false` | If true, only shows user-scoped actions (ignores project scope) |
 | `additional_workspaces` | array | `[]` | Additional workspaces to merge into the domain model. Entries may be relative paths, absolute paths (with `~` / env-var expansion), or URLs (planned). See [Additional workspaces](#additional-workspaces). |
-| `plan_component` | string | `vevent` | iCalendar component used to encode Plans: `vevent` for ordinary calendar scheduling or `vtodo` for task-oriented calendar clients. This changes the integration surface, not Plan or Action domain semantics. |
-| `expansion_total_instances` | integer | `2` | Bounded number of recurring Plan occurrences exposed by planning projections. Materialized current instances and read-only future projections may apply different view policies. |
+| `plan_component` | retired | — | Plans use VEVENT only (Decision 55). A legacy `vtodo` value warns; linked resources have a one-release conversion path in the ICS specification. |
+| `expansion_total_instances` | integer | `2` | Bound on read-only future planning projections only. Never a cap on arrived Habit occurrences or a reason to drop missed slots. Write-path catch-up may be bounded per transaction but must resume until every arrived slot is represented. |
 
 **Requirements:**
 

@@ -10,7 +10,7 @@ version: 2.0.0
 
 This specification defines the `*.actions` format.
 
-Under Decision 21, `.actions` files represent **actions** only (the executable units of work). Recurring schedules and other plan timing logic are represented in `.ics` files. See [ICS Schedule Specification](./ics_schedule_spec.md).
+File roles are defined in [Workspace](./workspace.md); entity roles are defined in [Ontology](./ontology.md).
 
 # Scope and Principles
 
@@ -18,14 +18,6 @@ Under Decision 21, `.actions` files represent **actions** only (the executable u
 - It must remain easy to read and write by hand.
 - Parsers should be whitespace-tolerant and symbol-driven.
 - The format should remain backwards-parseable over time.
-
-## Ontological role
-
-- **Objectives** are higher-level outcomes.
-- **Plans/Schedules** live in `.ics` files.
-- **Actions** live in `.actions` files.
-
-This split keeps scheduling concerns in calendar tooling and keeps `.actions` focused on actionable execution records.
 
 # Parser Guidance
 
@@ -42,7 +34,7 @@ Canonical property order (recommended for formatters and linters):
 5. `!` priority
 6. `*` objective/parent reference
 7. `+` context tag
-8. `@` do date/time
+8. `@` do date/time, followed by `R:` recurrence
 9. `:` due date/time
 10. `^` created date/time
 11. `%` completed date/time
@@ -236,7 +228,17 @@ Work that can happen outside an Action's window, such as preparing before it
 opens, belongs in its own Action with its own window, related by `<` where
 order matters.
 
-Note: recurrence is not represented in `.actions`.
+## Recurrence
+
+`R:` followed by an RFC 5545 §3.3.10 RRULE value may follow the complete `@` block it repeats. The block's start supplies `DTSTART`. For example:
+
+```actions
+[ ] Weekly review @2026-10-26T08:00/2026-10-26T12:00 R:FREQ=WEEKLY;BYDAY=MO :2026-10-26T17:00
+```
+
+`FREQ` is required. Standard rule parts (`INTERVAL`, `COUNT`, `UNTIL`, `BYDAY`, etc.) retain RFC 5545 semantics, including its value types and the mutual exclusion of `COUNT` and `UNTIL`. The rule is text, not a new recurrence language. Approved examples live in `examples/actions/habits/`.
+
+Which files give `R:` meaning is defined in [Workspace](./workspace.md#actions), with semantic diagnostics in [Linting](./linting.md). Habit generation, template stamping and occurrence windows are defined in [Process](./process.md#habits).
 
 ## Completed date/time (optional)
 
@@ -253,16 +255,7 @@ If missing, tooling may derive this from UUIDv7 timestamp data when present.
 `#<uuid>` stores a stable identifier.
 
 - Ad-hoc/manual acts typically use UUIDv7.
-- Generated acts may use deterministic UUIDv5 based on external schedule identity (see [ics_schedule_spec.md](./ics_schedule_spec.md)).
-
-# Non-goals for .actions
-
-- RRULE or other recurrence syntax
-- Calendar event object semantics
-- Embedded schedule definition
-
-Those belong to `.ics` and schedule expansion workflows.
-
+- Habit occurrences use deterministic UUIDv5 based on the native Habit UUID and canonical slot; steps also use the stable template-step UUID (see [ics_schedule_spec.md](./ics_schedule_spec.md)).
 # Examples
 
 Examples are in [examples/README.md](./examples/README.md).
