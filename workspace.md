@@ -134,7 +134,7 @@ A workspace's `<data_root>/plans/` directory stays a charter-scoped iCalendar vd
 
 Every constructed charter owns one calculated collection path even when its directory does not exist. This relative path is derived from the charter's canonical workspace anchor and is not written into charter Markdown or sidecars. The vdir's location is part of the workspace layout, not configuration, and it belongs to exactly one workspace; transport tooling points at it where it is. Calendar resources attach to charters by exact collection ownership, never by mutable alias or title matching.
 
-Each `.ics` file contains one `VCALENDAR` with a VEVENT master and same-UID recurrence overrides. VTODO sync and `plan_component` are retired (Decision 55); the transition is specified in the ICS schedule specification. ClearHead-created filenames use UID, but readers identify resources by UID because transport may rename files.
+Each `.ics` file contains one `VCALENDAR` with a VEVENT master and same-UID recurrence overrides. VTODO is not part of this calendar integration. ClearHead-created filenames use UID, but readers identify resources by UID because transport may rename files.
 
 This one-component-per-file vdir layout is directly compatible with tools such as vdirsyncer and does not assume a particular CalDAV server or any transport at all.
 

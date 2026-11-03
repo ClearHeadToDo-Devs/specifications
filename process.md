@@ -189,27 +189,39 @@ user deliberately requests cascading mutations.
 
 ## Plans
 
-Plans are VEVENT calendar projections of Action blocks and Habits. Native text owns the work; calendar edits reconcile back field by field. VTODO task reconciliation is retired (Decision 55).
+Plans are VEVENT calendar projections of Action blocks and Habits. Native text owns the work; calendar edits can change the projected fields, not local workflow facts.
 
-An unscheduled Action has no Plan. Assigning a schedule creates a one-off Plan;
-clearing it removes that Plan without closing the Action. A calendar-created Plan
-creates a scheduled, not-started Action in its owning Charter. The durable
-relationship is recorded in the Action sidecar so an arbitrary calendar UID is
-never mistaken for Action identity.
+An unscheduled Action has no Plan. Assigning or changing `@` creates or updates its one-off Plan; a calendar schedule edit updates `@`. Clearing `@` removes the Plan without closing the Action. Deleting an established Plan unschedules the Action without deleting or cancelling it. An untracked snapshot's absence alone is not evidence of deletion.
+
+A genuinely new, unrelated VEVENT in an owned collection creates a scheduled, not-started Action in its owning Charter, using SUMMARY and human DESCRIPTION. Its arbitrary calendar UID is never mistaken for native Action identity.
+
+Name, human description, planned start/end, recurrence and exceptions reconcile independently. Safe changes in one field continue while another conflicts. Agreeing values converge; differing values are presented for resolution, never silently decided by timestamps.
 
 ### Habits
 
 A Habit is a top-level line with `R:` in its charter's `.habits.actions`. `[ ]` is active; `[x]` completes the whole Habit and stops generation. Completing the Habit does not close any occurrence. Pausing remains unspecified.
 
-A write-path tick/sync adds an Action for **every arrived slot**, whether earlier occurrences are done or not. Missed occurrences stay open until individually completed or cancelled. Reads stay pure. Future slots are read-only projections, never editable Action rows.
+An Action is materialized for **every arrived slot**, whether earlier occurrences are done or not. Missed occurrences stay open until individually completed or cancelled. Reads stay pure. Future slots are read-only projections, never editable Action rows. Catch-up may be incremental, but interruption or a limit on work per operation must not drop slots. Repeating generation must not duplicate active or archived occurrences.
 
-Catch-up is bounded per transaction and resumable: record progress only after durable writes, retry safely after interruption, and report remaining backlog rather than skipping it. Scan active and archived occurrence identities before stamping. A budget limits transaction size, not the number of missed slots preserved. Progress is not the mutable last-open token.
+Only the root recurs. Its children are a template forest stamped below each occurrence, not recurring calendar components. Alternatively, a leading `template: <name>` directive in its description names a workspace template. Children win when both are present, with a warning. Template steps have persisted, stable native UUIDs; title, order and path are not their identity.
 
-Each occurrence's id derives from (native Habit id, original slot); step ids additionally derive from stable template-step ids. The canonical encoding is in the ICS specification. Children win over a `template: <name>` directive, with a warning; otherwise the named template forest is grafted below the occurrence. Require persisted step UUIDs before stamping. Repeated stamping, step rename and reorder do not duplicate steps. Template edits affect later stamps, never overwrite existing occurrence trees.
+Each occurrence's id derives from (native Habit id, original slot); step ids additionally derive from stable template-step ids. The canonical encoding is in the [ICS specification](./ics_schedule_spec.md#canonical-slot-keys-slot-key-zone). Repeated stamping, step rename and reorder do not duplicate steps. Template edits affect later stamps, never overwrite existing occurrence trees.
 
-The `:` window keeps its offset from the Habit's block per the actions specification. Rule edits change subsequent expansion, preserving all existing active and archived occurrence facts and ids. Re-evaluate the edited rule for arrived slots and suppress duplicates against both stores; a checkpoint from the previous rule cannot hide newly introduced slots. Exclusions do not silently delete materialized work. A completed Habit makes no further occurrences, including catch-up.
+The `:` window is never synchronized. Each occurrence keeps the window's offset from the repeated block, in that block's time frame: date offsets in calendar days, floating offsets in wall time, zoned offsets in the series zone. Children then inherit effective windows normally.
 
-Migration rewrites old vdir-owned Habits into habits files once, with no retention of the old event-derived occurrence ids. Preview and make the rewrite restart-safe. No ongoing dual source of truth remains.
+Rule edits change subsequent expansion, preserving all existing active and archived occurrence facts and ids. Newly introduced arrived slots must still materialize; progress under a previous rule cannot hide them. Exclusions skip unmaterialized excluded slots, never silently delete materialized work. A completed Habit makes no further occurrences, including catch-up.
+
+Series time/rule edits target the Habit. RDATE, EXDATE and time frames are preserved with it. A single-occurrence edit, including a rename, targets only its Action; edits for an occurrence not yet materialized must survive until it exists. Rescheduling changes the matching `RECURRENCE-ID` override and the materialized Action, preserving the original slot as identity.
+
+### Kind changes and identity
+
+Calendar changes between one-off and recurring work are never silently applied. The user must be able to review the resulting block and effects on children, dependencies, state, priority and contexts before authorizing the change.
+
+- An accepted one-off → recurring change retains the Action's native UUID as the Habit id; no duplicate old Action remains. The first occurrence has its own derived id, not the old Action's id.
+- An accepted recurring → one-off change ends the Habit. The newest open occurrence keeps its id and becomes the one-off Action; older open occurrences remain open for manual completion or cancellation. The resulting block must be visible, including when a calendar client returns to the original series start. If no open occurrence exists, explicit resolution is required rather than inventing an identity.
+- A text kind change moves the line between the ordinary actions file and habits file, adding or removing `R:` and retaining its UUID. It does not adopt that line as a generated occurrence.
+
+Transport UID replacement and `this and following` splits do not establish native identity. Retaining native identity after replacement requires an explicitly user-confirmed link, never automatic matching. Ambiguous relationships remain unresolved; a suspected replacement with no candidate stays held without creating a new entity until the user supplies a link. A possible match is not proof of identity.
 
 ### Plans vs Actions
 
@@ -221,16 +233,11 @@ Plans and Actions are distinct, linked concerns:
 - Not every Action has a Plan; ad-hoc and intentionally unscheduled Actions are
   valid.
 - VEVENT reconciles blocks, names, human descriptions, recurrence and exceptions field by field. State, completion, priority and contexts stay local; no peer silently wins conflicts.
-- Kind changes are proposed with accept/revert/defer. Native UUID retention and explicit confirmation after UID replacement follow the ICS specification; unresolved relationships remain held, not adopted.
-
-Editing a Plan changes future recurrence and schedule behavior. It does not
-rewrite archived occurrence facts. Rescheduling a live recurring occurrence updates the matching `RECURRENCE-ID`
-override and the materialized Action through field-wise three-way
-reconciliation while preserving the original recurrence key as identity.
+- Kind changes require user authorization; native identity and existing history are preserved as described above.
 
 See the [workspace specification](./workspace.md) for file placement and
 archival, the [iCalendar schedule specification](./ics_schedule_spec.md) for
-codec and synchronization semantics, and the [ontology](./ontology.md) for the
+format and identity semantics, and the [ontology](./ontology.md) for the
 Plan–Action relationship.
 
 ## Actions
