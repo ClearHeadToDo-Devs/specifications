@@ -31,7 +31,7 @@ assert validate(graph, shacl_graph=shapes, advanced=True)[0]
 # Every open Habit state is valid (blocked is not a pause); both terminal
 # states are valid with their closed date. These validate the graph contract,
 # not an implementation's generation behavior.
-for state in [APP.Active, APP.InProgress, APP.Blocked, APP.Completed, APP.Cancelled]:
+for state in [APP.NotStarted, APP.InProgress, APP.Blocked, APP.Completed, APP.Cancelled]:
     variant = deepcopy(graph)
     habit = next(variant.subjects(RDF.type, APP.Habit))
     variant.set((habit, APP.state, state))
