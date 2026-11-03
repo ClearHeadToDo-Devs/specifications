@@ -3,8 +3,11 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix ex: <urn:uuid:> .
 
+ex:01951111-cfa6-718d-b303-d7107f4005b2 a app:Objective ;
+    rdfs:label "Keep work current" ; app:file "objectives/keep-work-current.md" .
 ex:01951111-cfa6-718d-b303-d7107f4005b3 a app:Charter ;
-    rdfs:label "Review" ; app:state app:Active ; app:file "charters/review.md" .
+    rdfs:label "Review" ; app:state app:Active ; app:file "charters/review.md" ;
+    app:serves ex:01951111-cfa6-718d-b303-d7107f4005b2 .
 ex:01951111-cfa6-718d-b303-d7107f4005b4 a app:Habit ;
     rdfs:label "Daily review" ; app:state app:NotStarted ; app:rule "FREQ=DAILY" ;
     app:partOf ex:01951111-cfa6-718d-b303-d7107f4005b3 ;

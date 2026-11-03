@@ -109,11 +109,11 @@
         },
         "externalScheduleId": {
           "type": "string",
-          "description": "External schedule-series identifier (e.g. an ICS UID)."
+          "description": "External transport schedule-series identifier (e.g. an ICS UID), not native Habit identity. Native occurrence lineage is recorded in sidecar occurrence.habit_id."
         },
         "externalOccurrenceKey": {
           "type": "string",
-          "description": "External occurrence-level identifier within a series."
+          "description": "External transport occurrence-level identifier within a series, not the canonical native slot. The native slot is recorded in sidecar occurrence.occurrence_key."
         },
         "parentId": {
           "type": "string",

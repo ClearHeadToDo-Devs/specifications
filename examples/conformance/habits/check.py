@@ -38,6 +38,15 @@ for state in [APP.NotStarted, APP.InProgress, APP.Blocked, APP.Completed, APP.Ca
     if state in [APP.Completed, APP.Cancelled]:
         variant.add((habit, APP.closed, Literal("2026-11-03", datatype=XSD.date)))
     assert validate(variant, shacl_graph=shapes, advanced=True)[0]
+# Closed dates belong only to terminal Habits, and terminal Habits need one.
+for state in [APP.NotStarted, APP.InProgress, APP.Blocked, APP.Completed, APP.Cancelled]:
+    bad = deepcopy(graph)
+    habit = next(bad.subjects(RDF.type, APP.Habit))
+    bad.set((habit, APP.state, state))
+    if state not in [APP.Completed, APP.Cancelled]:
+        bad.add((habit, APP.closed, Literal("2026-11-03", datatype=XSD.date)))
+    assert not validate(bad, shacl_graph=shapes, advanced=True)[0], state
+
 # Missing rule, invalid Habit state, and old datetime slot type must all fail.
 for predicate, value in [(APP.rule, None), (APP.state, APP.Closed)]:
     bad = deepcopy(graph)
@@ -50,6 +59,18 @@ bad = deepcopy(graph)
 occurrence = next(bad.subjects(APP.occurrenceOf, None))
 bad.set((occurrence, APP.slot, Literal("2026-10-26T00:00:00Z", datatype=XSD.dateTime)))
 assert not validate(bad, shacl_graph=shapes, advanced=True)[0]
+
+# Slot strings keep the canonical frame and seconds, including normalized fractions.
+for slot in ["D:2026-10-26", "F:2026-10-26T09:00:00", "U:2026-10-26T16:00:00Z",
+             "F:2026-10-26T09:00:00.125", "U:2026-10-26T16:00:00.125Z"]:
+    variant = deepcopy(graph)
+    variant.set((occurrence, APP.slot, Literal(slot)))
+    assert validate(variant, shacl_graph=shapes, advanced=True)[0], slot
+for slot in ["F:2026-10-26T", "U:2026-10-26T16:00:00ZExtra", "U:2026-10-26T16:00:00",
+             "F:2026-10-26T09:00:00Z", "F:2026-10-26T09:00", "U:2026-10-26T16:00:00.120Z"]:
+    bad = deepcopy(graph)
+    bad.set((occurrence, APP.slot, Literal(slot)))
+    assert not validate(bad, shacl_graph=shapes, advanced=True)[0], slot
 
 mapped = Graph()
 for path in sorted((ROOT / "ontology/mapping").glob("*.rq")):
