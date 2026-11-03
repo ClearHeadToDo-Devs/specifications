@@ -51,7 +51,7 @@ Keys are ASCII strings, independent of the viewer or device zone. Seconds are al
 | UTC/offset | `2026-10-26T09:00:00-07:00` | `U:2026-10-26T16:00:00Z` |
 | TZID | `TZID=America/Los_Angeles:20261026T090000` | `U:2026-10-26T16:00:00Z` |
 
-For TZID slots, resolve in the series zone using RFC 5545 §3.3.5 (first occurrence in a fold, pre-gap offset for a nonexistent local time), not the host's zone. Preserve the frame separately for future expansion. In Los Angeles the fold slot `2026-11-01T01:30:00` keys as `U:2026-11-01T08:30:00Z`; the gap slot `2026-03-08T02:30:00` keys as `U:2026-03-08T10:30:00Z`. Devices in UTC, Los Angeles and Tokyo compute all these same keys. DATE and floating keys are never converted to UTC. This corrects the old UTC-only slot wording.
+For TZID slots, resolve in the series zone using RFC 5545 §3.3.5 (first occurrence in a fold, pre-gap offset for a nonexistent local time), not the host's zone. Preserve the frame separately for future expansion. In Los Angeles the fold slot `2026-11-01T01:30:00` keys as `U:2026-11-01T08:30:00Z`; the gap slot `2026-03-08T02:30:00` keys as `U:2026-03-08T10:30:00Z`. Devices in UTC, Los Angeles and Tokyo compute all these same keys. DATE and floating keys are never converted to UTC.
 
 The native occurrence id is `UUIDv5(Habit UUID, "occurrence/" + key)`. A stamped step id is `UUIDv5(occurrence UUID, "step/" + template-step UUID)`, with lowercase hyphenated step UUID text. Template-step UUIDs are persisted before stamping: renaming or reordering a step never changes its id; a deliberately new step gets a new UUID. Derived ids are persisted on the generated lines. `app:slot` is the canonical key as `xsd:string`, not a viewer-resolved `xsd:dateTime`.
 
