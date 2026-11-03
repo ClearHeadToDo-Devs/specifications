@@ -4,6 +4,15 @@
 
 A conforming implementation publishes a workspace as the **application graph**: RDF in ClearHead's application vocabulary, `app:`, defined here. It is what queries read and what an export writes. What each `app:` term *means* is defined by its mapping to CCO v2.2 and IAO terms, the [ClearHead ontology](./ontology/) (see its [domain reference](./ontology/domain.md)); an `app:` term asserts nothing its mapping does not, and every term has one. The [CCO graph](#meaning-the-cco-graph) below is that meaning, written out for the conformance fixture. The SHACL shapes in [`schemas/`](./schemas/) test both graphs (Decision 42).
 
+## Entity roles
+
+- **Objectives** are higher-level outcomes.
+- **Actions** are concrete executable units of work.
+- **Habits** are recurring prescriptions that generate Actions, not executable Actions themselves.
+- **Plans** are editable calendar projections of Action blocks and Habits, not a second authority for the work.
+
+File placement is defined in [Workspace](./workspace.md).
+
 ## Canonical RDF Dataset
 
 This is the normative, **engine-neutral** contract for the RDF that ClearHead publishes. A conforming implementation produces this dataset from a validated workspace whether or not any SPARQL engine is present.

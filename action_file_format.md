@@ -10,7 +10,7 @@ version: 2.0.0
 
 This specification defines the `*.actions` format.
 
-Ordinary `.actions` files represent **Actions**, the executable units of work. Under Decision 57, `<charter>.habits.actions` holds **Habits**, using this same syntax with `R:` recurrence. Calendar `.ics` files are editable projections, not the authoritative recurrence source. See [ICS Schedule Specification](./ics_schedule_spec.md).
+File roles are defined in [Workspace](./workspace.md); entity roles are defined in [Ontology](./ontology.md).
 
 # Scope and Principles
 
@@ -18,13 +18,6 @@ Ordinary `.actions` files represent **Actions**, the executable units of work. U
 - It must remain easy to read and write by hand.
 - Parsers should be whitespace-tolerant and symbol-driven.
 - The format should remain backwards-parseable over time.
-
-## Ontological role
-
-- **Objectives** are higher-level outcomes.
-- **Habits** live in `.habits.actions` files and generate Actions.
-- **Actions** live in ordinary `.actions` files.
-- **Plans** are calendar projections in the workspace's `plans/` vdir.
 
 # Parser Guidance
 
@@ -41,7 +34,7 @@ Canonical property order (recommended for formatters and linters):
 5. `!` priority
 6. `*` objective/parent reference
 7. `+` context tag
-8. `@` do date/time, followed by `R:` recurrence in habits files
+8. `@` do date/time, followed by `R:` recurrence
 9. `:` due date/time
 10. `^` created date/time
 11. `%` completed date/time
@@ -237,7 +230,7 @@ order matters.
 
 ## Recurrence
 
-A top-level line in `<charter>.habits.actions` is a Habit. `R:` followed by an RFC 5545 §3.3.10 RRULE value follows the complete `@` block it repeats. The block's start supplies `DTSTART`. For example:
+`R:` followed by an RFC 5545 §3.3.10 RRULE value may follow the complete `@` block it repeats. The block's start supplies `DTSTART`. For example:
 
 ```actions
 [ ] Weekly review @2026-10-26T08:00/2026-10-26T12:00 R:FREQ=WEEKLY;BYDAY=MO :2026-10-26T17:00
@@ -245,11 +238,7 @@ A top-level line in `<charter>.habits.actions` is a Habit. `R:` followed by an R
 
 `FREQ` is required. Standard rule parts (`INTERVAL`, `COUNT`, `UNTIL`, `BYDAY`, etc.) retain RFC 5545 semantics, including its value types and the mutual exclusion of `COUNT` and `UNTIL`. The rule is text, not a new recurrence language. Approved examples live in `examples/actions/habits/`.
 
-Only the root recurs. Its children are a template forest stamped below each occurrence, not recurring calendar components. Alternatively, a leading `template: <name>` directive in its description names a workspace template. If both are present, children win and a warning is emitted. Template steps carry stable native UUIDs; title, order and path are not their identity.
-
-The `:` window is never synchronized. Each occurrence keeps the window's offset from the repeated block, in that block's time frame (date offsets in calendar days, floating offsets in wall time, zoned offsets in the series zone). Children then inherit effective windows normally. `[ ]` means the Habit is active; `[x]` completes the whole Habit and stops generation. Pausing is not specified.
-
-`R:` on an ordinary Action or on a template child is a semantic lint, not a parse error. See [linting.md](./linting.md).
+Which files give `R:` meaning is defined in [Workspace](./workspace.md#actions), with semantic diagnostics in [Linting](./linting.md). Habit generation, template stamping and occurrence windows are defined in [Process](./process.md#habits).
 
 ## Completed date/time (optional)
 
@@ -267,14 +256,6 @@ If missing, tooling may derive this from UUIDv7 timestamp data when present.
 
 - Ad-hoc/manual acts typically use UUIDv7.
 - Habit occurrences use deterministic UUIDv5 based on the native Habit UUID and canonical slot; steps also use the stable template-step UUID (see [ics_schedule_spec.md](./ics_schedule_spec.md)).
-- Moving a line between an ordinary actions file and a habits file retains its UUID. The moved entity changes kind; it does not remain in both files.
-
-# Non-goals for .actions
-
-- Recurrence on ordinary Actions (outside `.habits.actions`)
-- Calendar event object semantics (kept in `.ics` projections and semantic sidecars)
-- Recurring child components
-
 # Examples
 
 Examples are in [examples/README.md](./examples/README.md).

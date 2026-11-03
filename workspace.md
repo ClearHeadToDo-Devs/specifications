@@ -168,7 +168,9 @@ Per the [Ontology][ontology] specification, actions are the actual executable wo
 
 Actions are stored in the `.actions` files within the workspace and represent the lowest atomic unit of work within the system.
 
-Ordinary `.actions` files hold occurrences and one-offs, not recurrence. A charter's `<charter>.habits.actions` holds Habit roots, their `R:` rules and optional template children. Directory-form charters and the root use `next.habits.actions`, beside `next.actions`, sharing `.next.json`. Habits and their template children must never be lowered as live executable Actions or inferred as extra charters.
+Ordinary `.actions` files hold executable Actions, including occurrences and one-offs, not recurrence. All these files use the same [actions syntax](./action_file_format.md): `R:` parses regardless of file role, but has recurrence meaning only on Habit roots in a habits file. `R:` on an ordinary Action or template child is a semantic lint, not a parse error; see [Linting](./linting.md). Calendar event object semantics belong to the `.ics` projections and semantic sidecars, not these action lines. A charter's `<charter>.habits.actions` holds Habit roots, their `R:` rules and optional template children. Directory-form charters and the root use `next.habits.actions`, beside `next.actions`, sharing `.next.json`. Habits and their template children must never be lowered as live executable Actions or inferred as extra charters.
+
+Moving a line between an ordinary actions file and a habits file, adding or removing `R:`, retains its UUID. The moved entity changes kind; it does not remain in both files or become its own generated occurrence. See [kind-change outcomes](./process.md#kind-changes-and-identity).
 
 All paths are relative to `charters/`:
 
