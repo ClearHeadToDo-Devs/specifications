@@ -1,7 +1,7 @@
 # Habit transition — Darrion's specification review
 
 Review branch: `review/spec-habits-darrion`, continuing Darrion's edits through `9ef1cf8` on the original draft based on specifications main `a8a09ad`.
-This is **not released**. Decisions 31, 54, 55 and 57 govern it. The vdir stays at the workspace's `plans/`; the calendar A/B/C proposal is closed, not part of this review. The already approved recurrence source/formatting fixtures are unchanged.
+Darrion approved source `2d812ec` on 2026-11-03 (findings 1–5 applied). Publication is tracked by platform `=release-habits`; see [release verification](habit-release-verification.md). Decisions 31, 54, 55 and 57 govern it. The vdir stays at the workspace's `plans/`; the calendar A/B/C proposal is closed, not part of this review. The already approved recurrence source/formatting fixtures are unchanged.
 
 ## Read these changes, in order
 
@@ -12,13 +12,14 @@ This is **not released**. Decisions 31, 54, 55 and 57 govern it. The vdir stays 
 5. `linting.md`, E002 and Habit scope/template warnings; `observability.md`, Habit Events; `configuration.md`, retired codec and projection-only expansion cap.
 6. Machine contracts: `schemas/{actions,charter_metadata,config}.schema.json`, `schemas/app.shapes.ttl`, `ontology/mapping/{entities,habits}.rq`, `ontology/unmapped.ttl`, and `examples/conformance/habits/`. Formatting README now indexes the approved Habit category.
 
-Please review the actual diff, not just this summary. In particular the slot-string/UUID recipe, stable step UUID requirement, window-offset wording and rule-edit re-evaluation are concrete draft interpretations of the already requested deterministic, lossless behavior; approval precedes publication. There is no Habit pausing: blocked still generates; to stop temporarily, close and recreate. **Marker clarification pending** (`=habit-cancel-marker`, platform, +human): finding 4 calls `[-]` cancelled, whereas the existing format defines `[-]` as in progress and `[_]` as cancelled. This draft preserves existing syntax, so `[x]` and `[_]` stop generation; it does not invent a Habit-specific marker remapping. Recurring → one-off with no open occurrence keeps the Habit's UUID (Darrion, 2026-11-03, `=habit-unrecur-no-open`).
+Please review the actual diff, not just this summary. In particular the slot-string/UUID recipe, stable step UUID requirement, window-offset wording and rule-edit re-evaluation are concrete draft interpretations of the already requested deterministic, lossless behavior; approval precedes publication. There is no Habit pausing: blocked still generates; to stop temporarily, close and recreate. The approved content preserves existing syntax: `[-]` is in progress, `[_]` is cancelled, and `[x]` and `[_]` stop generation. There is no Habit-specific marker remapping. Recurring → one-off with no open occurrence keeps the Habit's UUID (Darrion, 2026-11-03, `=habit-unrecur-no-open`).
 
 ## Findings applied before group 3 (2026-11-03)
 
 - Findings 1–2: file roles and text moves → `workspace.md`; entity roles → `ontology.md`; recurrence scope diagnostics stay in `linting.md`; template/window behavior → `process.md`.
 - Finding 3: slot strings and UUID recipes stay in the ICS format contract; generation, history, edit targeting and kind-change outcomes → `process.md`. Storage split, merge bases/three-way merge, command/link/doctor flows, per-transaction catch-up, quarantine and migration mechanics are preserved in full in platform's `=core-habit` description, not discarded or made normative here. Decision/proposal references are removed from the ICS specification.
-- Finding 4 amended: no pausing, all open states generate, both terminal states stop including catch-up, each with a closed date. Ontology, lint and SHACL/check examples agree; the marker wording question above still needs Darrion.
+- Finding 4 amended: no pausing, all open states generate, both terminal states stop including catch-up, each with a closed date. Ontology, lint and SHACL/check examples agree.
+- Finding 5: Habit states mirror Action states, so `[ ]` maps to `app:NotStarted`, not `app:Active`.
 
 ## Validation and release gate
 

@@ -1,5 +1,21 @@
 # Changelog - Actions Specifications
 
+## v0.5.0 — 2026-11-03
+
+Published jointly with tree-sitter-actions v0.11.0 after Darrion approved Habit source `2d812ec` and independent Claude machine-contract review. All schema `$id`s name `https://clearhead.dev/schemas/v0.5.0/<name>.schema.json`. Core adoption and platform pins follow separately.
+
+### Added
+
+**Native Habits and recurrence** (Decisions 56–57). `R:` follows the complete planned block; `<charter>.habits.actions` owns Habit roots and their template children. Habits have native UUIDs and Action state values. Every arrived slot materializes independently, missed slots remain open, and active/archived history suppresses duplicates. Completed and cancelled Habits stop generation; all open states generate, with no pause capability.
+
+**Deterministic identity and calendar format.** VEVENT projections preserve native/transport identity separation. DATE, floating and zoned slots have canonical string keys; UUIDv5 occurrence and template-step recipes converge across devices. Kind changes preserve the approved native identities, including reusing the Habit UUID when recurring-to-one-off has no open occurrence. UID replacement requires explicit linking, never automatic identity merging.
+
+**Executable contracts.** Habit JSON/sidecar schemas, application SHACL, CCO mappings and conformance fixtures cover state, lineage, canonical slots and cross-zone fold/gap examples. Independent review corrections align closed-date and slot validation with approved prose. Existing individual-close and root-tree archival contracts from v0.4.0 remain intact.
+
+### Changed
+
+Syntax, workspace file roles, ontology entity roles and process outcomes are separated. ICS specifies format and deterministic identity rather than implementation mechanics. Linting, observability and configuration describe Habit scope and lifecycle; obsolete upcoming-actions discovery is removed. Approved formatting fixtures remain the shared oracle.
+
 ## v0.4.0 — 2026-11-02
 
 A minor release: the specifications as of this entry, including the dated entry below down to v0.3.0. Closing an action becomes a state change in place, archive and unarchive move whole root trees, and transactions gain `reopen-action` (platform Decisions 58 and 59). Schema `$id`s are `https://clearhead.dev/schemas/v0.4.0/<name>.schema.json`.
