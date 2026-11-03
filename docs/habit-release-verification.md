@@ -8,7 +8,7 @@
 - Integration: `cb607c4` merges that approval with specification main `e9b0f84`, retaining v0.4.0 individual-close/root-tree-archival semantics. Artifact corrections: `5b705a5`.
 - No specification release branch update or release tags have been published. No Core dependency, lockfile, specification declaration or platform gitlinks have moved.
 
-Publication must remain joint. The host has no configured crates.io publishing credentials; a publishing credential or authorized publisher is needed before release. The public sparse registry index at `https://index.crates.io/tr/ee/tree-sitter-actions` lists **0.10.0** as its latest version and does **not** list **0.11.0** (checked 2026-11-03). The crates.io API request returned HTTP 403, so availability was checked against the registry index rather than inferred from the API failure.
+Publication must remain joint. An actual `cargo publish` attempt from grammar candidate `b2b98f9` failed before upload with `error: no token found, please run cargo login` (or use `CARGO_REGISTRY_TOKEN`). The host has no configured crates.io publishing credentials; a publishing credential or authorized publisher is needed before release. The public sparse registry index at `https://index.crates.io/tr/ee/tree-sitter-actions` lists **0.10.0** as its latest version and does **not** list **0.11.0** (checked 2026-11-03). The crates.io API request returned HTTP 403, so availability was checked against the registry index rather than inferred from the API failure.
 
 ## Independent review
 
