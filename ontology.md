@@ -73,7 +73,7 @@ Derived: `app:notBefore`, `app:lateFrom`, `app:plannedFrom`, `app:durationMinute
 
 | Entity | `app:state` values |
 | --- | --- |
-| Habit | `app:Active` `[ ]`, `app:Completed` `[x]` |
+| Habit | `app:Active` `[ ]`, `app:InProgress` `[-]`, `app:Blocked` `[=]`, `app:Completed` `[x]`, `app:Cancelled` `[_]` |
 | Action | `app:NotStarted` `[ ]`, `app:InProgress` `[-]`, `app:Blocked` `[=]`, `app:Completed` `[x]`, `app:Cancelled` `[_]` |
 | Charter | `app:New`, `app:Active`, `app:Blocked`, `app:Closed`, `app:Cancelled`, from its `state` (`app:New` when unset) |
 | Objective | Not yet defined ([objectives](./objectives.md) gives objectives a state without naming its values); none is emitted. |
@@ -138,14 +138,15 @@ A Habit is anything done regularly: a root with recurrence in `<charter>.habits.
 | description | `dcterms:description` |
 | `R:` | `app:rule`, RRULE text; the graph does not take it apart |
 | `@` | `app:plannedStart`, `app:plannedEnd`, as for an Action |
-| `[ ]` / `[x]` | `app:state app:Active` / `app:Completed` |
+| state marker | `app:state`, per [State values](#state-values) |
+| `%` | `app:closed`, when the Habit was completed or cancelled |
 | named template directive | `app:template`, name as text; omitted when inline children win |
 | charter | `app:partOf` (rule 5) |
 | source location | `app:file`: the `.habits.actions` path; `app:line`: 1-based root line |
 
 Derived: `app:plannedFrom` and `app:durationMinutes`, as for an action's block ([Time](#time)).
 
-A Habit's own state governs the whole Habit: `app:Active` generates arrived occurrences; `app:Completed` generates none. Rule exhaustion is not an implicit state write. The Habit state does not close its occurrences. Other Habit states, including pausing, are not defined.
+A Habit's own state governs generation: all open states (`app:Active`, `app:InProgress`, `app:Blocked`) generate arrived occurrences. `app:Completed` and `app:Cancelled` generate none, including catch-up, and each has its closed date. Rule exhaustion is not an implicit state write. The Habit state does not close its occurrences. There is no pause state: blocked still generates. To stop for a while, close and recreate the Habit; see [Process](./process.md#habits).
 
 Each occurrence is an ordinary action, `app:partOf` its charter, with `app:occurrenceOf` its Habit and `app:slot` the slot it fills ([Action terms](#action-terms)). `app:occurrenceOf` is not containment: the Habit does not hold its occurrences (Decision 56), and "a Habit's occurrences" is the pattern `?occurrence app:occurrenceOf ?habit`.
 

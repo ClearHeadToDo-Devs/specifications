@@ -156,7 +156,7 @@ All paths are relative to `<data_root>/plans/`. An example:
 
 Multi-component `.ics` files are an import format, not a storage format. Implementations should provide an import path that splits them into individual resources within the target charter's `plans/` directory.
 
-An immediate collection directory with no charter owner is invalid workspace state, not an alternate way to create a charter. Its resources are quarantined and mutations must not silently adopt them. Doctor should report the collection and may offer an explicit fix that removes it while warning that transport tools such as vdirsyncer can propagate the deletion.
+An immediate collection directory with no charter owner is invalid workspace state, not an alternate way to create a charter. Its resources must not be silently adopted; the ownership problem remains visible for explicit resolution.
 
 Be sure to review [the reference syntax][reference-syntax] for guidance on working with sub charters and sub plans.
 
@@ -280,7 +280,7 @@ One concept that is very important to the workspace format is the process of "ar
 
 1. At the lowest level, we have the actions that are implementations of their optional parent plans.
 1. at first, these are all open, then as the user is closing the actions, they move from `<charter>.actions` to `<charter>.completed.actions` in order to remove clutter and make the process of tracking closed actions easier for both humans and databases to comprehend, this way open act queries can be fast, but full history searches are still possible
-1. Habits have their own state: completing the Habit ends generation without closing its open occurrences. Their definitions move with the charter's known files; calendar projections have no independent work lifecycle.
+1. Habits have their own state: completing or cancelling the Habit ends generation without closing its open occurrences. Their definitions move with the charter's known files; calendar projections have no independent work lifecycle.
 1. Finally, like plans, the charters themselves at `charters/<charter>.md` can be archived after they are closed. Archival is a **move, not a translation**: the archived form is data, not a projection, so no Turtle or JSON-LD is written. Any RDF view of archived data is regenerated from the loaded domain model by Core's publication adapter, exactly like live data.
 1. archiving a parent charter archives its whole subtree as one unit; the open-actions precondition is recursive too — it refuses if *any* descendant still holds open actions
 1. the subtree's known files (`.actions`, `.completed.actions`, `.habits.actions`, the charter `.md`, and its `.json` sidecar) plus all supporting files owned by directory-form charters are moved into the `archive/` region together, preserving their path under `charters/` so the subtree's internal structure survives. The sidecar moves *with* the files rather than folding its `created_at` / `external_schedule_id` into the lines. An implementation must make the move safe to interrupt and retry: a file may transiently exist in both `charters/` and `archive/`, but it is never removed from `charters/` without already existing in `archive/` — redundant, never an orphaned or lost record
@@ -288,7 +288,7 @@ One concept that is very important to the workspace format is the process of "ar
 
 Because `archive/` is a sibling of `charters/`, the moved files leave the default read set automatically, but reference resolution can still look into them: an archived `<` target resolves to one of three states — **satisfied** (target Completed), **abandoned** (target Cancelled), or **dangling** (resolves nowhere). Keeping archives as readable plaintext is the whole reason that three-way signal is possible.
 
-The `.ics` files in `plans/<charter-name>/` are **not** touched by archival. Per [decision 31][decisions], the plans vdir is a shared projection boundary and archival must not infer that its resources should be deleted. Archived Action records retain history while the vdir remains independently manageable through calendar tooling. A collection left without a live charter owner is quarantined and reported by doctor; it is never silently adopted as an implicit charter.
+The `.ics` files in `plans/<charter-name>/` are **not** touched by archival. Per [decision 31][decisions], the plans vdir is a shared projection boundary and archival must not infer that its resources should be deleted. Archived Action records retain history while the vdir remains independently manageable through calendar tooling. A collection left without a live charter owner is invalid workspace state and must remain visible for explicit resolution; it is never silently adopted as an implicit charter.
 
 REMEMBER, per the [process spec][process] it is assumed that all child plans are completed/cancelled which is why the open files above are expected to be empty or atleast emptyable before being moved into `archive/`
 

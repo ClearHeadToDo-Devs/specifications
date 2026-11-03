@@ -1,18 +1,24 @@
 # Habit transition — Darrion's specification review
 
-Draft branch: `draft/spec-habits-20261026`, based on specifications main `a8a09ad`.
+Review branch: `review/spec-habits-darrion`, continuing Darrion's edits through `9ef1cf8` on the original draft based on specifications main `a8a09ad`.
 This is **not released**. Decisions 31, 54, 55 and 57 govern it. The vdir stays at the workspace's `plans/`; the calendar A/B/C proposal is closed, not part of this review. The already approved recurrence source/formatting fixtures are unchanged.
 
 ## Read these changes, in order
 
-1. `action_file_format.md` — opening scope, Recurrence, identifiers and non-goals: Habit roots, children/template precedence, state and text moves.
-2. `ics_schedule_spec.md` — native/transport separation, `Canonical slot keys (slot-key-zone)` (DATE, floating, UTC/TZID, fold/gap examples and UUID recipes), editable projection and explicit identity-link safeguards. This is a replacement of the old two-profile/UID-owned recurrence contract with Decisions 55/57, not a new calendar proposal.
-3. `process.md`, Plans/Habits and On Closure — every arrived slot survives; bounded catch-up is transaction budgeting, not backlog truncation; archives suppress duplicates and edited rules preserve materialized history.
+1. `action_file_format.md` — syntax and field meanings only, including `R:` after a complete `@` block; file placement and Habit behavior are linked rather than specified here.
+2. `ics_schedule_spec.md` — VEVENT format, native/transport separation, `Canonical slot keys (slot-key-zone)` (DATE, floating, UTC/TZID, fold/gap examples and UUID recipes), field authority and lossless preservation. Workflow outcomes now live in group 3; implementation mechanics wait in platform's `=core-habit` action.
+3. `process.md`, Plans/Habits, Kind changes and identity, and On Closure — every arrived slot survives; incremental catch-up cannot truncate backlog; active and archived occurrences suppress duplicates; rule edits preserve history; template precedence and window offsets; kind-change identities and explicit UID-link safeguards. All open Habit states generate; completed and cancelled stop generation without closing occurrences.
 4. `workspace.md`, Plans/Actions and Archival — known suffixes, reader classification and unchanged plans location/archive boundary. `ontology.md`, Habit terms/Habits — native ids, state and string slot typing.
 5. `linting.md`, E002 and Habit scope/template warnings; `observability.md`, Habit Events; `configuration.md`, retired codec and projection-only expansion cap.
 6. Machine contracts: `schemas/{actions,charter_metadata,config}.schema.json`, `schemas/app.shapes.ttl`, `ontology/mapping/{entities,habits}.rq`, `ontology/unmapped.ttl`, and `examples/conformance/habits/`. Formatting README now indexes the approved Habit category.
 
-Please review the actual diff, not just this summary. In particular the slot-string/UUID recipe, stable step UUID requirement, window-offset wording and rule-edit re-evaluation are concrete draft interpretations of the already requested deterministic, lossless behavior; approval precedes publication. Pausing is still explicitly unspecified. Recurring → one-off with no open occurrence is not assigned a fabricated identity: the draft leaves explicit resolution necessary rather than silently making product policy.
+Please review the actual diff, not just this summary. In particular the slot-string/UUID recipe, stable step UUID requirement, window-offset wording and rule-edit re-evaluation are concrete draft interpretations of the already requested deterministic, lossless behavior; approval precedes publication. There is no Habit pausing: blocked still generates; to stop temporarily, close and recreate. **Marker clarification pending** (`=habit-cancel-marker`, platform, +human): finding 4 calls `[-]` cancelled, whereas the existing format defines `[-]` as in progress and `[_]` as cancelled. This draft preserves existing syntax, so `[x]` and `[_]` stop generation; it does not invent a Habit-specific marker remapping. Recurring → one-off with no open occurrence is not assigned a fabricated identity: the draft leaves explicit resolution necessary rather than silently making product policy. The existing gap is now tracked by `=habit-unrecur-no-open` (platform, +human, NEEDS DECISION).
+
+## Findings applied before group 3 (2026-11-03)
+
+- Findings 1–2: file roles and text moves → `workspace.md`; entity roles → `ontology.md`; recurrence scope diagnostics stay in `linting.md`; template/window behavior → `process.md`.
+- Finding 3: slot strings and UUID recipes stay in the ICS format contract; generation, history, edit targeting and kind-change outcomes → `process.md`. Storage split, merge bases/three-way merge, command/link/doctor flows, per-transaction catch-up, quarantine and migration mechanics are preserved in full in platform's `=core-habit` description, not discarded or made normative here. Decision/proposal references are removed from the ICS specification.
+- Finding 4 amended: no pausing, all open states generate, both terminal states stop including catch-up, each with a closed date. Ontology, lint and SHACL/check examples agree; the marker wording question above still needs Darrion.
 
 ## Validation and release gate
 

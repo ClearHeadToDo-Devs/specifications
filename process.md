@@ -199,7 +199,7 @@ Name, human description, planned start/end, recurrence and exceptions reconcile 
 
 ### Habits
 
-A Habit is a top-level line with `R:` in its charter's `.habits.actions`. `[ ]` is active; `[x]` completes the whole Habit and stops generation. Completing the Habit does not close any occurrence. Pausing remains unspecified.
+A Habit is a top-level line with `R:` in its charter's `.habits.actions`. Any open state generates: `[ ]` not started, `[-]` in progress and `[=]` blocked. Only `[x]` completed and `[_]` cancelled stop generation, including catch-up; each records its closed date with `%`. Closing the Habit does not close any occurrence. There is no pausing, and `[=]` has no special generation meaning. To stop for a while, close the Habit and recreate it later.
 
 An Action is materialized for **every arrived slot**, whether earlier occurrences are done or not. Missed occurrences stay open until individually completed or cancelled. Reads stay pure. Future slots are read-only projections, never editable Action rows. Catch-up may be incremental, but interruption or a limit on work per operation must not drop slots. Repeating generation must not duplicate active or archived occurrences.
 
@@ -209,7 +209,7 @@ Each occurrence's id derives from (native Habit id, original slot); step ids add
 
 The `:` window is never synchronized. Each occurrence keeps the window's offset from the repeated block, in that block's time frame: date offsets in calendar days, floating offsets in wall time, zoned offsets in the series zone. Children then inherit effective windows normally.
 
-Rule edits change subsequent expansion, preserving all existing active and archived occurrence facts and ids. Newly introduced arrived slots must still materialize; progress under a previous rule cannot hide them. Exclusions skip unmaterialized excluded slots, never silently delete materialized work. A completed Habit makes no further occurrences, including catch-up.
+Rule edits change subsequent expansion, preserving all existing active and archived occurrence facts and ids. Newly introduced arrived slots must still materialize; progress under a previous rule cannot hide them. Exclusions skip unmaterialized excluded slots, never silently delete materialized work. A completed or cancelled Habit makes no further occurrences, including catch-up.
 
 Series time/rule edits target the Habit. RDATE, EXDATE and time frames are preserved with it. A single-occurrence edit, including a rename, targets only its Action; edits for an occurrence not yet materialized must survive until it exists. Rescheduling changes the matching `RECURRENCE-ID` override and the materialized Action, preserving the original slot as identity.
 

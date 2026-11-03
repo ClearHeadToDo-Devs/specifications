@@ -97,7 +97,8 @@ shape:Habit a sh:NodeShape ;
     sh:property
         [ sh:path rdfs:label ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ,
         [ sh:path app:rule ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] ,
-        [ sh:path app:state ; sh:minCount 1 ; sh:maxCount 1 ; sh:in ( app:Active app:Completed ) ] ,
+        [ sh:path app:state ; sh:minCount 1 ; sh:maxCount 1 ; sh:in ( app:Active app:InProgress app:Blocked app:Completed app:Cancelled ) ] ,
+        [ sh:path app:closed ; sh:maxCount 1 ; sh:or ( [ sh:datatype xsd:date ] [ sh:datatype xsd:dateTime ] ) ] ,
         [ sh:path app:partOf ; sh:minCount 1 ; sh:maxCount 1 ; sh:class app:Charter ] ,
         [ sh:path app:plannedStart ; sh:minCount 1 ; sh:maxCount 1 ; sh:or ( [ sh:datatype xsd:date ] [ sh:datatype xsd:dateTime ] ) ] ,
         [ sh:path app:file ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^[^/.].*\\.habits\\.actions$" ] ,

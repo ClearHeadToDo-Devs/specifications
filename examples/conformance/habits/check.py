@@ -28,8 +28,18 @@ Draft7Validator(sidecar).validate({"actions": {"8e337bcd-ad84-5158-baec-ac9b81c5
 shapes = Graph().parse(ROOT / "schemas/app.shapes.ttl")
 graph = Graph().parse(Path(__file__).with_name("app.ttl"))
 assert validate(graph, shacl_graph=shapes, advanced=True)[0]
+# Every open Habit state is valid (blocked is not a pause); both terminal
+# states are valid with their closed date. These validate the graph contract,
+# not an implementation's generation behavior.
+for state in [APP.Active, APP.InProgress, APP.Blocked, APP.Completed, APP.Cancelled]:
+    variant = deepcopy(graph)
+    habit = next(variant.subjects(RDF.type, APP.Habit))
+    variant.set((habit, APP.state, state))
+    if state in [APP.Completed, APP.Cancelled]:
+        variant.add((habit, APP.closed, Literal("2026-11-03", datatype=XSD.date)))
+    assert validate(variant, shacl_graph=shapes, advanced=True)[0]
 # Missing rule, invalid Habit state, and old datetime slot type must all fail.
-for predicate, value in [(APP.rule, None), (APP.state, APP.Blocked)]:
+for predicate, value in [(APP.rule, None), (APP.state, APP.Closed)]:
     bad = deepcopy(graph)
     habit = next(bad.subjects(RDF.type, APP.Habit))
     bad.remove((habit, predicate, None))
