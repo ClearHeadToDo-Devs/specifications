@@ -1,14 +1,16 @@
 # Habit joint release verification — 2026-11-03
 
-## Release candidate, not yet published
+## Published joint transition
 
-- Specification candidate: **v0.5.0**, branch `publish-habits-20261103`.
-- Grammar candidate: **tree-sitter-actions v0.11.0**, branch `publish-habits-20261103` in its own repository.
+- Specification: **v0.5.0**, released 2026-11-04 from `publish-habits-20261103` to `main` and `release`.
+- Grammar: **tree-sitter-actions v0.11.0**, annotated tag at `3139e81333cf917838eee084ad612b6745eae959`, published on crates.io and landed on `main`.
 - Approved source: `review/spec-habits-darrion` at `2d812ec`, findings 1–5 applied and approved by Darrion on 2026-11-03.
 - Integration: `cb607c4` merges that approval with specification main `e9b0f84`, retaining v0.4.0 individual-close/root-tree-archival semantics. Artifact corrections: `5b705a5`.
-- No specification release branch update or release tags have been published. No Core dependency, lockfile, specification declaration or platform gitlinks have moved.
+- Core dependency, lockfile, specification declaration and platform gitlink adoption are tracked separately by `=core-habit-pins`; this publication does not move them.
 
-Publication must remain joint. An actual `cargo publish` attempt from grammar candidate `b2b98f9` failed before upload with `error: no token found, please run cargo login` (or use `CARGO_REGISTRY_TOKEN`). The host has no configured crates.io publishing credentials; a publishing credential or authorized publisher is needed before release. The public sparse registry index at `https://index.crates.io/tr/ee/tree-sitter-actions` lists **0.10.0** as its latest version and does **not** list **0.11.0** (checked 2026-11-03). The crates.io API request returned HTTP 403, so availability was checked against the registry index rather than inferred from the API failure.
+The 2026-11-03 local `cargo publish` attempt was blocked by absent credentials. Darrion chose crates.io trusted publishing instead: facilitator commit `3139e81` adds only `.github/workflows/publish.yml` on top of reviewed grammar `b2b98f9`. The `crates-io` environment requires Darrion's approval and accepts only `v*` tags. Darrion approved [Publish run 41770414263](https://github.com/ClearHeadToDo-Devs/tree-sitter-actions/actions/runs/41770414263), which completed successfully.
+
+On 2026-11-04 the steward independently verified **0.11.0** exists and is not yanked in `https://index.crates.io/tr/ee/tree-sitter-actions`, downloaded the public crate from `https://static.crates.io/crates/tree-sitter-actions/tree-sitter-actions-0.11.0.crate`, and verified SHA-256 **`c587f5318244840a87573a7ed6e9c5122349624a9684d0f52ffda8aac36aa236`** matches the index. Published `grammar.js`, `patterns.js`, `src/` and `queries/` match the tagged source file for file. The public packaged Rust tests and doctest pass. No local registry token was needed or stored.
 
 ## Independent review
 
@@ -49,10 +51,8 @@ Host prerequisites were absent, so gate tools were bootstrapped only under `/tmp
 
 These are release artifact and grammar checks, **not a claim that Core implements Habits**. Real Core Habit conformance and released-composition `scripts/validate-pinned` belong to `=core-habit-pins` and its implementation successors. The current platform composition remains untouched.
 
-## Resume publication
+## Release procedure and adoption
 
-1. Provide crates.io publishing access securely; do not put a token in source, action descriptions or chat.
-2. From the prepared grammar branch, rerun the publishing checklist as needed and `cargo publish`; confirm 0.11.0 in the sparse registry index and download/build the published crate.
-3. Fast-forward each repository's `main` to its reviewed candidate; tag specification `v0.5.0` and grammar `v0.11.0`. Fast-forward specification `release` to its release tag and push; verify `clearhead.dev` schema/site availability. Do not update platform gitlinks here.
-4. Record actual tags, commit hashes, registry availability and site proof here and in platform `=release-habits`; complete `=release-habits` and `=spec-habits` only then.
-5. Queue `=core-habit-pins` against those exact published releases. Leave `=grammar-habits` open until released adoption is complete.
+The release commit moves all eight schema IDs to v0.5.0 and records this verification. Annotated specification tag `v0.5.0` names that commit; `main` and `release` fast-forward to it. Grammar `main` fast-forwards to its existing published `v0.11.0` tag. Schema identity resolves at `https://clearhead.dev/schemas/v0.5.0/actions.schema.json`; the site and vocabulary publish together from `release` (specification README).
+
+Platform `=release-habits` records the exact specification release hash and public site proof after push. `=spec-habits` completes at publication. `=core-habit-pins` then adopts these exact published versions as a separately reviewed cycle; `=grammar-habits` remains open until that adoption is complete.
