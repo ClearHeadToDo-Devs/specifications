@@ -164,6 +164,25 @@ A Habit root in `.habits.actions` requires `R:` with a valid RFC 5545 RRULE and 
     contradiction, not a plan (Decision 48). An empty block is the same mistake
     in intent (Decision 51).
 
+#### E009: Template Step Depends on Its Habit
+
+    **Fixable:** No
+
+    A step of a Habit's template, its inline children in `.habits.actions`,
+    has a predecessor that resolves to the Habit itself.
+
+    ```actions
+    [ ] Weekly review =weekly @2026-11-09T09:00/2026-11-09T10:00 R:FREQ=WEEKLY
+    >[ ] Clear the inbox < weekly
+    ```
+
+    **Rationale:** a template is stamped below each occurrence and does not
+    recur, and the Habit's state is the whole series. A step that waits on
+    the Habit waits for the series to end, so stamping refuses it
+    ([process.md](./process.md), Habits).
+
+    **Fix suggestion:** drop the dependency, or point it at a sibling step.
+
 ### 2. Warnings
 
     These rules check for suspicious date/time relationships.

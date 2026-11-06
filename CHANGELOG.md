@@ -1,5 +1,11 @@
 # Changelog - Actions Specifications
 
+## Unreleased
+
+### Added
+
+**E009: a template step may not depend on its Habit.** Stamping refuses such a step and the linter reports it, because the Habit's state is the whole series (Darrion, 2026-11-05: "templates shouldnt have recurrence that would be a lint as well as an error on generation").
+
 ## v0.5.0 — 2026-11-03
 
 Published jointly with tree-sitter-actions v0.11.0 after Darrion approved Habit source `2d812ec` and independent Claude machine-contract review. All schema `$id`s name `https://clearhead.dev/schemas/v0.5.0/<name>.schema.json`. Core adoption and platform pins follow separately.
