@@ -205,6 +205,8 @@ An Action is materialized for **every arrived slot**, whether earlier occurrence
 
 Only the root recurs. Its children are a template forest stamped below each occurrence, not recurring calendar components. Alternatively, a leading `template: <name>` directive in its description names a workspace template. Children win when both are present, with a warning. Template steps have persisted, stable native UUIDs; title, order and path are not their identity.
 
+A template does not recur and its steps do not depend on their ancestors. Generating from a template, by stamping an occurrence or applying it on demand, refuses a template with `R:` on any of its lines (lint E002) or a step whose `<` resolves to the Habit or another of the step's ancestors (lint E009), naming each offending line's file and line. A refused Habit generates nothing until it is fixed; its arrived slots then materialize as usual. Steps may still depend on sibling steps.
+
 Each occurrence's id derives from (native Habit id, original slot); step ids additionally derive from stable template-step ids. The canonical encoding is in the [ICS specification](./ics_schedule_spec.md#canonical-slot-keys-slot-key-zone). Repeated stamping, step rename and reorder do not duplicate steps. Template edits affect later stamps, never overwrite existing occurrence trees.
 
 The `:` window is never synchronized. Each occurrence keeps the window's offset from the repeated block, in that block's time frame: date offsets in calendar days, floating offsets in wall time, zoned offsets in the series zone. Children then inherit effective windows normally.

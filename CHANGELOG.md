@@ -1,5 +1,15 @@
 # Changelog - Actions Specifications
 
+## Unreleased
+
+### Changed
+
+**E002 covers recurrence in any template.** `R:` on a line of a named template (`templates/<name>.actions`) is now an error, as it already was on a Habit's inline child, and generating from such a template is refused. `R:` in other ordinary `.actions` stays a warning (Darrion, 2026-11-07: "that is a filter to make sure templates dont use recurrence").
+
+### Added
+
+**E009: an Action may not depend on its ancestors.** A `<` that resolves to the line's parent or any ancestor, including a Habit above its template steps, is a lint error, and stamping refuses such a step (Darrion, 2026-11-07: "subactions shouldnt depend on parents anyways ... the dependency is implicit").
+
 ## v0.5.0 — 2026-11-03
 
 Published jointly with tree-sitter-actions v0.11.0 after Darrion approved Habit source `2d812ec` and independent Claude machine-contract review. All schema `$id`s name `https://clearhead.dev/schemas/v0.5.0/<name>.schema.json`. Core adoption and platform pins follow separately.

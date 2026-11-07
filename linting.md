@@ -68,11 +68,11 @@ These rules detect logical inconsistencies that block core functionality. These 
 
 **Fixable:** No
 
-A Habit root in `.habits.actions` requires `R:` with a valid RFC 5545 RRULE and an `@` recurrence anchor. A missing rule/start, invalid rule, or recurrence on a child is a violation. Validate FREQ, rule-part values and COUNT/UNTIL exclusion using RFC 5545. Preserve malformed source for diagnostics; do not guess a rule or a date. All open Habit states (`[ ]`, `[-]`, `[=]`) generate; only `[x]` completed and `[_]` cancelled stop generation. No state pauses a Habit. Both closed states require `%`, and open states must not carry a closed date, as with Actions (I001/I002).
+A Habit root in `.habits.actions` requires `R:` with a valid RFC 5545 RRULE and an `@` recurrence anchor. A missing rule/start, invalid rule, or recurrence in a template is a violation: on a Habit's inline child, or on any line of a named template (`templates/<name>.actions`). A template is stamped below each occurrence and does not recur itself, so generating from a template with `R:` is refused ([process.md](./process.md#habits)). Validate FREQ, rule-part values and COUNT/UNTIL exclusion using RFC 5545. Preserve malformed source for diagnostics; do not guess a rule or a date. All open Habit states (`[ ]`, `[-]`, `[=]`) generate; only `[x]` completed and `[_]` cancelled stop generation. No state pauses a Habit. Both closed states require `%`, and open states must not carry a closed date, as with Actions (I001/I002).
 
 #### Habit scope and template warnings
 
-`R:` in ordinary `.actions`, including named templates, is a semantic warning: move the intended Habit to the charter's `.habits.actions` rather than stripping recurrence silently. A habits root with both children and a `template: <name>` directive warns; children win. Missing persisted Habit or template-step ids block deterministic stamping and are reported for explicit identity minting. Unresolved transport-identity relationships must remain visible and must not silently merge native identities.
+`R:` in ordinary `.actions` is a semantic warning (in a template it is E002): move the intended Habit to the charter's `.habits.actions` rather than stripping recurrence silently. A habits root with both children and a `template: <name>` directive warns; children win. Missing persisted Habit or template-step ids block deterministic stamping and are reported for explicit identity minting. Unresolved transport-identity relationships must remain visible and must not silently merge native identities.
 
 #### E003: Empty Context Tag
 
@@ -163,6 +163,32 @@ A Habit root in `.habits.actions` requires `R:` with a valid RFC 5545 RRULE and 
     **Rationale:** a window is a constraint from the world; an empty one is a
     contradiction, not a plan (Decision 48). An empty block is the same mistake
     in intent (Decision 51).
+
+#### E009: Dependency on an Ancestor
+
+    **Fixable:** No
+
+    An Action has a predecessor (`<`) that resolves to one of its ancestors:
+    its parent, its parent's parent, and so on, up to a Habit root above its
+    template steps.
+
+    ```actions
+    [ ] Plan the trip =trip
+    >[ ] Book flights < trip
+    [ ] Weekly review =weekly @2026-11-09T09:00/2026-11-09T10:00 R:FREQ=WEEKLY
+    >[ ] Clear the inbox < weekly
+    ```
+
+    **Rationale:** a child is already related to its ancestors by the
+    hierarchy, so the dependency adds nothing. It is also a contradiction: a
+    parent closed while a descendant is open is itself reported
+    ([process.md](./process.md#on-child-actions)), so a child waiting on its
+    parent waits on something that waits on it, the W007 cycle in another
+    form. A Habit's state is its whole series, so a step waiting on its Habit
+    would wait for the series to end. Stamping refuses such a template step.
+
+    **Fix suggestion:** drop the dependency, or point it at a sibling or
+    another Action outside the line's ancestry.
 
 ### 2. Warnings
 
