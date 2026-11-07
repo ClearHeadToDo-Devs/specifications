@@ -1,6 +1,8 @@
 # Changelog - Actions Specifications
 
-## Unreleased
+## v0.6.0 — 2026-11-07
+
+Publishes the template-recurrence and ancestor-dependency contracts approved by Darrion at `139f0c9`. All eight schema `$id`s name `https://clearhead.dev/schemas/v0.6.0/<name>.schema.json`; their structures are unchanged. These are specification contracts: Core adoption and implementation follow in separately reviewed increments. No grammar syntax changed, so no companion grammar release is required.
 
 ### Changed
 
