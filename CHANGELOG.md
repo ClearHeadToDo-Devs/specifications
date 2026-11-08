@@ -1,5 +1,11 @@
 # Changelog - Actions Specifications
 
+## Unreleased
+
+### Fixed
+
+**Predecessors never resolve by name.** W007, W008 and W009 now follow [Reference Syntax](reference_syntax.md#matching-rules): a `<` resolves by full UUID, short UUID, alias or path, across the workspace, and an ambiguous match at the strongest tier does not resolve. E009 uses the same resolution. Their examples and wording had treated action names as references (Darrion, 2026-11-08: "alias is more clear... i think for right now we can keep with the simple version and see if it bites").
+
 ## v0.6.0 — 2026-11-07
 
 Publishes the template-recurrence and ancestor-dependency contracts approved by Darrion at `139f0c9`. All eight schema `$id`s name `https://clearhead.dev/schemas/v0.6.0/<name>.schema.json`; their structures are unchanged. These are specification contracts: Core adoption and implementation follow in separately reviewed increments. No grammar syntax changed, so no companion grammar release is required.

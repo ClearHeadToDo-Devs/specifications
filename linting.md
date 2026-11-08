@@ -273,8 +273,8 @@ because the plaintext field is absent.
     Actions cannot have circular dependencies (directly or transitively).
 
     ```actions
-    [ ] Task A < Task B
-    [ ] Task B < Task A
+    [ ] Task A =task-a < task-b
+    [ ] Task B =task-b < task-a
     ```
 
     **Rationale:** Circular dependencies are logically impossible — neither action can ever be completed.
@@ -288,26 +288,26 @@ because the plaintext field is absent.
     A predecessor references an action that doesn't exist in the workspace.
 
     ```actions
-    [ ] Task < Nonexistent Action
+    [ ] Task < nonexistent-alias
     ```
 
     **Rationale:** Actions should only depend on other actions that actually exist.
 
-    **Fix suggestion:** Check the name/UUID spelling, or create the missing predecessor action.
+    **Fix suggestion:** Check the UUID or alias spelling, or create the missing predecessor action. Names are not references ([Reference Syntax](reference_syntax.md#matching-rules)); give the predecessor an alias.
 
 #### W009: Ambiguous Predecessor Reference
 
     **Fixable:** No
 
-    Multiple actions in the workspace match the predecessor name. Use UUID or alias to disambiguate.
+    Multiple actions in the workspace match the predecessor at its strongest tier, such as the same alias in two charters or a short UUID shared by two actions ([Reference Syntax](reference_syntax.md#matching-rules)). The reference does not resolve. Use a path or a full UUID to disambiguate.
 
     ```actions
-    [ ] Deploy < setup  # Three "setup" actions exist in workspace
+    [ ] Deploy < setup  # charters inbox and release both have =setup
+    [ ] Deploy < release/setup
     [ ] Deploy < 01951111-cfa6-718d-b303-d7107f4005b3
-    [ ] Deploy < setup-alias  # Using alias is also valid
     ```
 
-    **Rationale:** Name-based references should be unambiguous. When multiple matches exist, recommend UUIDs, short UUIDs, or aliases for clarity.
+    **Rationale:** A reference must name exactly one action; resolution never picks by file or collection order.
 
     **Configuration:** `require_uuid_for_ambiguous_predecessors` (default: false) — if true, escalates to error severity.
 
