@@ -93,7 +93,7 @@ A log entry is a note `{at, by, text}`. `at` is an ISO 8601 date-time with its U
 
 ### The legacy `## Log` section
 
-Charters written before notes may have a `## Log` section beneath the core section, a list whose items each begin with an ISO 8601 date or date-time, followed by ` — ` and the entry text. Readers still accept it, as a log read before the charter's notes, until a charter is migrated. Tools never append to it. An entry without a leading date is read as undated text, and implementations must not add a date to an existing entry: the time of that edit is not the time the entry was written. Migration moves each entry to a note, keeping its text and its date; a date without a time gives `at` the date at midnight, and `by` is omitted where unknown. A migrated charter has no `## Log` section.
+Charters written before notes may have a `## Log` section beneath the core section, a list whose items each begin with an ISO 8601 date or date-time, followed by ` — ` and the entry text. Readers still accept it, as a log read before the charter's notes, until a charter is migrated. Tools never append to it. An entry without a leading date is read as undated text, and implementations must not add a date to an existing entry: the time of that edit is not the time the entry was written. Migration moves each entry to a note, keeping its text and its date; a date without a time gives `at` the date at midnight UTC (`2026-09-17T00:00Z`), so every reader of a migrated entry agrees on the instant, and `by` is omitted where unknown. A migrated charter has no `## Log` section.
 
 example (legacy)
 
