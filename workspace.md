@@ -126,6 +126,22 @@ This will cover all the pieces we will be going over and has various properties 
 
 please review the [charter sidecar schema][charter-sidecar-schema] for more details on how to use this file and its properties.
 
+#### Notes
+
+Any entity can carry notes: a charter, an Action, a Habit. Notes are the one uniform log of the workspace, kept in the sidecar of the charter whose file holds the entity, under a top-level `notes` map keyed by the entity's UUID: `notes.<uuid>` is an array of notes, oldest first. A note is `{at, by, text}`:
+
+- `at`: an ISO 8601 date-time with its UTC offset, the instant the note was written.
+- `by`: who wrote it, in the convention the docs' front matter uses: `human:Darrion`, `agent:<role>`. Optional only for notes migrated from a legacy log.
+- `text`: plain text.
+
+The tools treat notes as an append-only log. `clearhead jot` is the single verb that writes one and takes any entity's id; a correction is a new note, and no tool edits or deletes one. The JSON can still be edited by hand, so readers accept what they find (unordered notes, a missing `by`) rather than refusing it; they order by `at`, ties by position.
+
+Appending is not a mutation of the entity. It works in any state, closed and archived included, never touches the `.actions` line or the charter document, and so cannot disturb a description. Appends are serialized, by a lock or by compare-and-retry: two writers appending at once never lose a note.
+
+Notes follow the entity. Readers take the union of every sidecar keyed by UUID, so a note reaches its entity wherever the line now lives. `doctor --fix` therefore relocates rather than prunes: a notes entry whose entity lives in another charter moves to that charter's sidecar, and an entry whose entity exists nowhere is reported and kept, never deleted. (Other orphaned sidecar entries remain prunable.) Archiving moves the sidecar whole, notes included.
+
+Descriptions that already carry dated additions are not migrated automatically.
+
 Note: we use the hidden file convention here to indicate that this is a sidecar file meant to be read and written by tools as a companion to the charter, but should not be directly interacted with by users.
 
 #### Plans

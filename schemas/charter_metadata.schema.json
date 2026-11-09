@@ -2,7 +2,7 @@
        "$schema": "http://json-schema.org/draft-07/schema#",
        "$id": "https://clearhead.dev/schemas/v0.6.0/charter_metadata.schema.json",
        "title": "Charter Metadata",
-       "description": "Per-charter sidecar for machine-oriented metadata that does not belong in human-readable .actions or .ics files. Keyed by domain concept (charter, actions, plans) with entries keyed by identifier.",
+       "description": "Per-charter sidecar for machine-oriented metadata that does not belong in human-readable .actions or .ics files. Keyed by domain concept (charter, actions, notes, plans) with entries keyed by identifier.",
        "type": "object",
        "properties": {
               "charter": {
@@ -87,6 +87,23 @@
                                    }
                             },
                             "additionalProperties": true
+                     }
+              },
+              "notes": {
+                     "type": "object",
+                     "description": "Append-only notes keyed by the UUID of any entity (charter, action, Habit) whose line or document this charter holds. Oldest first. Tools only append; readers accept hand edits.",
+                     "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                                   "type": "object",
+                                   "properties": {
+                                          "at": {"type": "string", "format": "date-time", "description": "ISO 8601 date-time with UTC offset: the instant the note was written"},
+                                          "by": {"type": "string", "description": "Writer: human:<name> or agent:<role>"},
+                                          "text": {"type": "string"}
+                                   },
+                                   "required": ["at", "text"],
+                                   "additionalProperties": true
+                            }
                      }
               },
               "habits": {

@@ -66,6 +66,7 @@ An action is `app:Action`. Fields are those of [`actions.schema.json`](./schemas
 | `alias` | `=` | `app:alias` |
 | sidecar `occurrence.habit_id` | none | `app:occurrenceOf`, the native Habit whose occurrence this is; transport UID is not the Habit id |
 | sidecar `occurrence.occurrence_key` | none | `app:slot`, the canonical slot key as `xsd:string`: `D:` date, `F:` floating or `U:` UTC instant ([ICS schedule specification](./ics_schedule_spec.md#canonical-slot-keys-slot-key-zone)) |
+| sidecar `notes.<id>[]` | none | `app:note`, per note, a blank node on the entity with `rdf:value` (`text`), `dcterms:created` (`at`, `xsd:dateTime`) and `dcterms:creator` (`by`, when present). Charters, Actions and Habits alike |
 
 Derived: `app:notBefore`, `app:lateFrom`, `app:plannedFrom`, `app:durationMinutes` ([Time](#time)) and `app:waitsOn` ([Waits](#waits)). Location: `app:file`, `app:line`.
 

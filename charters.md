@@ -85,19 +85,17 @@ All subsections are included in the description while sibling sections are meant
 
 ## charter logs
 
-charters may also have a log section beneath the core section and this will be assumed to be a log of various events and changes that happened within the charter.
-
-good for keeping a running log if semantic activity
+A charter's log is its [notes](./workspace.md#notes): a running record of the semantic activity within the charter, kept in its JSON sidecar under `notes.<charter id>` and appended by `clearhead jot`. It is not part of the charter document, so a reader of the charter's text, a worker brief included, gets the core and not the history.
 
 ### format
 
-Each log entry is a single item of an unordered list that begins with an ISO 8601 date or date-time, followed by ` — ` and the entry text. The entry carries its own date so it keeps its meaning when it is moved, archived, or read on its own; entries are appended, so their order in the document is their order in time.
+A log entry is a note `{at, by, text}`. `at` is an ISO 8601 date-time with its UTC offset (`2026-09-17T23:28-07:00`), since entries from different machines share one log and must order correctly; tools that write entries always include it. `by` and `text` are as for any note. Entries are appended, so their order in the array is their order in time. Editors may render `at` in a friendlier form, but the stored value stays ISO 8601.
 
-A date-time should carry its UTC offset (`2026-09-17T23:28-07:00`), since entries from different machines share one log and must order correctly; tools that write entries always include it. Editors may render the timestamp in a friendlier form, but the stored text stays ISO 8601.
+### The legacy `## Log` section
 
-An entry without a leading date is still valid and is read as undated text. Linters should report it, but implementations must not add a date to an existing entry: the time of that edit is not the time the entry was written.
+Charters written before notes may have a `## Log` section beneath the core section, a list whose items each begin with an ISO 8601 date or date-time, followed by ` — ` and the entry text. Readers still accept it, as a log read before the charter's notes, until a charter is migrated. Tools never append to it. An entry without a leading date is read as undated text, and implementations must not add a date to an existing entry: the time of that edit is not the time the entry was written. Migration moves each entry to a note, keeping its text and its date; a date without a time gives `at` the date at midnight, and `by` is omitted where unknown. A migrated charter has no `## Log` section.
 
-example
+example (legacy)
 
 ```md
 # test
