@@ -1,6 +1,6 @@
 {
        "$schema": "http://json-schema.org/draft-07/schema#",
-       "$id": "https://clearhead.dev/schemas/v0.6.0/charter_metadata.schema.json",
+       "$id": "https://clearhead.dev/schemas/v0.7.0/charter_metadata.schema.json",
        "title": "Charter Metadata",
        "description": "Per-charter sidecar for machine-oriented metadata that does not belong in human-readable .actions or .ics files. Keyed by domain concept (charter, actions, notes, plans) with entries keyed by identifier.",
        "type": "object",

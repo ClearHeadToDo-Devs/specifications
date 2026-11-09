@@ -1,10 +1,12 @@
 # Changelog - Actions Specifications
 
-## Unreleased
+## v0.7.0 — 2026-11-09
+
+Publishes the notes-in-the-sidecar contract approved by Darrion at `96e1c76` (a date-only migrated log entry gets midnight UTC), with the predecessor-reference fix already on main. All eight schema `$id`s name `https://clearhead.dev/schemas/v0.7.0/<name>.schema.json`. Core adoption follows separately.
 
 ### Added
 
-**Notes: one append-only log for any entity, in the sidecar.** `notes.<uuid>` in the charter sidecar holds `{at, by, text}` notes for a charter, Action or Habit; `jot` is the single append verb; appends are serialized; `doctor --fix` relocates a moved entity's notes and keeps an orphan's. Draft awaiting Darrion's approval (`docs/action-notes-proposal.md`).
+**Notes: one append-only log for any entity, in the sidecar.** `notes.<uuid>` in the charter sidecar holds `{at, by, text}` notes for a charter, Action or Habit; `jot` is the single append verb; appends are serialized; `doctor --fix` relocates a moved entity's notes and keeps an orphan's. Approved by Darrion 2026-11-09 (`docs/action-notes-proposal.md`).
 
 ### Changed
 
