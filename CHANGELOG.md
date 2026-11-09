@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### Added
+
+**Notes: one append-only log for any entity, in the sidecar.** `notes.<uuid>` in the charter sidecar holds `{at, by, text}` notes for a charter, Action or Habit; `jot` is the single append verb; appends are serialized; `doctor --fix` relocates a moved entity's notes and keeps an orphan's. Draft awaiting Darrion's approval (`docs/action-notes-proposal.md`).
+
+### Changed
+
+**The charter log moves to the sidecar.** `charters.md` Log is now the charter's notes; the `## Log` section is legacy, read but never appended, and migrated by tool.
+
 ### Fixed
 
 **Predecessors never resolve by name.** W007, W008 and W009 now follow [Reference Syntax](reference_syntax.md#matching-rules): a `<` resolves by full UUID, short UUID, alias or path, across the workspace, and an ambiguous match at the strongest tier does not resolve. E009 uses the same resolution. Their examples and wording had treated action names as references (Darrion, 2026-11-08: "alias is more clear... i think for right now we can keep with the simple version and see if it bites").
