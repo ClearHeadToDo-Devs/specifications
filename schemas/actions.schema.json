@@ -126,9 +126,39 @@
           "items": {
             "$ref": "#/definitions/action"
           }
+        },
+        "notes": {
+          "type": "array",
+          "description": "The Action's notes (workspace.md Notes), read from every sidecar and ordered by `at`, ties by position. The sidecar stays the authority. May be omitted when there are none.",
+          "items": {
+            "$ref": "#/definitions/note"
+          }
         }
       },
       "additionalProperties": false
+    },
+    "note": {
+      "type": "object",
+      "description": "One note, as the sidecar stores it under `notes.<uuid>` (charter_metadata.schema.json).",
+      "required": [
+        "at",
+        "text"
+      ],
+      "properties": {
+        "at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 date-time with UTC offset: the instant the note was written"
+        },
+        "by": {
+          "type": "string",
+          "description": "Writer: human:<name> or agent:<role>"
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
     }
   }
 }

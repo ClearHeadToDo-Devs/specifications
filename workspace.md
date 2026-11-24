@@ -140,6 +140,8 @@ Appending is not a mutation of the entity. It works in any state, closed and arc
 
 Notes follow the entity. Readers take the union of every sidecar keyed by UUID, so a note reaches its entity wherever the line now lives. `doctor --fix` therefore relocates rather than prunes: a notes entry whose entity lives in another charter moves to that charter's sidecar, and an entry whose entity exists nowhere is reported and kept, never deleted. (Other orphaned sidecar entries remain prunable.) Archiving moves the sidecar whole, notes included.
 
+JSON projections carry an entity's notes on the entity itself: an Action or Habit in [`actions.schema.json`](./schemas/actions.schema.json) and a charter in [`charters.schema.json`](./schemas/charters.schema.json) have an optional `notes` array, each note in the shape above, read from every sidecar and ordered as readers order them. Where notes are stored does not change: the projection is a view, and the sidecar's `notes` map stays the one place they are written.
+
 Descriptions that already carry dated additions are not migrated automatically.
 
 Note: we use the hidden file convention here to indicate that this is a sidecar file meant to be read and written by tools as a companion to the charter, but should not be directly interacted with by users.
