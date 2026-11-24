@@ -152,7 +152,7 @@
         },
         "by": {
           "type": "string",
-          "description": "Writer: human:<name> or agent:<role>"
+          "description": "The writer's name"
         },
         "text": {
           "type": "string"

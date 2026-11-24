@@ -98,7 +98,7 @@
                                    "type": "object",
                                    "properties": {
                                           "at": {"type": "string", "format": "date-time", "description": "ISO 8601 date-time with UTC offset: the instant the note was written"},
-                                          "by": {"type": "string", "description": "Writer: human:<name> or agent:<role>"},
+                                          "by": {"type": "string", "description": "The writer's name"},
                                           "text": {"type": "string"}
                                    },
                                    "required": ["at", "text"],

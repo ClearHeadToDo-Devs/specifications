@@ -131,7 +131,7 @@ please review the [charter sidecar schema][charter-sidecar-schema] for more deta
 Any entity can carry notes: a charter, an Action, a Habit. Notes are the one uniform log of the workspace, kept in the sidecar of the charter whose file holds the entity, under a top-level `notes` map keyed by the entity's UUID: `notes.<uuid>` is an array of notes, oldest first. A note is `{at, by, text}`:
 
 - `at`: an ISO 8601 date-time with its UTC offset, the instant the note was written.
-- `by`: who wrote it, in the convention the docs' front matter uses: `human:Darrion`, `agent:<role>`. Optional only for notes migrated from a legacy log.
+- `by`: the writer's name, as the writing tool resolved it. Any naming convention, such as a prefix telling people from agents, belongs to the people using the workspace, not to this format. Optional only for notes migrated from a legacy log.
 - `text`: plain text.
 
 The tools treat notes as an append-only log. `clearhead jot` is the single verb that writes one and takes any entity's id; a correction is a new note, and no tool edits or deletes one. The JSON can still be edited by hand, so readers accept what they find (unordered notes, a missing `by`) rather than refusing it; they order by `at`, ties by position.

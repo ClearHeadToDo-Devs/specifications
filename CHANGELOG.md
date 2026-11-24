@@ -6,6 +6,10 @@
 
 **Notes in the JSON projections.** The `action` definition in `actions.schema.json` (Actions and Habits) and the `charter` definition in `charters.schema.json` gain an optional `notes` array, each item the note `charter_metadata.schema.json` stores, ordered by `at`, ties by position (`workspace.md` Notes). Storage is unchanged: the sidecar's single `notes.<uuid>` map stays the authority (Darrion, 2026-11-24: "keep the single map"). Lets `show action --json` and `show charter --json` carry notes in the specification's own shapes (platform Decision 61).
 
+### Changed
+
+**A note's `by` is the writer's name, with no prescribed convention.** `workspace.md` Notes and the three schemas' `by` descriptions no longer prescribe `human:<name>` or `agent:<role>`; that prefix is a convention of the people using a workspace, not of the format (Darrion, 2026-11-24). Validation is unchanged: `by` was and stays any string.
+
 ## v0.7.0 — 2026-11-09
 
 Publishes the notes-in-the-sidecar contract approved by Darrion at `96e1c76` (a date-only migrated log entry gets midnight UTC), with the predecessor-reference fix already on main. All eight schema `$id`s name `https://clearhead.dev/schemas/v0.7.0/<name>.schema.json`. Core adoption follows separately.
