@@ -1,6 +1,8 @@
 # Changelog - Actions Specifications
 
-## Unreleased
+## v0.8.0 — 2026-11-24
+
+Publishes notes in the action and charter JSON projections and drops the prescribed `by` convention. All eight schema `$id`s name `https://clearhead.dev/schemas/v0.8.0/<name>.schema.json`. No grammar syntax changed. Core adoption follows separately.
 
 ### Added
 
