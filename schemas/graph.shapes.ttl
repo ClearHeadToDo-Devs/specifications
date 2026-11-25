@@ -91,10 +91,11 @@ shape:Objective a sh:NodeShape ;
 
 shape:Condition a sh:NodeShape ;
     sh:targetClass cco:ont00000127 ;  # Performance Specification
-    sh:message "A condition has exactly two parts: one action and one description (convention 7)." ;
+    sh:message "A condition has exactly two parts: one action or charter, and one description (convention 7)." ;
     sh:property
         [ sh:path obo:BFO_0000178 ; sh:minCount 2 ; sh:maxCount 2 ] ,
-        [ sh:path obo:BFO_0000178 ; sh:qualifiedValueShape [ sh:class obo:IAO_0000007 ] ;
+        [ sh:path obo:BFO_0000178 ;
+          sh:qualifiedValueShape [ sh:or ( [ sh:class obo:IAO_0000007 ] [ sh:class cco:ont00000974 ] ) ] ;
           sh:qualifiedMinCount 1 ; sh:qualifiedMaxCount 1 ] ,
         [ sh:path obo:BFO_0000178 ; sh:qualifiedValueShape [ sh:class cco:ont00000853 ] ;
           sh:qualifiedMinCount 1 ; sh:qualifiedMaxCount 1 ] .

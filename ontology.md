@@ -98,6 +98,9 @@ The planned block is `@`, never inherited, and read as the window is.
 ### Waits
 
 `app:after` is each predecessor as written, an action or a charter. `app:waitsOn` is derived: everything that must be closed before the action can start. It is the action's own `app:after` targets, the sibling before it when its parent is `app:sequential`, and its parent action's `app:waitsOn`; a top-level action also waits on the `base` predecessors of its charter and of every charter above it ([charters](./charters.md#optional-frontmatter)), which its descendants then inherit through their parents. An action is free to start when every `app:waitsOn` target is closed: an action `app:Completed` or `app:Cancelled`, a charter `app:Closed` or `app:Cancelled`.
+
+A charter waits too. Its `app:after` is each of its own `predecessors`, an action or a charter, and its `app:waitsOn` is those targets and the `base` predecessors of every charter above it. A charter's own waits order the charter and do not reach the actions it holds; only `base` waits do. So a walk through `app:waitsOn` passes through a charter to what it waits on.
+
 ### Charter terms
 
 A charter (a [charter document](./charters.md)) is `app:Charter`.
@@ -110,9 +113,12 @@ A charter (a [charter document](./charters.md)) is `app:Charter`.
 | `alias` | `app:alias` |
 | `parent` | `app:partOf` the parent charter |
 | `objectives` | `app:serves`, per objective |
-| `defaults`, `base` | none: read into the derived window and waits of the actions it holds (rule 8) |
+| `predecessors` | `app:after`, per reference, the action or charter it names; see [Waits](#waits) |
+| `defaults`, `base` | none: read into the derived window and waits of the actions it holds (rule 8), and the waits of its descendant charters |
 | `state` | `app:state` |
 | its file | `app:file`: the charter document, or its actions file if it has none |
+
+Derived: `app:waitsOn` ([Waits](#waits)).
 
 ### Objective terms
 
@@ -196,7 +202,7 @@ These rules decide every row of the mapping below.
 4. **Literal values sit on a bearer.** As CCO requires, a measurement or description carries its value through an Information Bearing Entity (`cco:ont00000253`) that `is carrier of` it (`obo:BFO_0000101`), with `has text value` (`cco:ont00001765`), `has integer value` (`cco:ont00001773`) or `has datetime value` (`cco:ont00001767`).
 5. **Containment is published downward.** A whole `has continuant part` (`obo:BFO_0000178`) each part; the inverse is derivable and not emitted.
 6. **Entities keep their IRIs; helper nodes are blank** (Decision 49). Actions, charters, objectives, metrics and contexts are IRIs; a condition, description, measurement, bearer, intent or act exists only as part of its owner and nothing outside the graph refers to it, so it is a blank node. Exports that must diff byte for byte are canonicalized with RDF Dataset Canonicalization (RDFC-1.0); fixtures compare by graph isomorphism.
-7. **One condition per Performance Specification.** Each wait, context, energy level or time is its own Performance Specification (`cco:ont00000127`) whose parts are the action and one Descriptive ICE (`cco:ont00000853`) that `describes` (`cco:ont00001982`) the condition.
+7. **One condition per Performance Specification.** Each wait, context, energy level or time is its own Performance Specification (`cco:ont00000127`) whose parts are the action or charter it applies to and one Descriptive ICE (`cco:ont00000853`) that `describes` (`cco:ont00001982`) the condition.
 8. **Conditions are effective.** An action carries every wait and window bound that applies to it, its own and those it inherits, read from `app:waitsOn`, `app:notBefore` and `app:lateFrom` rather than from the terms as written: one fact, one condition. An inherited condition is true of the child.
 
 Prefixes: `cco:` `https://www.commoncoreontologies.org/`, `obo:` `http://purl.obolibrary.org/obo/`, `dcterms:` `http://purl.org/dc/terms/`, `skos:` `http://www.w3.org/2004/02/skos/core#`, `rdfs:` as usual.
@@ -251,6 +257,7 @@ A charter (a [charter document](./charters.md)) is a Plan, `cco:ont00000974`.
 | `parent` | The parent charter `has continuant part` this one. |
 | `objectives` | The charter `has continuant part` each objective. A charter with none is reported, never refused ([Objectives](./objectives.md)). |
 | `state` | A Nominal Measurement ICE that `is a nominal measurement of` the plan, text `new`, `active`, `blocked`, `closed` or `cancelled`. |
+| `predecessors` | Per effective wait (`app:waitsOn`), a condition describing the awaited action or charter, as for actions. |
 | its actions | The charter `has continuant part` each top-level action. |
 
 ### Objectives

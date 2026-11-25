@@ -30,10 +30,11 @@ The workspace root charter is no exception: its frontmatter lives in `charters/R
   - `Blocked` — unable to advance
   - `Closed` — finished and terminal
   - `Cancelled` — abandoned and terminal
+- predecessors: references, resolved and linted as `<` is ([predecessors](./action_file_format.md#predecessors-optional)). They order the Charter itself: whatever waits on it also waits on them. They do not reach the Actions it holds, which is what `base` predecessors do. An `Active` Charter with an open predecessor is reported ([W017](./linting.md#w017-active-charter-with-an-open-predecessor)), and activating it is not refused.
 - defaults: values for the fields of the Actions the Charter holds, its own and its descendant Charters', used only where a field is still empty after inheritance. An Action's own value, or one it inherits from an ancestor Action or a `base`, overrules a default. No keys are specified yet.
 - base: conditions every Action the Charter holds carries, its own and its descendant Charters'. They compose as an ancestor Action's do: an Action's own values combine with them and never replace them. Keys take [`actions.schema.json`](./schemas/actions.schema.json) names. Two keys are specified, and the rest are reserved:
   - `dueDateTime`: a window, written as `:` is ([due date/time](./action_file_format.md#due-datetime-optional)). It bounds each Action as an ancestor's window does, so an Action's effective window opens no earlier and closes no later.
-  - `predecessors`: references, resolved and linted as `<` is ([predecessors](./action_file_format.md#predecessors-optional)). Each Action waits on them.
+  - `predecessors`: references, resolved and linted as `<` is ([predecessors](./action_file_format.md#predecessors-optional)). Each Action waits on them, and so does each descendant Charter.
 
 ```yaml
 base:
@@ -65,7 +66,7 @@ implementations must support. State transitions do not implicitly cascade to
 descendant Charters or Actions. The normative admission, readiness, transition,
 and contradiction rules are defined in [Process Overview](./process.md#charters).
 
-An Action may wait on a Charter ([predecessors](./action_file_format.md#predecessors-optional)); the wait ends when the Charter is `Closed` or `Cancelled`.
+An Action or a Charter may wait on a Charter ([predecessors](./action_file_format.md#predecessors-optional)); the wait ends when the Charter is `Closed` or `Cancelled`.
 
 `Closed` and `Cancelled` are both terminal states: either makes a Charter
 eligible for archival (see [Archive](./Archive)).

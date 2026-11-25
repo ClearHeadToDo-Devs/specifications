@@ -173,6 +173,17 @@ shape:Window a sh:NodeShape ;
 
 # --- Effective waits (Waits) -------------------------------------------------
 
+shape:CharterWaits a sh:NodeShape ;
+    sh:targetClass app:Charter ;
+    sh:sparql [
+        sh:message "A charter waits on everything it is written to come after." ;
+        sh:prefixes shape: ;
+        sh:select """
+            SELECT $this ?value WHERE {
+                $this app:after ?value .
+                FILTER NOT EXISTS { $this app:waitsOn ?value }
+            }""" ] .
+
 shape:Waits a sh:NodeShape ;
     sh:targetClass app:Action ;
     sh:sparql [
@@ -213,6 +224,10 @@ shape:Charter a sh:NodeShape ;
           sh:in ( app:New app:Active app:Blocked app:Closed app:Cancelled ) ;
           sh:message "A charter has exactly one charter state (State values)." ] ,
         [ sh:path app:partOf ; sh:maxCount 1 ; sh:class app:Charter ] ,
+        [ sh:path app:after ; sh:or ( [ sh:class app:Action ] [ sh:class app:Charter ] ) ;
+          sh:message "A charter comes after actions and charters only (Waits)." ] ,
+        [ sh:path app:waitsOn ; sh:or ( [ sh:class app:Action ] [ sh:class app:Charter ] ) ;
+          sh:message "A charter waits on actions and charters only (Waits)." ] ,
         [ sh:path app:serves ; sh:class app:Objective ] ,
         [ sh:path app:file ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^[^/.][^\\\\]*$" ] .
 

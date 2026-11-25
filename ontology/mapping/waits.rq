@@ -1,6 +1,7 @@
-# A wait is a condition describing the awaited action. From app:waitsOn, the
-# effective waits: written predecessors, the sequential sibling before, and the
-# parent's waits, so an inherited wait is true of the child.
+# A wait is a condition describing the awaited action or charter. From
+# app:waitsOn, the effective waits: written predecessors, the sequential sibling
+# before, and the parent's waits, so an inherited wait is true of the child.
+# A charter's own waits map the same way, as conditions on the charter.
 PREFIX app: <https://clearhead.dev/vocab/app/v1#>
 PREFIX cco: <https://www.commoncoreontologies.org/>
 PREFIX obo: <http://purl.obolibrary.org/obo/>

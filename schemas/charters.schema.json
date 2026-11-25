@@ -68,6 +68,14 @@
           },
           "minItems": 1
         },
+        "predecessors": {
+          "type": "array",
+          "description": "Frontmatter `predecessors`: references, as `<` writes them, that the charter itself waits on (charters.md). They order the charter and do not reach the Actions it holds.",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
         "defaults": {
           "type": "object",
           "description": "Frontmatter `defaults`: values for the fields of the Actions the charter holds, used only where a field is still empty after inheritance (charters.md). No keys are specified yet.",

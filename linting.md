@@ -191,7 +191,8 @@ A Habit root in `.habits.actions` requires `R:` with a valid RFC 5545 RRULE and 
     ([process.md](./process.md#closure)), so an Action waiting on a Charter
     that holds it waits on its own closure. A Charter's `base` predecessor that
     names that Charter, or one above it, puts every Action it holds in that
-    position and is reported the same way, once, at the Charter.
+    position and is reported the same way, once, at the Charter. So is a
+    Charter's own predecessor that names the Charter itself or one above it.
 
     **Fix suggestion:** drop the dependency, or point it at a sibling or
     another Action outside the line's ancestry.
@@ -276,7 +277,9 @@ because the plaintext field is absent.
 
     **Fixable:** No
 
-    Actions cannot have circular dependencies (directly or transitively).
+    Actions and Charters cannot have circular dependencies (directly or
+    transitively), through `<`, `~`, a Charter's own `predecessors` or its
+    `base` predecessors.
 
     ```actions
     [ ] Task A =task-a < task-b
@@ -439,6 +442,29 @@ because the plaintext field is absent.
 
     **Fix suggestion:** move the charter's `base` window, or end the recurrence
     with `UNTIL`, `COUNT` or by closing the Habit.
+
+#### W017: Active Charter With an Open Predecessor
+
+    **Fixable:** No
+
+    A Charter is `Active` while something it waits on is still open: one of
+    its own `predecessors`, or a `base` predecessor of a Charter above it
+    ([charters](./charters.md#optional-frontmatter)). Open means an Action
+    not completed or cancelled, or a Charter not `Closed` or `Cancelled`.
+
+    ```yaml
+    # charters/renovate.md
+    state: Active
+    predecessors: [pack]  # [ ] Pack =pack is still open
+    ```
+
+    **Rationale:** a Charter's own wait orders it, and activation is an
+    explicit choice the user may make early, so this is a warning, never a
+    refusal. Activating it says its work can start, while its predecessor
+    says it should not yet.
+
+    **Fix suggestion:** set the Charter back to `New` or `Blocked` until the
+    predecessor closes, or drop the predecessor.
 
 ### 3. Style and Conventions (Info)
 

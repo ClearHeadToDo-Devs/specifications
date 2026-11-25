@@ -42,6 +42,9 @@ _:c1-alias a cco:ont00000003 ; cco:ont00001916 <urn:uuid:01a0fb10-0000-7000-8000
 _:c1-alias-value a cco:ont00000253 ; obo:BFO_0000101 _:c1-alias ; cco:ont00001765 "groceries" .
 _:c1-state a cco:ont00000293 ; cco:ont00001868 <urn:uuid:01a0fb10-0000-7000-8000-0000000000c1> .
 _:c1-state-value a cco:ont00000253 ; obo:BFO_0000101 _:c1-state ; cco:ont00001765 "new" .
+# groceries' own wait on "Plan the party": a condition on the charter, not on its actions
+_:c1-after-a08 a cco:ont00000127 ; obo:BFO_0000178 <urn:uuid:01a0fb10-0000-7000-8000-0000000000c1> , _:c1-after-a08-condition .
+_:c1-after-a08-condition a cco:ont00000853 ; cco:ont00001982 <urn:uuid:01a0fb10-0000-7000-8000-000000000008> .
 
 # [-] Call the plumber: every field
 <urn:uuid:01a0fb10-0000-7000-8000-000000000001> a obo:IAO_0000007 ; rdfs:label "Call the plumber" ;
