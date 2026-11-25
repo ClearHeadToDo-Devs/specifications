@@ -85,8 +85,8 @@ Derived: `app:notBefore`, `app:lateFrom`, `app:plannedFrom`, `app:durationMinute
 
 The window is `:` alone; `@` is intent and bounds nothing (Decision 48). A date covers its day and a time is an instant (Decisions 47 and 51). The derived instants say when an action's **effective window** opens and closes, each an `xsd:dateTime` with an offset:
 
-- `app:notBefore`: the first instant the action may be worked. The latest of its own `app:availableFrom` and every ancestor action's, taking a date's first instant.
-- `app:lateFrom`: the first instant the action is late. The earliest of its own `app:due` and every ancestor action's, taking where it ends: a date's following midnight, a time itself.
+- `app:notBefore`: the first instant the action may be worked. The latest of its own `app:availableFrom`, every ancestor action's, and the lower bound of every holding charter's `base` window ([charters](./charters.md#optional-frontmatter)), taking a date's first instant.
+- `app:lateFrom`: the first instant the action is late. The earliest of its own `app:due`, every ancestor action's, and the deadline of every holding charter's `base` window, taking where it ends: a date's following midnight, a time itself.
 
 A child with no bound of its own therefore inherits its parent's, and one with its own narrows it ([action file format](./action_file_format.md#due-datetime-optional)). A time written without an offset, and every date, is resolved in the **viewer's zone**, the zone in which the graph is projected, using the time-zone database. Queries compare these instants, never the written values: an `xsd:date`, a floating `xsd:dateTime` and one with an offset do not compare reliably in SPARQL.
 
@@ -97,7 +97,7 @@ The planned block is `@`, never inherited, and read as the window is.
 
 ### Waits
 
-`app:after` is each predecessor as written, an action or a charter. `app:waitsOn` is derived: everything that must be closed before the action can start. It is the action's own `app:after` targets, the sibling before it when its parent is `app:sequential`, and its parent action's `app:waitsOn`. An action is free to start when every `app:waitsOn` target is closed: an action `app:Completed` or `app:Cancelled`, a charter `app:Closed` or `app:Cancelled`.
+`app:after` is each predecessor as written, an action or a charter. `app:waitsOn` is derived: everything that must be closed before the action can start. It is the action's own `app:after` targets, the sibling before it when its parent is `app:sequential`, and its parent action's `app:waitsOn`; a top-level action also waits on the `base` predecessors of its charter and of every charter above it ([charters](./charters.md#optional-frontmatter)), which its descendants then inherit through their parents. An action is free to start when every `app:waitsOn` target is closed: an action `app:Completed` or `app:Cancelled`, a charter `app:Closed` or `app:Cancelled`.
 ### Charter terms
 
 A charter (a [charter document](./charters.md)) is `app:Charter`.
@@ -110,6 +110,7 @@ A charter (a [charter document](./charters.md)) is `app:Charter`.
 | `alias` | `app:alias` |
 | `parent` | `app:partOf` the parent charter |
 | `objectives` | `app:serves`, per objective |
+| `defaults`, `base` | none: read into the derived window and waits of the actions it holds (rule 8) |
 | `state` | `app:state` |
 | its file | `app:file`: the charter document, or its actions file if it has none |
 

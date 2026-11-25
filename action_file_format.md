@@ -172,7 +172,7 @@ Aliases provide stable references independent of name changes:
 
 `<ref>` denotes logical dependencies that must be closed before this act is dependency-clean.
 
-A reference names an Action or a Charter, resolved by [Reference Syntax](./reference_syntax.md). An Action is closed when it is completed or cancelled; a Charter when its `state` is `Closed` or `Cancelled` ([charters](./charters.md#frontmatter)), which only an explicit transition sets, never its actions. An Action and a Charter that share an alias make the reference ambiguous ([W009](./linting.md#w009-ambiguous-predecessor-reference)); a `c:` or `a:` prefix chooses. A letter must follow the prefix's colon, so it takes an alias or a path, never a UUID, which needs no prefix; and since a date starts with a digit, `<c:2026-12-01` stays alias `c` with a due date.
+A reference names an Action or a Charter, resolved by [Reference Syntax](./reference_syntax.md). An Action is closed when it is completed or cancelled; a Charter when its `state` is `Closed` or `Cancelled` ([charters](./charters.md#frontmatter)), which only an explicit transition sets, never its actions. An Action and a Charter that share an alias make the reference ambiguous ([W009](./linting.md#w009-ambiguous-predecessor-reference)); a `c:` or `a:` prefix chooses. A Charter's `base` predecessors are waits of every Action it holds ([charters](./charters.md#optional-frontmatter)). A letter must follow the prefix's colon, so it takes an alias or a path, never a UUID, which needs no prefix; and since a date starts with a digit, `<c:2026-12-01` stays alias `c` with a due date.
 
 ```actions
 [ ] Host a dinner < c:groceries
@@ -214,16 +214,16 @@ at its lower bound, and the Action is late from where its deadline ends. So
 from 17:00.
 
 Action hierarchy composes windows without changing the locally stored values.
-An Action's effective window opens at the latest lower bound asserted by itself
-or any ancestor and closes at the earliest deadline asserted by itself or any
-ancestor. A missing bound therefore inherits an ancestor's naturally, while a
+An Action's effective window opens at the latest lower bound asserted by itself,
+any ancestor, or the `base` of any Charter that holds it, and closes at the
+earliest deadline any of them asserts ([charters](./charters.md#optional-frontmatter)). A missing bound therefore inherits an ancestor's naturally, while a
 child may narrow the inherited window. `@` is not inherited.
 
 Coherence:
 
 - A planned block outside the effective window is a warning: `@` starting
   before the window opens, or its block ending after it closes.
-- A local window bound outside an ancestor's window is a warning.
+- A local window bound outside an ancestor's window, or a holding Charter's `base` window, is a warning.
 - An empty effective window, which opens at or after it closes, is a violation,
   as is an `@` block that ends at or before it starts.
 

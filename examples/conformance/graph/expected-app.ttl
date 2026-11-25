@@ -144,11 +144,14 @@
   app:partOf <urn:uuid:01a0fb10-0000-7000-8000-0000000000c0> ;
   app:file "charters/next.actions" ; app:line 11 .
 
-# Actions in charters/groceries.actions
+# Actions in charters/groceries.actions. The charter's base window and its wait
+# on plumber reach every one: no app:after or app:due of their own for them.
 <urn:uuid:01a0fb10-0000-7000-8000-000000000010> a app:Action ;
   rdfs:label "Weekly shop" ;
   app:state app:NotStarted ;
   app:sequential true ;
+  app:waitsOn <urn:uuid:01a0fb10-0000-7000-8000-000000000001> ;
+  app:lateFrom "2026-10-11T00:00:00Z"^^xsd:dateTime ;
   app:context <urn:uuid:64c88ec0-94dc-5583-a02e-8f4ae1f80d9b> ;
   app:partOf <urn:uuid:01a0fb10-0000-7000-8000-0000000000c1> ;
   app:file "charters/groceries.actions" ; app:line 1 .
@@ -156,13 +159,16 @@
 <urn:uuid:01a0fb10-0000-7000-8000-000000000011> a app:Action ;
   rdfs:label "Write the list" ;
   app:state app:NotStarted ;
+  app:waitsOn <urn:uuid:01a0fb10-0000-7000-8000-000000000001> ;
+  app:lateFrom "2026-10-11T00:00:00Z"^^xsd:dateTime ;
   app:partOf <urn:uuid:01a0fb10-0000-7000-8000-000000000010> ;
   app:file "charters/groceries.actions" ; app:line 2 .
 
 <urn:uuid:01a0fb10-0000-7000-8000-000000000012> a app:Action ;
   rdfs:label "Buy the food" ;
   app:state app:NotStarted ;
-  app:waitsOn <urn:uuid:01a0fb10-0000-7000-8000-000000000011> ;
+  app:waitsOn <urn:uuid:01a0fb10-0000-7000-8000-000000000011> , <urn:uuid:01a0fb10-0000-7000-8000-000000000001> ;
+  app:lateFrom "2026-10-11T00:00:00Z"^^xsd:dateTime ;
   app:partOf <urn:uuid:01a0fb10-0000-7000-8000-000000000010> ;
   app:file "charters/groceries.actions" ; app:line 3 .
 
@@ -170,7 +176,8 @@
   rdfs:label "Cook the soup" ;
   app:state app:NotStarted ;
   app:after <urn:uuid:01a0fb10-0000-7000-8000-000000000012> ;
-  app:waitsOn <urn:uuid:01a0fb10-0000-7000-8000-000000000012> ;
+  app:waitsOn <urn:uuid:01a0fb10-0000-7000-8000-000000000012> , <urn:uuid:01a0fb10-0000-7000-8000-000000000001> ;
+  app:lateFrom "2026-10-11T00:00:00Z"^^xsd:dateTime ;
   app:partOf <urn:uuid:01a0fb10-0000-7000-8000-0000000000c1> ;
   app:file "charters/groceries.actions" ; app:line 4 .
 

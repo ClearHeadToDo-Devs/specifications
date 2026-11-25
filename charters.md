@@ -30,7 +30,20 @@ The workspace root charter is no exception: its frontmatter lives in `charters/R
   - `Blocked` — unable to advance
   - `Closed` — finished and terminal
   - `Cancelled` — abandoned and terminal
-- defaults: any settings that shoud be applied to all descendants of the charter. primarily good for controlling structure and making consistent actions more alike. primarily done by setting key value pairs within the defaults dictionary.
+- defaults: values for the fields of the Actions the Charter holds, its own and its descendant Charters', used only where a field is still empty after inheritance. An Action's own value, or one it inherits from an ancestor Action or a `base`, overrules a default. No keys are specified yet.
+- base: conditions every Action the Charter holds carries, its own and its descendant Charters'. They compose as an ancestor Action's do: an Action's own values combine with them and never replace them. Keys take [`actions.schema.json`](./schemas/actions.schema.json) names. Two keys are specified, and the rest are reserved:
+  - `dueDateTime`: a window, written as `:` is ([due date/time](./action_file_format.md#due-datetime-optional)). It bounds each Action as an ancestor's window does, so an Action's effective window opens no earlier and closes no later.
+  - `predecessors`: references, resolved and linted as `<` is ([predecessors](./action_file_format.md#predecessors-optional)). Each Action waits on them.
+
+```yaml
+base:
+  dueDateTime: 2026-12-01/2026-12-20
+  predecessors: [c:venue]
+```
+
+A value is read as its text, as the DSL writes it: a date-only `dueDateTime` is a date, whatever type a YAML reader gives it. Like inherited windows, neither map is ever written into action lines.
+
+A Habit's occurrences are Actions and carry `base` like any other. A Habit whose rule outlives a `base` window is reported once, on the Habit ([W016](./linting.md#w016-habit-outlives-its-charters-base-window)). Habit roots, their template steps and `templates/` files are not Actions and take neither map; Actions stamped from them do.
 
 When `state` is omitted, semantic projections must expose it as `New`; omission
 must not be interpreted as `Active`. Effective engagement also requires every

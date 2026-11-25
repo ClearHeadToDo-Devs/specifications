@@ -149,8 +149,8 @@ A Habit root in `.habits.actions` requires `R:` with a valid RFC 5545 RRULE and 
 
     **Fixable:** No
 
-    An Action's effective window (its own `:` intersected with every ancestor's)
-    opens at or after it closes, so the Action can never be done on time; or its
+    An Action's effective window (its own `:` intersected with every ancestor's
+    and every holding Charter's `base` window) opens at or after it closes, so the Action can never be done on time; or its
     `@` block ends at or before it starts.
 
     ```actions
@@ -189,7 +189,9 @@ A Habit root in `.habits.actions` requires `R:` with a valid RFC 5545 RRULE and 
     would wait for the series to end. Stamping refuses such a template step.
     A Charter closed while its work is open is likewise reported
     ([process.md](./process.md#closure)), so an Action waiting on a Charter
-    that holds it waits on its own closure.
+    that holds it waits on its own closure. A Charter's `base` predecessor that
+    names that Charter, or one above it, puts every Action it holds in that
+    position and is reported the same way, once, at the Charter.
 
     **Fix suggestion:** drop the dependency, or point it at a sibling or
     another Action outside the line's ancestry.
@@ -414,6 +416,29 @@ because the plaintext field is absent.
     **Rationale:** `@` is intent and bounds nothing, so planning outside the
     window is allowed but probably a mistake. Work that really can happen
     earlier, such as preparing, belongs in its own Action (Decision 48).
+
+#### W016: Habit Outlives Its Charter's Base Window
+
+    **Fixable:** No
+
+    A Habit's rule has slots whose occurrences fall outside the `base` window
+    of a Charter that holds it ([charters](./charters.md#optional-frontmatter)):
+    the rule runs past the window's deadline, with no `UNTIL` or `COUNT`
+    ending it in time, or starts before the window opens. It is reported once,
+    on the Habit. An occurrence whose window is empty only because of a `base`
+    window is covered by this warning and not reported as E008.
+
+    ```actions
+    [ ] Check the site @2026-11-02 R:FREQ=WEEKLY  # charter base: dueDateTime: 2026-12-20
+    ```
+
+    **Rationale:** a recurrence that outlives the charter's window is a signal,
+    not an error: either the charter's border or the Habit's end is out of date.
+    One finding on the Habit says so without flooding doctor with one empty
+    window per occurrence.
+
+    **Fix suggestion:** move the charter's `base` window, or end the recurrence
+    with `UNTIL`, `COUNT` or by closing the Habit.
 
 ### 3. Style and Conventions (Info)
 

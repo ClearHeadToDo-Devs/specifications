@@ -134,17 +134,42 @@ _:a0b-after-c1-condition a cco:ont00000853 ; cco:ont00001982 <urn:uuid:01a0fb10-
 # [ ] Weekly shop ~: sequential parent; the marker itself is not emitted
 <urn:uuid:01a0fb10-0000-7000-8000-000000000010> a obo:IAO_0000007 ; rdfs:label "Weekly shop" ;
     obo:BFO_0000178 <urn:uuid:01a0fb10-0000-7000-8000-000000000011> , <urn:uuid:01a0fb10-0000-7000-8000-000000000012> .
+# groceries' base: a wait on plumber and a deadline, true of every action it holds
+_:a10-after-a01 a cco:ont00000127 ; obo:BFO_0000178 <urn:uuid:01a0fb10-0000-7000-8000-000000000010> , _:a10-after-a01-condition .
+_:a10-after-a01-condition a cco:ont00000853 ; cco:ont00001982 <urn:uuid:01a0fb10-0000-7000-8000-000000000001> .
+_:a10-late-from a cco:ont00000127 ; obo:BFO_0000178 <urn:uuid:01a0fb10-0000-7000-8000-000000000010> , _:a10-late-from-condition .
+_:a10-late-from-condition a cco:ont00000853 .
+_:a10-late-from-condition-value a cco:ont00000253 ; obo:BFO_0000101 _:a10-late-from-condition ;
+    cco:ont00001765 "late from" ; cco:ont00001767 "2026-10-11T00:00:00Z"^^xsd:dateTime .
 _:a10-context-errands a cco:ont00000127 ; obo:BFO_0000178 <urn:uuid:01a0fb10-0000-7000-8000-000000000010> , _:a10-context-errands-condition .
 _:a10-context-errands-condition a cco:ont00000853 ; cco:ont00001982 <urn:uuid:64c88ec0-94dc-5583-a02e-8f4ae1f80d9b> .
 
 # Its children: the second waits on the first (sequential expansion)
 <urn:uuid:01a0fb10-0000-7000-8000-000000000011> a obo:IAO_0000007 ; rdfs:label "Write the list" .
+_:a11-after-a01 a cco:ont00000127 ; obo:BFO_0000178 <urn:uuid:01a0fb10-0000-7000-8000-000000000011> , _:a11-after-a01-condition .
+_:a11-after-a01-condition a cco:ont00000853 ; cco:ont00001982 <urn:uuid:01a0fb10-0000-7000-8000-000000000001> .
+_:a11-late-from a cco:ont00000127 ; obo:BFO_0000178 <urn:uuid:01a0fb10-0000-7000-8000-000000000011> , _:a11-late-from-condition .
+_:a11-late-from-condition a cco:ont00000853 .
+_:a11-late-from-condition-value a cco:ont00000253 ; obo:BFO_0000101 _:a11-late-from-condition ;
+    cco:ont00001765 "late from" ; cco:ont00001767 "2026-10-11T00:00:00Z"^^xsd:dateTime .
 <urn:uuid:01a0fb10-0000-7000-8000-000000000012> a obo:IAO_0000007 ; rdfs:label "Buy the food" .
+_:a12-after-a01 a cco:ont00000127 ; obo:BFO_0000178 <urn:uuid:01a0fb10-0000-7000-8000-000000000012> , _:a12-after-a01-condition .
+_:a12-after-a01-condition a cco:ont00000853 ; cco:ont00001982 <urn:uuid:01a0fb10-0000-7000-8000-000000000001> .
+_:a12-late-from a cco:ont00000127 ; obo:BFO_0000178 <urn:uuid:01a0fb10-0000-7000-8000-000000000012> , _:a12-late-from-condition .
+_:a12-late-from-condition a cco:ont00000853 .
+_:a12-late-from-condition-value a cco:ont00000253 ; obo:BFO_0000101 _:a12-late-from-condition ;
+    cco:ont00001765 "late from" ; cco:ont00001767 "2026-10-11T00:00:00Z"^^xsd:dateTime .
 _:a12-after-a11 a cco:ont00000127 ; obo:BFO_0000178 <urn:uuid:01a0fb10-0000-7000-8000-000000000012> , _:a12-after-a11-condition .
 _:a12-after-a11-condition a cco:ont00000853 ; cco:ont00001982 <urn:uuid:01a0fb10-0000-7000-8000-000000000011> .
 
 # [ ] Cook the soup: an explicit predecessor
 <urn:uuid:01a0fb10-0000-7000-8000-000000000013> a obo:IAO_0000007 ; rdfs:label "Cook the soup" .
+_:a13-after-a01 a cco:ont00000127 ; obo:BFO_0000178 <urn:uuid:01a0fb10-0000-7000-8000-000000000013> , _:a13-after-a01-condition .
+_:a13-after-a01-condition a cco:ont00000853 ; cco:ont00001982 <urn:uuid:01a0fb10-0000-7000-8000-000000000001> .
+_:a13-late-from a cco:ont00000127 ; obo:BFO_0000178 <urn:uuid:01a0fb10-0000-7000-8000-000000000013> , _:a13-late-from-condition .
+_:a13-late-from-condition a cco:ont00000853 .
+_:a13-late-from-condition-value a cco:ont00000253 ; obo:BFO_0000101 _:a13-late-from-condition ;
+    cco:ont00001765 "late from" ; cco:ont00001767 "2026-10-11T00:00:00Z"^^xsd:dateTime .
 _:a13-after-a12 a cco:ont00000127 ; obo:BFO_0000178 <urn:uuid:01a0fb10-0000-7000-8000-000000000013> , _:a13-after-a12-condition .
 _:a13-after-a12-condition a cco:ont00000853 ; cco:ont00001982 <urn:uuid:01a0fb10-0000-7000-8000-000000000012> .
 

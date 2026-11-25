@@ -70,8 +70,28 @@
         },
         "defaults": {
           "type": "object",
-          "description": "Frontmatter `defaults`: key-value settings applied to descendants. Keys are not yet specified.",
+          "description": "Frontmatter `defaults`: values for the fields of the Actions the charter holds, used only where a field is still empty after inheritance (charters.md). No keys are specified yet.",
           "additionalProperties": true
+        },
+        "base": {
+          "type": "object",
+          "description": "Frontmatter `base`: conditions every Action the charter holds carries, composing as an ancestor Action's do (charters.md). Other keys are reserved.",
+          "properties": {
+            "dueDateTime": {
+              "type": "string",
+              "description": "A window, as `:` writes it: a deadline, or an ISO 8601 interval `start/end`.",
+              "minLength": 1
+            },
+            "predecessors": {
+              "type": "array",
+              "description": "References, as `<` writes them; each Action the charter holds waits on them.",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "additionalProperties": false
         },
         "log": {
           "type": "array",

@@ -4,5 +4,8 @@ alias: groceries
 parent: home
 objectives: [keep-food]
 state: New
+base:
+  dueDateTime: 2026-10-10
+  predecessors: [plumber]
 ---
 # Groceries
