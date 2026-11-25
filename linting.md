@@ -170,7 +170,8 @@ A Habit root in `.habits.actions` requires `R:` with a valid RFC 5545 RRULE and 
 
     An Action has a predecessor (`<`) that resolves to one of its ancestors:
     its parent, its parent's parent, and so on, up to a Habit root above its
-    template steps.
+    template steps, or a Charter that holds it: its own Charter or any Charter
+    above that.
 
     ```actions
     [ ] Plan the trip =trip
@@ -186,6 +187,9 @@ A Habit root in `.habits.actions` requires `R:` with a valid RFC 5545 RRULE and 
     parent waits on something that waits on it, the W007 cycle in another
     form. A Habit's state is its whole series, so a step waiting on its Habit
     would wait for the series to end. Stamping refuses such a template step.
+    A Charter closed while its work is open is likewise reported
+    ([process.md](./process.md#closure)), so an Action waiting on a Charter
+    that holds it waits on its own closure.
 
     **Fix suggestion:** drop the dependency, or point it at a sibling or
     another Action outside the line's ancestry.
@@ -285,13 +289,13 @@ because the plaintext field is absent.
 
     **Fixable:** No
 
-    A predecessor references an action that doesn't exist in the workspace.
+    A predecessor references an action or charter that doesn't exist in the workspace.
 
     ```actions
     [ ] Task < nonexistent-alias
     ```
 
-    **Rationale:** Actions should only depend on other actions that actually exist.
+    **Rationale:** Actions should only depend on actions and charters that actually exist.
 
     **Fix suggestion:** Check the UUID or alias spelling, or create the missing predecessor action. Names are not references ([Reference Syntax](reference_syntax.md#matching-rules)); give the predecessor an alias.
 
@@ -299,7 +303,7 @@ because the plaintext field is absent.
 
     **Fixable:** No
 
-    Multiple actions in the workspace match the predecessor at its strongest tier, such as the same alias in two charters or a short UUID shared by two actions ([Reference Syntax](reference_syntax.md#matching-rules)). The reference does not resolve. Use a path or a full UUID to disambiguate.
+    Multiple actions or charters in the workspace match the predecessor at its strongest tier, such as the same alias in two charters, an action and a charter sharing an alias, or a short UUID shared by two actions ([Reference Syntax](reference_syntax.md#matching-rules)). The reference does not resolve. Use a path or a full UUID to disambiguate.
 
     ```actions
     [ ] Deploy < setup  # charters inbox and release both have =setup
@@ -307,7 +311,7 @@ because the plaintext field is absent.
     [ ] Deploy < 01951111-cfa6-718d-b303-d7107f4005b3
     ```
 
-    **Rationale:** A reference must name exactly one action; resolution never picks by file or collection order.
+    **Rationale:** A reference must name exactly one action or charter; resolution never picks by file or collection order.
 
     **Configuration:** `require_uuid_for_ambiguous_predecessors` (default: false) — if true, escalates to error severity.
 

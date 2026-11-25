@@ -172,6 +172,12 @@ Aliases provide stable references independent of name changes:
 
 `<ref>` denotes logical dependencies that must be closed before this act is dependency-clean.
 
+A reference names an Action or a Charter, resolved by [Reference Syntax](./reference_syntax.md). An Action is closed when it is completed or cancelled; a Charter when its `state` is `Closed` or `Cancelled` ([charters](./charters.md#frontmatter)), which only an explicit transition sets, never its actions. An Action and a Charter that share an alias make the reference ambiguous ([W009](./linting.md#w009-ambiguous-predecessor-reference)); a `c:` or `a:` prefix chooses.
+
+```actions
+[ ] Host a dinner < c:groceries
+```
+
 ## Do date/time (optional)
 
 `@` is intent: when the Action is planned to be worked. It bounds nothing; the

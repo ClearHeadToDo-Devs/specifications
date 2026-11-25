@@ -29,7 +29,7 @@ _:b1-metric-fridge-stocked-value a cco:ont00000253 ; obo:BFO_0000101 <urn:uuid:2
 <urn:uuid:01a0fb10-0000-7000-8000-0000000000c0> a cco:ont00000974 ; rdfs:label "Run the household" ;
     dcterms:description "Everything that keeps the house going." ;
     obo:BFO_0000178 <urn:uuid:01a0fb10-0000-7000-8000-0000000000b0> , <urn:uuid:01a0fb10-0000-7000-8000-0000000000c1> ,
-        <urn:uuid:01a0fb10-0000-7000-8000-000000000001> , <urn:uuid:01a0fb10-0000-7000-8000-000000000002> , <urn:uuid:01a0fb10-0000-7000-8000-000000000003> , <urn:uuid:01a0fb10-0000-7000-8000-000000000004> , <urn:uuid:01a0fb10-0000-7000-8000-000000000005> , <urn:uuid:01a0fb10-0000-7000-8000-000000000006> , <urn:uuid:01a0fb10-0000-7000-8000-000000000008> .
+        <urn:uuid:01a0fb10-0000-7000-8000-000000000001> , <urn:uuid:01a0fb10-0000-7000-8000-000000000002> , <urn:uuid:01a0fb10-0000-7000-8000-000000000003> , <urn:uuid:01a0fb10-0000-7000-8000-000000000004> , <urn:uuid:01a0fb10-0000-7000-8000-000000000005> , <urn:uuid:01a0fb10-0000-7000-8000-000000000006> , <urn:uuid:01a0fb10-0000-7000-8000-000000000008> , <urn:uuid:01a0fb10-0000-7000-8000-00000000000b> .
 _:c0-alias a cco:ont00000003 ; cco:ont00001916 <urn:uuid:01a0fb10-0000-7000-8000-0000000000c0> .
 _:c0-alias-value a cco:ont00000253 ; obo:BFO_0000101 _:c0-alias ; cco:ont00001765 "home" .
 _:c0-state a cco:ont00000293 ; cco:ont00001868 <urn:uuid:01a0fb10-0000-7000-8000-0000000000c0> .
@@ -125,6 +125,11 @@ _:a0a-late-from a cco:ont00000127 ; obo:BFO_0000178 <urn:uuid:01a0fb10-0000-7000
 _:a0a-late-from-condition a cco:ont00000853 .
 _:a0a-late-from-condition-value a cco:ont00000253 ; obo:BFO_0000101 _:a0a-late-from-condition ;
     cco:ont00001765 "late from" ; cco:ont00001767 "2026-10-05T00:00:00Z"^^xsd:dateTime .
+
+# [ ] Host a dinner: waits on a charter, the condition describes the charter
+<urn:uuid:01a0fb10-0000-7000-8000-00000000000b> a obo:IAO_0000007 ; rdfs:label "Host a dinner" .
+_:a0b-after-c1 a cco:ont00000127 ; obo:BFO_0000178 <urn:uuid:01a0fb10-0000-7000-8000-00000000000b> , _:a0b-after-c1-condition .
+_:a0b-after-c1-condition a cco:ont00000853 ; cco:ont00001982 <urn:uuid:01a0fb10-0000-7000-8000-0000000000c1> .
 
 # [ ] Weekly shop ~: sequential parent; the marker itself is not emitted
 <urn:uuid:01a0fb10-0000-7000-8000-000000000010> a obo:IAO_0000007 ; rdfs:label "Weekly shop" ;

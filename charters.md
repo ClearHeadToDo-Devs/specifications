@@ -52,6 +52,8 @@ implementations must support. State transitions do not implicitly cascade to
 descendant Charters or Actions. The normative admission, readiness, transition,
 and contradiction rules are defined in [Process Overview](./process.md#charters).
 
+An Action may wait on a Charter ([predecessors](./action_file_format.md#predecessors-optional)); the wait ends when the Charter is `Closed` or `Cancelled`.
+
 `Closed` and `Cancelled` are both terminal states: either makes a Charter
 eligible for archival (see [Archive](./Archive)).
 

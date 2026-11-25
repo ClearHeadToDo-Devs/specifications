@@ -1,5 +1,11 @@
 # Changelog - Actions Specifications
 
+## Unreleased
+
+### Added
+
+**An action can wait on a charter.** A predecessor (`<`) may name a Charter, and the wait ends when the Charter is `Closed` or `Cancelled` (`action_file_format.md` Predecessors, `charters.md`, `ontology.md` Waits). `app.shapes.ttl` widens `app:after` and `app:waitsOn` to Action or Charter. E009 now covers an Action waiting on a Charter that holds it; W008 and W009 name charters, and an action and a charter sharing an alias is ambiguous. The graph fixture gains "Host a dinner", waiting on `groceries`, in both expected graphs, and `invalid-app/after-objective.ttl` keeps waits off objectives. First step toward promoting an action to a subcharter, which keeps the action's UUID, so existing waits on it then name the charter (Darrion, 2026-11-25).
+
 ## v0.8.0 — 2026-11-24
 
 Publishes notes in the action and charter JSON projections and drops the prescribed `by` convention. All eight schema `$id`s name `https://clearhead.dev/schemas/v0.8.0/<name>.schema.json`. No grammar syntax changed. Core adoption follows separately.

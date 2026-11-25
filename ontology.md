@@ -60,7 +60,7 @@ An action is `app:Action`. Fields are those of [`actions.schema.json`](./schemas
 | `dueDateTime` | `:` | `app:due`, the deadline as written, and `app:availableFrom`, the window's lower bound as written when `:` is an interval; see [Time](#time) |
 | `completedDateTime` | `%` | `app:closed`, written: when the action was completed or cancelled |
 | `createdDateTime` | `^` | `dcterms:created`, written |
-| `predecessors` | `<` | `app:after`, per reference, the action it names; see [Waits](#waits) |
+| `predecessors` | `<` | `app:after`, per reference, the action or charter it names; see [Waits](#waits) |
 | `sequentialChildren` | `~` | `app:sequential true` |
 | `parentId`, `charter` | `>`, the file | `app:partOf` (rule 5) |
 | `alias` | `=` | `app:alias` |
@@ -97,8 +97,7 @@ The planned block is `@`, never inherited, and read as the window is.
 
 ### Waits
 
-`app:after` is each predecessor as written. `app:waitsOn` is derived: everything that must be closed before the action can start. It is the action's own `app:after` targets, the sibling before it when its parent is `app:sequential`, and its parent action's `app:waitsOn`. An action is free to start when every `app:waitsOn` target is completed or cancelled.
-
+`app:after` is each predecessor as written, an action or a charter. `app:waitsOn` is derived: everything that must be closed before the action can start. It is the action's own `app:after` targets, the sibling before it when its parent is `app:sequential`, and its parent action's `app:waitsOn`. An action is free to start when every `app:waitsOn` target is closed: an action `app:Completed` or `app:Cancelled`, a charter `app:Closed` or `app:Cancelled`.
 ### Charter terms
 
 A charter (a [charter document](./charters.md)) is `app:Charter`.
@@ -216,7 +215,7 @@ An action (one line of a [`.actions` file](./action_file_format.md)) is an IAO a
 | `scheduledDateTime` | `@` | Intent (Decision 48): a Prescriptive ICE (`cco:ont00000965`) that is part of the action, the planned start on its bearer; a block's length is the duration below, so `app:plannedEnd` is not read. Not a condition, and no act exists until the work starts (ontology Decision 4). |
 | `dueDateTime` | `:` | The effective window (convention 8): per bound, a condition whose description's bearer carries the text `not before` or `late from` and the instant, from `app:notBefore` and `app:lateFrom`. The time sits on the bearer, not on a BFO temporal instant designated through a CCO identifier, which would add two nodes per time. |
 | `durationMinutes` | derived from `@` | A Measurement ICE (`cco:ont00001163`) `is about` (`cco:ont00001808`) the action; its bearer has the integer and `uses measurement unit` (`cco:ont00001863`) Minute (`cco:ont00001667`). |
-| `predecessors` | `<` | Per effective wait (`app:waitsOn`, convention 8), a condition describing the awaited action. |
+| `predecessors` | `<` | Per effective wait (`app:waitsOn`, convention 8), a condition describing the awaited action or charter. |
 | `sequentialChildren` | `~` | Expanded through `app:waitsOn`: each child after the first waits on the child before it. The marker itself is not emitted. |
 | `parentId`, `children` | `>` | The parent `has continuant part` the child. A top-level action is a part of its charter. |
 | `charter` | `*` | No triple: membership is the containment above. |

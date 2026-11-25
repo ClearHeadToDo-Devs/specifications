@@ -135,6 +135,15 @@
   app:partOf <urn:uuid:01a0fb10-0000-7000-8000-000000000008> ;
   app:file "charters/next.actions" ; app:line 10 .
 
+# Waits on a charter: free to start once groceries is Closed or Cancelled
+<urn:uuid:01a0fb10-0000-7000-8000-00000000000b> a app:Action ;
+  rdfs:label "Host a dinner" ;
+  app:state app:NotStarted ;
+  app:after <urn:uuid:01a0fb10-0000-7000-8000-0000000000c1> ;
+  app:waitsOn <urn:uuid:01a0fb10-0000-7000-8000-0000000000c1> ;
+  app:partOf <urn:uuid:01a0fb10-0000-7000-8000-0000000000c0> ;
+  app:file "charters/next.actions" ; app:line 11 .
+
 # Actions in charters/groceries.actions
 <urn:uuid:01a0fb10-0000-7000-8000-000000000010> a app:Action ;
   rdfs:label "Weekly shop" ;

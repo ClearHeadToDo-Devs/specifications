@@ -58,8 +58,10 @@ shape:Action a sh:NodeShape ;
         [ sh:path app:alias ; sh:maxCount 1 ; sh:datatype xsd:string ] ,
         [ sh:path app:sequential ; sh:maxCount 1 ; sh:in ( true ) ] ,
         [ sh:path app:context ; sh:class app:Context ] ,
-        [ sh:path app:after ; sh:class app:Action ] ,
-        [ sh:path app:waitsOn ; sh:class app:Action ] ,
+        [ sh:path app:after ; sh:or ( [ sh:class app:Action ] [ sh:class app:Charter ] ) ;
+          sh:message "An action comes after actions and charters only (Waits)." ] ,
+        [ sh:path app:waitsOn ; sh:or ( [ sh:class app:Action ] [ sh:class app:Charter ] ) ;
+          sh:message "An action waits on actions and charters only (Waits)." ] ,
         [ sh:path app:plannedStart ; sh:maxCount 1 ; sh:or ( [ sh:datatype xsd:date ] [ sh:datatype xsd:dateTime ] ) ] ,
         [ sh:path app:plannedEnd ; sh:maxCount 1 ; sh:or ( [ sh:datatype xsd:date ] [ sh:datatype xsd:dateTime ] ) ] ,
         [ sh:path app:availableFrom ; sh:maxCount 1 ; sh:or ( [ sh:datatype xsd:date ] [ sh:datatype xsd:dateTime ] ) ] ,
