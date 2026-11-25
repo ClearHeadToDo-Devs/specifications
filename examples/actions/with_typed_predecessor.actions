@@ -1,0 +1,9 @@
+[ ] Plan the groceries =groceries #01a21100-0000-7000-8000-000000000001
+
+[ ] Host a dinner
+< c:groceries
+#01a21100-0000-7000-8000-000000000002
+
+[ ] Set the table <a:groceries <c:home/groceries #01a21100-0000-7000-8000-000000000003
+
+[ ] Wait on an action aliased c, due in December <c:2026-12-01 #01a21100-0000-7000-8000-000000000004
