@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/ClearHeadToDo-Devs/specifications/v0.1.0/schemas/charter_metadata.schema.json",
+  "$schema": "https://clearhead.dev/schemas/v0.8.0/charter_metadata.schema.json",
   "charter": {
     "id": "01a0dae1-07d8-7b90-82df-fcf896f2022d"
   },
@@ -10,5 +10,14 @@
     "019f54cf-540c-7530-aa16-1c8b712d644f": {
       "created": "2026-07-12T05:31:41.452Z"
     }
+  },
+  "notes": {
+    "01a19a34-d347-7b62-baea-f5cc8fbc4bd3": [
+      {
+        "at": "2026-11-25T01:18:27Z",
+        "by": "agent:facilitator",
+        "text": "From review 20261102-024334/10. The steward ran jsonschema by hand for v0.4.0 and all nine examples behaved as named."
+      }
+    ]
   }
 }
