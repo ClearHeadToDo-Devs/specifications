@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## v0.9.0 — 2026-11-26
+
+Lets charters wait and pass conditions to the actions they hold, lets an action wait on a charter, and accepts git's merge conflict markers in `.actions` files. All eight schema `$id`s name `https://clearhead.dev/schemas/v0.9.0/<name>.schema.json`. Grammar and Core adoption follow separately.
+
 ### Added
 
 **A `.actions` file may carry git's merge conflict markers.** `<<<<<<<`, `|||||||`, `=======` and `>>>>>>>` at the start of a line stand between whole actions at any depth; inside a description such a line stays description text (`action_file_format.md` Merge Conflict Markers). A conflicted file parses, so every tool can read it, but it is quarantined as recovered source is (`workspace.md`), fails the formatting gate (`formatting.md`), and is reported by new E010, an error so the conflict is resolved before queries miss its actions (Darrion, 2026-11-26). One parse changes: a run of seven `=` after an action, which read as seven empty aliases (each reported by I015), is now a marker; no real file was found to hold one, and Darrion accepted it as nonsense (2026-11-26). Every other marker line was a syntax error before or was description text, where it stays. Grammar and Core adoption follow (platform charter `merge-actions`).
