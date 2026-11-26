@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
+**Conformance fixtures for merge conflict markers.** `examples/conformance/syntax/conflict_*.actions`: a conflict between root actions, one between children with a diff3 base section after a name, marker-like lines inside a description, and seven `=` after an action. The grammar's corpus tests parse them directly.
+
 ## v0.9.0 — 2026-11-26
 
 Lets charters wait and pass conditions to the actions they hold, lets an action wait on a charter, and accepts git's merge conflict markers in `.actions` files. All eight schema `$id`s name `https://clearhead.dev/schemas/v0.9.0/<name>.schema.json`. Grammar and Core adoption follow separately.

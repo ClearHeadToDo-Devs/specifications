@@ -1,0 +1,9 @@
+[ ] Plan the release
+<<<<<<< ours
+>[ ] Write the notes
+>>[ ] Draft them
+||||||| base
+>[ ] Write notes
+=======
+>[ ] Write the release notes
+>>>>>>> theirs
