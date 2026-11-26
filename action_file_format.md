@@ -262,6 +262,29 @@ If missing, tooling may derive this from UUIDv7 timestamp data when present.
 
 - Ad-hoc/manual acts typically use UUIDv7.
 - Habit occurrences use deterministic UUIDv5 based on the native Habit UUID and canonical slot; steps also use the stable template-step UUID (see [ics_schedule_spec.md](./ics_schedule_spec.md)).
+
+# Merge Conflict Markers
+
+A line merge, git's included, marks each conflict with marker lines. A `.actions` file may carry them, so that a conflicted file stays readable by every tool:
+
+- `<<<<<<<` opens a conflict, `|||||||` opens the base's version (optional, git's diff3 style), `=======` separates the two sides, and `>>>>>>>` closes the conflict.
+- A marker is exactly those seven characters at the start of a line; the rest of the line, such as git's label, is free text.
+- Markers stand between whole actions, at any depth. Nesting is at most five `>`, so a closing marker is never read as a depth marker.
+- Inside a description a marker-like line is description text, so a Markdown `=======` heading underline keeps its meaning.
+
+```actions
+[ ] Plan the release #01951111-cfa6-718d-b303-d7107f4005b3
+<<<<<<< ours
+>[ ] Write the notes !1 #01951111-cfa6-718d-b303-d7107f4005b4
+||||||| base
+>[ ] Write the notes #01951111-cfa6-718d-b303-d7107f4005b4
+=======
+>[ ] Write the notes !2 #01951111-cfa6-718d-b303-d7107f4005b4
+>>>>>>> theirs
+```
+
+A file with a marker holds an unresolved conflict. Each side's lines parse, so one UUID may appear more than once, and the file's meaning is undecided until someone chooses. It is quarantined as recovered source is ([workspace](./workspace.md#recovered-source-is-quarantined-from-semantics)): its actions leave the domain model, [E010](./linting.md#e010-unresolved-merge-conflict) reports it, and formatting and mutation refuse it until no marker remains.
+
 # Examples
 
 Examples are in [examples/README.md](./examples/README.md).

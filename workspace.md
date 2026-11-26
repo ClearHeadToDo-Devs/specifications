@@ -47,7 +47,7 @@ The root charter's `charters/next.actions` (see [The Root Charter](#the-root-cha
 
 ### Recovered source is quarantined from semantics
 
-A relaxed parser may return a document containing recovery diagnostics so doctor, the linter, and editor tooling can explain malformed input. Such a document is not eligible for semantic workspace lowering: generic parser recovery can attach a later field or UUID to the wrong action. The affected action file is omitted from the domain model until it parses with clean integrity, while a structured finding remains visible. Formatting and mutation likewise require the clean source capability; they must never reserialize recovered actions. Sidecar orphan cleanup is also deferred while any action source is quarantined, because absence from the semantic model is not proof that its provenance is stale.
+A relaxed parser may return a document containing recovery diagnostics so doctor, the linter, and editor tooling can explain malformed input. Such a document is not eligible for semantic workspace lowering: generic parser recovery can attach a later field or UUID to the wrong action. The affected action file is omitted from the domain model until it parses with clean integrity, while a structured finding remains visible. Formatting and mutation likewise require the clean source capability; they must never reserialize recovered actions. Sidecar orphan cleanup is also deferred while any action source is quarantined, because absence from the semantic model is not proof that its provenance is stale. A file holding an unresolved merge conflict ([conflict markers](./action_file_format.md#merge-conflict-markers)) is quarantined the same way, though it parses cleanly: its two sides may both hold an action.
 
 ### Example
 

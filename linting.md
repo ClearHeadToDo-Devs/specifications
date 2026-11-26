@@ -197,6 +197,30 @@ A Habit root in `.habits.actions` requires `R:` with a valid RFC 5545 RRULE and 
     **Fix suggestion:** drop the dependency, or point it at a sibling or
     another Action outside the line's ancestry.
 
+#### E010: Unresolved Merge Conflict
+
+    **Fixable:** No
+
+    An action file holds merge conflict markers
+    ([action_file_format.md](./action_file_format.md#merge-conflict-markers)).
+    Report one finding per file, naming the lines of each conflict.
+
+    ```actions
+    [ ] Plan the release
+    <<<<<<< ours
+    >[ ] Write the notes !1
+    =======
+    >[ ] Write the notes !2
+    >>>>>>> theirs
+    ```
+
+    **Rationale:** the file is quarantined, so its actions are missing from
+    every query until it is resolved. An error says so loudly and early,
+    before queries quietly leave the charter's work out.
+
+    **Fix suggestion:** keep the lines each conflict should keep and delete
+    the markers, then `git add` the file as for any conflict.
+
 ### 2. Warnings
 
     These rules check for suspicious date/time relationships.
