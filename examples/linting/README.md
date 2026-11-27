@@ -23,6 +23,15 @@ Not every specified rule needs a hand-authored pair. Implementations should use
 the cheapest discriminating oracle: exact fixtures for named byte/location
 contracts and generated planted conditions for combinatorial semantics.
 
+## E002: recurrence in a named template
+
+Use the exact [weekly-review Habit source](../actions/habits/weekly-review.habits.actions)
+under `templates/weekly-review.actions` in a workspace. The `R:` that is valid
+in a Habit's definition must produce E002 at line 1 in this location. To fix the
+template, remove `R:` and its rule; keep the `@` block and `:` window. The source
+is shared because the file's workspace role, not different syntax, is what
+makes the recurrence invalid.
+
 ## Tree-consistency codes
 
 The canonical meanings are:
